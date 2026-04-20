@@ -1,7 +1,14 @@
 import axios from "axios";
 
+const isBrowser = typeof window !== "undefined";
+const isLocalHost =
+  isBrowser && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const fallbackBaseURL = isLocalHost
+  ? "http://localhost:3000"
+  : "https://opportunity-portal-1.onrender.com";
+
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  import.meta.env.VITE_API_BASE_URL || fallbackBaseURL;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,

@@ -292,7 +292,7 @@ const AdminOpportunityFormPage = () => {
 
   return (
     <div className="min-h-screen bg-[#EEF3FF] py-8 px-4">
-      <div className="max-w-5xl mx-auto bg-white border border-[#DCE5FA] rounded-2xl p-6">
+      <div className="max-w-[1400px] mx-auto bg-white border border-[#DCE5FA] rounded-2xl p-6">
         <div className="flex items-start justify-between gap-3 mb-5">
           <div>
             <h1 className="text-3xl font-semibold text-slate-800">

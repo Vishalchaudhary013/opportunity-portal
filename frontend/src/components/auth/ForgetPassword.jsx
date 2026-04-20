@@ -96,7 +96,7 @@ const ForgetPassword = () => {
         <div className="flex items-center justify-center min-h-[calc(100dvh-88px)] py-8 sm:py-10">
           <form
             onSubmit={step === 1 ? requestReset : submitNewPassword}
-            className="bg-white rounded-xl p-5 w-full max-w-md"
+            className="bg-white rounded-xl p-5 w-full max-w-[370px]"
           >
             <h2 className="text-center text-2xl font-medium mb-6">
               Reset your password

@@ -735,7 +735,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     <>
       
       <div className="min-h-screen bg-[#EEF3FF]">
-        <div className="mx-auto w-full max-w-425 px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
+        <div className="mx-auto w-full max-w-[1400px] px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[250px_minmax(0,1fr)] xl:gap-5">
             <aside className="bg-[#E4EBFB] border border-[#D8E2F7] rounded-2xl p-4 xl:sticky xl:top-6 h-fit">
               <div className="mb-7">

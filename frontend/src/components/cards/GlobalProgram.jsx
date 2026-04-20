@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FaLongArrowAltRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CiLocationOn } from "react-icons/ci";
 import { IoMdTime } from "react-icons/io";
 import { MdAttachMoney } from "react-icons/md";
@@ -11,8 +11,9 @@ import ApplicationFormModal from "../form/ApplicationFormModal";
 import { useOpportunities } from "../../context/OpportunitiesContext";
 
 const GlobalProgram = ({ limit }) => {
+  const navigate = useNavigate();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
-  const { opportunities } = useOpportunities();
+  const { opportunities, user } = useOpportunities();
   const globalData = opportunities.filter(
     (item) => item.type === "Global Program",
   );
@@ -119,7 +120,13 @@ const GlobalProgram = ({ limit }) => {
                 <div className="flex bg-slate-900 font-medium text-base sm:text-xl rounded-xl text-white justify-center py-2">
                   <button
                     className="flex gap-2 items-center"
-                    onClick={() => setSelectedOpportunity(data)}
+                    onClick={() => {
+                      if (!user) {
+                        navigate("/signup");
+                      } else {
+                        setSelectedOpportunity(data);
+                      }
+                    }}
                   >
                     Apply Now <FaLongArrowAltRight />{" "}
                   </button>

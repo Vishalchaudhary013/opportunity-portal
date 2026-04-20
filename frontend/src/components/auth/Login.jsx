@@ -56,7 +56,7 @@ const Login = () => {
 
       <div className="w-full max-w-350 mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-center min-h-[calc(100dvh-88px)] py-8 sm:py-10">
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 w-full max-w-md">
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 w-full max-w-[370px]">
             <h2 className="text-center text-2xl font-medium mb-6">Sign In</h2>
 
             <label

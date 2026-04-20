@@ -9,6 +9,7 @@ import { IoMdTime } from "react-icons/io";
 import { MdAttachMoney } from "react-icons/md";
 import { ImPower } from "react-icons/im";
 import { HiOutlineShieldCheck } from "react-icons/hi2";
+import { useNavigate } from "react-router-dom";
 import ApplicationFormModal from "../components/form/ApplicationFormModal";
 import { useOpportunities } from "../context/OpportunitiesContext";
 
@@ -19,7 +20,8 @@ const normalizeDurationValue = (value) =>
     .replace(/\s+/g, " ");
 
 const Global = () => {
-  const { opportunities } = useOpportunities();
+  const navigate = useNavigate();
+  const { opportunities, user } = useOpportunities();
   const [query, setQuery] = useState("");
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
@@ -318,7 +320,13 @@ const Global = () => {
                   <div className="flex bg-slate-900 font-medium text-base sm:text-xl rounded-xl text-white justify-center py-2">
                     <button
                       className="flex gap-2 items-center"
-                      onClick={() => setSelectedOpportunity(data)}
+                      onClick={() => {
+                        if (!user) {
+                          navigate(\"/signup\");
+                        } else {
+                          setSelectedOpportunity(data);
+                        }
+                      }}
                     >
                       Apply Now <FaLongArrowAltRight />
                     </button>

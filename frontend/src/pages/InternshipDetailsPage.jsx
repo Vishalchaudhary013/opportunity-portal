@@ -92,7 +92,7 @@ const getBenefitIcon = (benefit) => {
 const InternshipDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { opportunities, isInternshipSaved, toggleSavedInternship } =
+  const { opportunities, isInternshipSaved, toggleSavedInternship, user } =
     useOpportunities();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
 
@@ -285,7 +285,13 @@ const InternshipDetailsPage = () => {
               <div className="bg-white border border-[#E4EAF8] rounded-2xl p-4">
                 <button
                   type="button"
-                  onClick={() => setSelectedOpportunity(internship)}
+                  onClick={() => {
+                    if (!user) {
+                      navigate("/signup");
+                    } else {
+                      setSelectedOpportunity(internship);
+                    }
+                  }}
                   className="w-full py-3 rounded-lg bg-[#0B4AA6] hover:bg-[#083C86] text-white font-semibold"
                 >
                   Apply Now
