@@ -164,6 +164,19 @@ const resolveChromeExecutablePath = () => {
     return envPath;
   }
 
+  if (process.platform !== "win32") {
+    const linuxCandidates = [
+      "/usr/bin/google-chrome",
+      "/usr/bin/google-chrome-stable",
+      "/usr/bin/chromium-browser",
+      "/usr/bin/chromium",
+    ];
+    const foundLinux = linuxCandidates.find((candidate) =>
+      fs.existsSync(candidate),
+    );
+    if (foundLinux) return foundLinux;
+  }
+
   const windowsCandidates = [
     "C:/Program Files/Google/Chrome/Application/chrome.exe",
     "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
