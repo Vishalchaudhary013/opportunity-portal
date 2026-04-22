@@ -33,6 +33,8 @@ app.use("/api/global-programs", globalProgramRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
 
+
+
 app.use((error, req, res, next) => {
   if (error.code === 11000) {
     res.status(409).json({ message: "Duplicate value conflict." });

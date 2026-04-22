@@ -246,51 +246,21 @@ export const OpportunitiesProvider = ({ children }) => {
     bootstrap();
   }, []);
 
-  const signup = async ({ firstName, lastName, fullName, email, password, whatsappNumber }) => {
+  const signup = async (payload) => {
     clearImpersonation();
-    const response = await authAPI.signup({
-      firstName,
-      lastName,
-      fullName,
-      email,
-      password,
-      whatsappNumber,
-    });
+    const response = await authAPI.signup(payload);
     return response.data;
   };
 
-  const adminSignup = async ({ firstName, lastName, fullName, email, password, whatsappNumber }) => {
+  const adminSignup = async (payload) => {
     clearImpersonation();
-    const response = await authAPI.adminSignup({
-      firstName,
-      lastName,
-      fullName,
-      email,
-      password,
-      whatsappNumber,
-    });
+    const response = await authAPI.adminSignup(payload);
     return response.data;
   };
 
-  const superAdminSignup = async ({
-    firstName,
-    lastName,
-    fullName,
-    email,
-    password,
-    superAdminSecret,
-    whatsappNumber,
-  }) => {
+  const superAdminSignup = async (payload) => {
     clearImpersonation();
-    const response = await authAPI.superAdminSignup({
-      firstName,
-      lastName,
-      fullName,
-      email,
-      password,
-      superAdminSecret,
-      whatsappNumber,
-    });
+    const response = await authAPI.superAdminSignup(payload);
     return response.data;
   };
 

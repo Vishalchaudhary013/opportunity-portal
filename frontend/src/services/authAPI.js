@@ -8,75 +8,14 @@ export const socialAuthURL = {
 };
 
 export const authAPI = {
-  signup: async ({
-    firstName,
-    lastName,
-    fullName,
-    email,
-    password,
-    whatsappNumber,
-  }) =>
-    apiClient.post("/api/auth/signup", {
-      firstName,
-      lastName,
-      fullName,
-      email,
-      password,
-      whatsappNumber,
-    }),
+  signup: async (payload) => apiClient.post("/api/auth/signup", payload),
 
-  userSignup: async ({
-    firstName,
-    lastName,
-    fullName,
-    email,
-    password,
-    whatsappNumber,
-  }) =>
-    apiClient.post("/api/auth/user-signup", {
-      firstName,
-      lastName,
-      fullName,
-      email,
-      password,
-      whatsappNumber,
-    }),
+  userSignup: async (payload) => apiClient.post("/api/auth/user-signup", payload),
 
-  adminSignup: async ({
-    firstName,
-    lastName,
-    fullName,
-    email,
-    password,
-    whatsappNumber,
-  }) =>
-    apiClient.post("/api/auth/admin-signup", {
-      firstName,
-      lastName,
-      fullName,
-      email,
-      password,
-      whatsappNumber,
-    }),
+  adminSignup: async (payload) => apiClient.post("/api/auth/admin-signup", payload),
 
-  superAdminSignup: async ({
-    firstName,
-    lastName,
-    fullName,
-    email,
-    password,
-    superAdminSecret,
-    whatsappNumber,
-  }) =>
-    apiClient.post("/api/auth/super-admin-signup", {
-      firstName,
-      lastName,
-      fullName,
-      email,
-      password,
-      superAdminSecret,
-      whatsappNumber,
-    }),
+  superAdminSignup: async (payload) =>
+    apiClient.post("/api/auth/super-admin-signup", payload),
 
   login: async ({ email, password }) =>
     apiClient.post("/api/auth/login", {

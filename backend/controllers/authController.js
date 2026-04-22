@@ -69,6 +69,8 @@ const sanitizeUser = (userDoc) => ({
   location: userDoc.location || "",
   phoneNumber: userDoc.phoneNumber || "",
   whatsappNumber: userDoc.whatsappNumber || "",
+  resumeFileName: userDoc.resumeFileName || "",
+  resumeFilePath: userDoc.resumeFilePath || "",
   agreeToWhatsAppUpdates: Boolean(userDoc.agreeToWhatsAppUpdates),
   isEmailVerified: Boolean(userDoc.isEmailVerified),
   isPhoneVerified: Boolean(userDoc.isPhoneVerified),
@@ -80,111 +82,59 @@ const sanitizeUser = (userDoc) => ({
   adminApprovedAt: userDoc.adminApprovedAt || null,
 });
 
+// ─── OTP Email Content Builder ────────────────────────────────────────────────
+
 const buildOtpEmailContent = ({ fullName, code, reason }) => {
-  const actionText =
-    reason === "password_reset" ? "reset your password" : "verify your email";
+  const isReset = reason === "password_reset";
 
-  const subject =
-    reason === "password_reset"
-      ? "Password reset code"
-      : "Verify your email address";
+  const subject = isReset
+    ? "Your password reset code"
+    : "Your email verification code";
+
+  const purposeLabel = isReset
+    ? "reset your password"
+    : "verify your email address";
 
   const text = [
     `Hi ${fullName || "there"},`,
     "",
-    `Use this one-time code to ${actionText}: ${code}`,
+    `Your ${isReset ? "password reset" : "email verification"} code is: ${code}`,
+    `It expires in ${OTP_EXPIRES_IN_MINUTES} minutes.`,
     "",
-    `The code expires in ${OTP_EXPIRES_IN_MINUTES} minutes.`,
+    `If you did not request this code, please ignore this email.`,
   ].join("\n");
 
   const html = `
-    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6; max-width: 480px;">
       <p>Hi ${fullName || "there"},</p>
-      <p>Use this one-time code to ${actionText}:</p>
-      <p style="font-size: 24px; font-weight: 700; letter-spacing: 2px;">${code}</p>
-      <p>This code expires in ${OTP_EXPIRES_IN_MINUTES} minutes.</p>
-    </div>
-  `;
-
-  return {
-    subject,
-    text,
-    html,
-  };
-};
-
-const buildRegistrationSuccessEmailContent = ({ fullName, accountLabel }) => {
-  const subject = "Registration successful";
-  const text = [
-    `Hi ${fullName || "there"},`,
-    "",
-    `Your ${accountLabel} account was created successfully on EDECO.`,
-    "You can now continue with email and phone verification to activate login access.",
-  ].join("\n");
-
-  const html = `
-    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-      <p>Hi ${fullName || "there"},</p>
-      <p>Your <strong>${accountLabel}</strong> account was created successfully on EDECO.</p>
-      <p>You can now continue with email and phone verification to activate login access.</p>
-    </div>
-  `;
-
-  return {
-    subject,
-    text,
-    html,
-  };
-};
-
-const buildAdminAccessRequestEmailContent = ({ adminName, adminEmail }) => {
-  const subject = "New admin access request";
-  const text = [
-    "A new admin account is waiting for approval.",
-    "",
-    `Name: ${adminName || "N/A"}`,
-    `Email: ${adminEmail || "N/A"}`,
-    "",
-    "Please review and approve from the super admin dashboard.",
-  ].join("\n");
-
-  const html = `
-    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-      <p>A new admin account is waiting for approval.</p>
-      <p><strong>Name:</strong> ${adminName || "N/A"}</p>
-      <p><strong>Email:</strong> ${adminEmail || "N/A"}</p>
-      <p>Please review and approve from the super admin dashboard.</p>
-    </div>
-  `;
-
-  return { subject, text, html };
-};
-
-const buildAdminApprovedEmailContent = ({ adminName, approverName }) => {
-  const subject = "Admin access approved";
-  const text = [
-    `Hi ${adminName || "Admin"},`,
-    "",
-    `Your admin account has been approved by ${approverName || "Super Admin"}.`,
-    "You can now login to the admin panel.",
-  ].join("\n");
-
-  const html = `
-    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
-      <p>Hi ${adminName || "Admin"},</p>
-      <p>
-        Your admin account has been approved by
-        <strong>${approverName || "Super Admin"}</strong>.
+      <p>Use the code below to ${purposeLabel}:</p>
+      <div style="
+        display: inline-block;
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 28px;
+        font-weight: bold;
+        letter-spacing: 6px;
+        color: #111827;
+        margin: 8px 0;
+      ">${code}</div>
+      <p style="color: #6b7280; font-size: 14px;">
+        This code expires in <strong>${OTP_EXPIRES_IN_MINUTES} minutes</strong>.
       </p>
-      <p>You can now login to the admin panel.</p>
+      <p style="color: #6b7280; font-size: 14px;">
+        If you did not request this code, you can safely ignore this email.
+      </p>
     </div>
   `;
 
   return { subject, text, html };
 };
+
+// ─── Send Email OTP ───────────────────────────────────────────────────────────
 
 const sendEmailOtp = async ({ user, code, reason }) => {
-  const emailContent = buildOtpEmailContent({
+  const content = buildOtpEmailContent({
     fullName: user.fullName,
     code,
     reason,
@@ -192,11 +142,175 @@ const sendEmailOtp = async ({ user, code, reason }) => {
 
   const result = await sendTransactionalEmail({
     to: user.email,
-    ...emailContent,
+    ...content,
   });
 
-  return result;
+  return {
+    sent: Boolean(result?.sent),
+    message: result?.message || (result?.sent ? "OTP sent." : "OTP delivery failed."),
+  };
 };
+
+// ─── Admin Approved Email Content Builder ─────────────────────────────────────
+
+const buildAdminApprovedEmailContent = ({ adminName, approverName }) => {
+  const subject = "Your admin account has been approved";
+
+  const text = [
+    `Hi ${adminName || "Admin"},`,
+    "",
+    `Your admin account has been approved by ${approverName || "Super Admin"}.`,
+    "You can now log in to the admin panel.",
+  ].join("\n");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6; max-width: 480px;">
+      <p>Hi ${adminName || "Admin"},</p>
+      <p>
+        Your admin account has been approved by
+        <strong>${approverName || "Super Admin"}</strong>.
+      </p>
+      <p>You can now <a href="${process.env.ADMIN_LOGIN_URL || "#"}">log in to the admin panel</a>.</p>
+    </div>
+  `;
+
+  return { subject, text, html };
+};
+
+// ─── Registration Success Notifications ───────────────────────────────────────
+
+const sendRegistrationSuccessNotifications = async ({ user, accountLabel }) => {
+  const label = accountLabel || "user";
+  const isAdmin = label === "admin";
+
+  const subject = `Welcome${isAdmin ? " — your admin request is under review" : ""}! Account created successfully`;
+
+  const adminNote = isAdmin
+    ? "\n\nYour account is pending approval by a super admin. You will be notified once approved."
+    : "";
+
+  const text = [
+    `Hi ${user.fullName || "there"},`,
+    "",
+    `Your ${label} account has been created successfully.`,
+    `Please verify your email and phone number to complete setup.${adminNote}`,
+  ].join("\n");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6; max-width: 480px;">
+      <p>Hi ${user.fullName || "there"},</p>
+      <p>Your <strong>${label}</strong> account has been created successfully.</p>
+      <p>Please verify your email and phone number to complete setup.</p>
+      ${isAdmin ? `<p style="color: #6b7280;">Your account is pending approval by a super admin. You will be notified once approved.</p>` : ""}
+    </div>
+  `;
+
+  const email = await sendTransactionalEmail({
+    to: user.email,
+    subject,
+    text,
+    html,
+  });
+
+  let whatsapp = {
+    sent: false,
+    message: "WhatsApp number not available.",
+  };
+
+  const toNumber = user.phoneNumber || user.whatsappNumber;
+
+  if (toNumber) {
+    whatsapp = await sendWhatsAppText({
+      to: toNumber,
+      body: text,
+    });
+  }
+
+  return { email, whatsapp };
+};
+
+// ─── Admin Access Request Notifications (to Super Admins) ─────────────────────
+
+const sendAdminAccessRequestNotifications = async ({ adminUser }) => {
+  const superAdmins = await User.find({ role: "super_admin" }).select(
+    "_id fullName email phoneNumber whatsappNumber",
+  );
+
+  if (!superAdmins.length) {
+    return {
+      recipients: [],
+      totalRecipients: 0,
+    };
+  }
+
+  const subject = "New admin account request pending approval";
+
+  const results = await Promise.all(
+    superAdmins.map(async (superAdmin) => {
+      const text = [
+        `Hi ${superAdmin.fullName || "Super Admin"},`,
+        "",
+        `A new admin account has been registered and requires your approval.`,
+        `Name: ${adminUser.fullName}`,
+        `Email: ${adminUser.email}`,
+        "",
+        "Please log in to the super admin panel to review this request.",
+      ].join("\n");
+
+      const html = `
+        <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6; max-width: 480px;">
+          <p>Hi ${superAdmin.fullName || "Super Admin"},</p>
+          <p>A new admin account has been registered and requires your approval.</p>
+          <table style="border-collapse: collapse; width: 100%; margin: 8px 0;">
+            <tr>
+              <td style="padding: 4px 8px; font-weight: bold;">Name</td>
+              <td style="padding: 4px 8px;">${adminUser.fullName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 4px 8px; font-weight: bold;">Email</td>
+              <td style="padding: 4px 8px;">${adminUser.email}</td>
+            </tr>
+          </table>
+          <p>Please log in to the super admin panel to review this request.</p>
+        </div>
+      `;
+
+      const email = await sendTransactionalEmail({
+        to: superAdmin.email,
+        subject,
+        text,
+        html,
+      });
+
+      let whatsapp = {
+        sent: false,
+        message: "WhatsApp number not available.",
+      };
+
+      const toNumber = superAdmin.phoneNumber || superAdmin.whatsappNumber;
+
+      if (toNumber) {
+        whatsapp = await sendWhatsAppText({
+          to: toNumber,
+          body: text,
+        });
+      }
+
+      return {
+        recipientEmail: superAdmin.email,
+        email,
+        whatsapp,
+      };
+    }),
+  );
+
+  return {
+    recipients: results,
+    totalRecipients: results.length,
+  };
+};
+
+// ─── Phone OTP ────────────────────────────────────────────────────────────────
 
 const sendPhoneOtp = async ({ user, code }) => {
   const body = [
@@ -228,107 +342,6 @@ const sendPhoneOtp = async ({ user, code }) => {
     message: emailFallback.sent
       ? "Phone verification code was sent to your email because phone delivery is unavailable."
       : whatsappResult.message || emailFallback.message,
-  };
-};
-
-const sendRegistrationSuccessNotifications = async ({ user, accountLabel }) => {
-  const emailContent = buildRegistrationSuccessEmailContent({
-    fullName: user.fullName,
-    accountLabel,
-  });
-
-  const email = await sendTransactionalEmail({
-    to: user.email,
-    ...emailContent,
-  });
-
-  const whatsappBody = [
-    `Hi ${user.fullName || "there"},`,
-    `Your ${accountLabel} account registration is successful on EDECO.`,
-    "Please complete your email and phone OTP verification to activate your login.",
-  ].join("\n");
-
-  let whatsapp = {
-    sent: false,
-    message: "WhatsApp number not available.",
-  };
-
-  const toNumber = user.phoneNumber || user.whatsappNumber;
-
-  if (toNumber) {
-    whatsapp = await sendWhatsAppText({
-      to: toNumber,
-      body: whatsappBody,
-    });
-  }
-
-  return {
-    email,
-    whatsapp,
-  };
-};
-
-const sendAdminAccessRequestNotifications = async ({ adminUser }) => {
-  const superAdmins = await User.find({ role: "super_admin" }).select(
-    "_id fullName email phoneNumber whatsappNumber",
-  );
-
-  const emailContent = buildAdminAccessRequestEmailContent({
-    adminName: adminUser.fullName,
-    adminEmail: adminUser.email,
-  });
-
-  const notificationTargets = superAdmins.length
-    ? superAdmins.map((item) => ({
-        fullName: item.fullName,
-        email: item.email,
-        phoneNumber: item.phoneNumber || item.whatsappNumber || "",
-      }))
-    : [
-        {
-          fullName: "Super Admin",
-          email: process.env.SUPER_ADMIN_EMAIL || "",
-          phoneNumber: "",
-        },
-      ];
-
-  const deliveries = await Promise.all(
-    notificationTargets
-      .filter((target) => target.email)
-      .map(async (target) => {
-        const email = await sendTransactionalEmail({
-          to: target.email,
-          ...emailContent,
-        });
-
-        let whatsapp = {
-          sent: false,
-          message: "WhatsApp number not available.",
-        };
-
-        if (target.phoneNumber) {
-          whatsapp = await sendWhatsAppText({
-            to: target.phoneNumber,
-            body: [
-              "New admin access request pending approval.",
-              `Name: ${adminUser.fullName || "N/A"}`,
-              `Email: ${adminUser.email || "N/A"}`,
-              "Open super admin dashboard to approve.",
-            ].join("\n"),
-          });
-        }
-
-        return {
-          recipientEmail: target.email,
-          email,
-          whatsapp,
-        };
-      }),
-  );
-
-  return {
-    recipients: deliveries,
-    totalRecipients: deliveries.length,
   };
 };
 
@@ -367,6 +380,8 @@ const sendAdminApprovedNotifications = async ({ adminUser, approverName }) => {
   };
 };
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
 const buildFullName = ({ fullName, firstName, lastName }) => {
   if (typeof fullName === "string" && fullName.trim()) {
     return fullName.trim();
@@ -386,6 +401,8 @@ const buildContactNumber = ({ whatsappNumber, phoneNumber, mobileNumber }) => {
 };
 
 const getNormalizedEnvValue = (value) => String(value || "").trim();
+
+// ─── Super Admin Env Login ────────────────────────────────────────────────────
 
 const tryEnvSuperAdminLogin = async ({ email, password }) => {
   const envEmail = getNormalizedEnvValue(
@@ -445,6 +462,8 @@ const tryEnvSuperAdminLogin = async ({ email, password }) => {
     user: sanitizeUser(user),
   };
 };
+
+// ─── Core Auth Helpers ────────────────────────────────────────────────────────
 
 const authenticateUser = async ({ email, password, allowedRoles = null }) => {
   const user = await User.findOne({ email: email.toLowerCase() });
@@ -563,6 +582,8 @@ const registerUser = async ({
   };
 };
 
+// ─── OTP Code Setters ─────────────────────────────────────────────────────────
+
 const setEmailVerificationCode = async (user) => {
   const code = generateOtpCode();
   await User.updateOne(
@@ -643,6 +664,8 @@ const issueInitialVerificationCodes = async (userId) => {
   };
 };
 
+// ─── Route Handlers ───────────────────────────────────────────────────────────
+
 export const signup = async (req, res, next) => {
   try {
     const {
@@ -690,6 +713,14 @@ export const signup = async (req, res, next) => {
       return;
     }
 
+    const resolvedResumeFileName = req.file
+      ? req.file.originalname
+      : String(req.body.resumeFileName || "").trim();
+
+    const resolvedResumeFilePath = req.file
+      ? `/uploads/resumes/${req.file.filename}`
+      : String(req.body.resumeFilePath || "").trim();
+
     const result = await registerUser({
       accountType: accountType || "student",
       firstName,
@@ -704,8 +735,8 @@ export const signup = async (req, res, next) => {
       location,
       phoneNumber: mobileNumber || phoneNumber || "",
       whatsappNumber: resolvedContactNumber,
-      resumeFileName,
-      resumeFilePath,
+      resumeFileName: resolvedResumeFileName,
+      resumeFilePath: resolvedResumeFilePath,
       agreeToWhatsAppUpdates,
       agreeToTerms,
     });
@@ -1405,6 +1436,14 @@ export const updateMe = async (req, res, next) => {
       user.collegeName = String(req.body.collegeName || "").trim();
     }
 
+    if (hasField("resumeFileName")) {
+      user.resumeFileName = String(req.body.resumeFileName || "").trim();
+    }
+
+    if (hasField("resumeFilePath")) {
+      user.resumeFilePath = String(req.body.resumeFilePath || "").trim();
+    }
+
     if (hasField("agreeToWhatsAppUpdates")) {
       user.agreeToWhatsAppUpdates = Boolean(req.body.agreeToWhatsAppUpdates);
     }
@@ -1428,7 +1467,7 @@ export const getUserDirectory = async (req, res, next) => {
   try {
     const users = await User.find({})
       .select(
-        "_id fullName email role whatsappNumber phoneNumber createdAt adminApprovalStatus adminApprovedAt isEmailVerified isPhoneVerified",
+        "_id fullName email role whatsappNumber phoneNumber createdAt adminApprovalStatus adminApprovedAt isEmailVerified isPhoneVerified latestQualification resumeFilePath resumeFileName",
       )
       .sort({ createdAt: -1 });
 
@@ -1445,6 +1484,9 @@ export const getUserDirectory = async (req, res, next) => {
       isEmailVerified: Boolean(item.isEmailVerified),
       isPhoneVerified: Boolean(item.isPhoneVerified),
       createdAt: item.createdAt,
+      latestQualification: item.latestQualification || "",
+      resumeFilePath: item.resumeFilePath || "",
+      resumeFileName: item.resumeFileName || "",
     });
 
     const admins = users

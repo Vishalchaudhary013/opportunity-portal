@@ -20,6 +20,7 @@ import {
   formatStipendPeriod,
   formatStipendText,
   getInternshipTags,
+  isInternshipOpen,
   resolveWorkMode,
 } from "../utils/internshipCardData";
 
@@ -95,15 +96,22 @@ const InternshipDetailsPage = () => {
   const { opportunities, isInternshipSaved, toggleSavedInternship, user } =
     useOpportunities();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const internship = useMemo(
-    () => opportunities.find((item) => item.id === id && item.type === "Internship"),
+    () =>
+      opportunities.find(
+        (item) =>
+          item.id === id && item.type === "Internship" && isInternshipOpen(item),
+      ),
     [opportunities, id],
   );
 
   const requiredSkills = toList(internship?.requiredSkills || internship?.skills);
   const whoCanApply = toList(internship?.whoCanApply);
   const benefits = toList(internship?.benefits);
+  const descriptionText = String(internship?.description || "").trim();
+  const shouldShowDescriptionToggle = descriptionText.length > 320;
   const isSaved = isInternshipSaved(internship?.id);
   const mapSearchUrl = getMapSearchUrl(internship?.location);
   const mapEmbedUrl = getMapEmbedUrl(internship?.location);
@@ -273,9 +281,30 @@ const InternshipDetailsPage = () => {
 
               <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Job Description</h2>
-                <p className="text-slate-700 mt-3 text-[15px] ">
-                  {internship.description}
+                <p
+                  className="text-slate-700 mt-3 text-[15px]"
+                  style={
+                    shouldShowDescriptionToggle && !isDescriptionExpanded
+                      ? {
+                          display: "-webkit-box",
+                          WebkitBoxOrient: "vertical",
+                          WebkitLineClamp: 6,
+                          overflow: "hidden",
+                        }
+                      : undefined
+                  }
+                >
+                  {descriptionText}
                 </p>
+                {shouldShowDescriptionToggle && (
+                  <button
+                    type="button"
+                    onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+                    className="mt-3 block mx-auto text-sm font-semibold text-[#0B4AA6] hover:underline"
+                  >
+                    {isDescriptionExpanded ? "Read less" : "Read more"}
+                  </button>
+                )}
               </div>
             </div>
 

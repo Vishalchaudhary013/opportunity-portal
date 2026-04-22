@@ -30,7 +30,13 @@ const Signup = () => {
     mobileNumber: "",
     password: "",
     confirmPassword: "",
+    latestQualification: "",
+    yearOfPassing: "",
+    collegeName: "",
+    location: "",
+    agreeToWhatsAppUpdates: true,
   });
+  const [studentResumeFile, setStudentResumeFile] = useState(null);
   const [employerForm, setEmployerForm] = useState({
     firstName: "",
     lastName: "",
@@ -38,6 +44,10 @@ const Signup = () => {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
+    organizationName: "",
+    organizationType: "",
+    username: "",
+    agreeToWhatsAppUpdates: true,
   });
   const [showPassword, setShowPassword] = useState({
     studentPassword: false,
@@ -71,6 +81,12 @@ const Signup = () => {
     setStudentForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleStudentResumeChange = (event) => {
+    const file = event.target.files?.[0];
+    setStudentResumeFile(file || null);
+    setStudentResumeName(file ? file.name : "");
+  };
+
   const handleEmployerChange = (event) => {
     const { name, value } = event.target;
     setEmployerForm((prev) => ({ ...prev, [name]: value }));
@@ -87,9 +103,14 @@ const Signup = () => {
       !fullName ||
       !studentForm.email ||
       !studentForm.mobileNumber ||
-      !studentForm.password
+      !studentForm.password ||
+      !studentForm.latestQualification ||
+      !studentForm.yearOfPassing ||
+      !studentForm.collegeName ||
+      !studentForm.location ||
+      !studentResumeFile
     ) {
-      setError("Please fill all required fields.");
+      setError("Please fill all required fields, including qualification, year, college, location, and resume.");
       return;
     }
 
@@ -100,14 +121,21 @@ const Signup = () => {
 
     try {
       setIsSubmitting(true);
-      await signup({
-        firstName: String(studentForm.firstName || "").trim(),
-        lastName: String(studentForm.lastName || "").trim(),
-        fullName,
-        email: studentForm.email,
-        password: studentForm.password,
-        whatsappNumber: studentForm.mobileNumber,
-      });
+      const formData = new FormData();
+      formData.append("firstName", String(studentForm.firstName || "").trim());
+      formData.append("lastName", String(studentForm.lastName || "").trim());
+      formData.append("fullName", fullName);
+      formData.append("email", studentForm.email);
+      formData.append("password", studentForm.password);
+      formData.append("whatsappNumber", studentForm.mobileNumber);
+      formData.append("latestQualification", studentForm.latestQualification);
+      formData.append("yearOfPassing", studentForm.yearOfPassing);
+      formData.append("collegeName", studentForm.collegeName);
+      formData.append("location", studentForm.location);
+      formData.append("agreeToWhatsAppUpdates", String(studentForm.agreeToWhatsAppUpdates));
+      formData.append("resume", studentResumeFile);
+
+      await signup(formData, { isFormData: true });
       setVerificationEmail(studentForm.email);
       setEmailCode("");
       setPhoneCode("");
@@ -155,6 +183,10 @@ const Signup = () => {
         email: employerForm.email,
         password: employerForm.password,
         whatsappNumber: employerForm.phoneNumber,
+        organizationName: employerForm.organizationName,
+        organizationType: employerForm.organizationType,
+        username: employerForm.username,
+        agreeToWhatsAppUpdates: employerForm.agreeToWhatsAppUpdates,
       });
       setVerificationEmail(employerForm.email);
       setEmailCode("");
@@ -435,7 +467,6 @@ const Signup = () => {
                         value={studentForm.lastName}
                         onChange={handleStudentChange}
                         className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
-                        required
                       />
                     </div>
                   </div>
@@ -445,26 +476,38 @@ const Signup = () => {
                       <label className="font-medium text-gray-700 block mb-1.5 text-[15px]">
                         Latest Qualification <span className="text-red-500">*</span>
                       </label>
-                      <select className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full">
+                      <select
+                        name="latestQualification"
+                        value={studentForm.latestQualification}
+                        onChange={handleStudentChange}
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        required
+                      >
                         <option value="">Select Course</option>
-                        <option value="">Bachelor's</option>
-                        <option value="">Master's</option>
-                        <option value="">Diploma</option>
-                        <option value="">Phd</option>
+                        <option value="Bachelor's">Bachelor's</option>
+                        <option value="Master's">Master's</option>
+                        <option value="Diploma">Diploma</option>
+                        <option value="Phd">Phd</option>
                       </select>
                     </div>
                     <div>
                       <label className="font-medium text-gray-700 block mb-1.5 text-[15px]">
                         Year of Passing <span className="text-red-500">*</span>
                       </label>
-                      <select className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full">
+                      <select
+                        name="yearOfPassing"
+                        value={studentForm.yearOfPassing}
+                        onChange={handleStudentChange}
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        required
+                      >
                         <option value="">Select Year</option>
-                        <option value="">2021</option>
-                        <option value="">2022</option>
-                        <option value="">2023</option>
-                        <option value="">2024</option>
-                        <option value="">2025</option>
-                        <option value="">2026</option>
+                        <option value="2021">2021</option>
+                        <option value="2022">2022</option>
+                        <option value="2023">2023</option>
+                        <option value="2024">2024</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
                       </select>
                     </div>
                   </div>
@@ -476,8 +519,12 @@ const Signup = () => {
                       </label>
                       <input
                         type="text"
+                        name="collegeName"
+                        value={studentForm.collegeName}
+                        onChange={handleStudentChange}
                         placeholder="Enter institute name"
                         className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        required
                       />
                     </div>
                     <div>
@@ -486,8 +533,12 @@ const Signup = () => {
                       </label>
                       <input
                         type="text"
+                        name="location"
+                        value={studentForm.location}
+                        onChange={handleStudentChange}
                         placeholder="city,state"
                         className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        required
                       />
                     </div>
                   </div>
@@ -598,11 +649,25 @@ const Signup = () => {
                   </div>
 
                   <div className="flex items-center gap-2 mb-6">
-                    <input type="checkbox" />
-                    <span className="text-sm  text-gray-600">
+                    <input
+                      type="checkbox"
+                      id="student-whatsapp-updates"
+                      name="agreeToWhatsAppUpdates"
+                      checked={studentForm.agreeToWhatsAppUpdates}
+                      onChange={(e) =>
+                        setStudentForm((prev) => ({
+                          ...prev,
+                          agreeToWhatsAppUpdates: e.target.checked,
+                        }))
+                      }
+                    />
+                    <label
+                      htmlFor="student-whatsapp-updates"
+                      className="text-sm text-gray-600 cursor-pointer"
+                    >
                       I would like to receive important updates and notifications
                       via WhatsApp.
-                    </span>
+                    </label>
                   </div>
 
                   <label className="font-medium text-gray-700 block mb-1.5 text-[15px]">
@@ -613,10 +678,7 @@ const Signup = () => {
                     id="student-resume-upload"
                     type="file"
                     accept=".pdf"
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      setStudentResumeName(file ? file.name : "");
-                    }}
+                    onChange={handleStudentResumeChange}
                     className="sr-only"
                   />
 
@@ -724,26 +786,36 @@ const Signup = () => {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5 mb-6">
                     <div>
                       <label className="font-medium text-gray-700 block mb-1.5 text-[15px]">
-                       Organisation Name <span className="text-red-500">*</span>
+                        Organisation Name <span className="text-red-500">*</span>
                       </label>
                       <input
+                        type="text"
+                        name="organizationName"
+                        value={employerForm.organizationName}
+                        onChange={handleEmployerChange}
                         placeholder="Enter organization name"
-                        
                         className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        required
                       />
                     </div>
                     <div>
                       <label className="font-medium text-gray-700 block mb-1.5 text-[15px]">
                         Organisation Type <span className="text-red-500">*</span>
                       </label>
-                     <select name="" id="" className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full">
-                      <option value="">Select organization type</option>
-                      <option value="">Startup</option>
-                      <option value="">Enterprice</option>
-                      <option value="">Ed Tech</option>
-                      <option value="">NGO</option>
-                      <option value="">Other</option>
-                     </select>
+                      <select
+                        name="organizationType"
+                        value={employerForm.organizationType}
+                        onChange={handleEmployerChange}
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        required
+                      >
+                        <option value="">Select organization type</option>
+                        <option value="Startup">Startup</option>
+                        <option value="Enterprise">Enterprise</option>
+                        <option value="Ed Tech">Ed Tech</option>
+                        <option value="NGO">NGO</option>
+                        <option value="Other">Other</option>
+                      </select>
                     </div>
                   </div>
 
@@ -752,8 +824,12 @@ const Signup = () => {
                       </label>
                       <input
                         type="text"
-                        
+                        name="username"
+                        value={employerForm.username}
+                        onChange={handleEmployerChange}
+                        placeholder="Enter username"
                         className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full mb-6"
+                        required
                       />
 
                  
@@ -834,9 +910,19 @@ const Signup = () => {
                   </div>
 
                   <div className="flex items-center gap-2 mb-6">
-                    <input type="checkbox" />
-                    <span className="text-sm text-gray-600 font-medium
-                    ">
+                    <input
+                      type="checkbox"
+                      id="employer-whatsapp-updates"
+                      name="agreeToWhatsAppUpdates"
+                      checked={employerForm.agreeToWhatsAppUpdates}
+                      onChange={(e) =>
+                        setEmployerForm((prev) => ({
+                          ...prev,
+                          agreeToWhatsAppUpdates: e.target.checked,
+                        }))
+                      }
+                    />
+                    <span className="text-sm text-gray-600 font-medium">
                       I agree to edeco <Link to='' className="text-blue-600">Terms & Conditions</Link> and <Link to='' className="text-blue-600">Privacy Policy</Link>
                     </span>
                   </div>

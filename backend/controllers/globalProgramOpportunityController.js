@@ -147,7 +147,7 @@ export const updateGlobalProgram = async (req, res, next) => {
       },
       payload,
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     ).populate({ path: "createdBy", select: "fullName email role" });

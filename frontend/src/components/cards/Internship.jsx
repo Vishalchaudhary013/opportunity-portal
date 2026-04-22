@@ -13,6 +13,7 @@ import {
   formatStipendPeriod,
   formatStipendText,
   getInternshipTags,
+  isInternshipOpen,
   resolveWorkMode,
 } from "../../utils/internshipCardData";
 
@@ -20,7 +21,7 @@ const Internship = ({ limit }) => {
   const { opportunities, isInternshipSaved, toggleSavedInternship } =
     useOpportunities();
   const intershipData = opportunities.filter(
-    (item) => item.type === "Internship",
+    (item) => item.type === "Internship" && isInternshipOpen(item),
   );
   const visibleInternships =
     typeof limit === "number" ? intershipData.slice(0, limit) : intershipData;
@@ -155,8 +156,8 @@ const Internship = ({ limit }) => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1.5  ">
-                  <CiCalendar size={19} />
+                <div className="flex items-start gap-1.5  ">
+                  <CiCalendar size={18}  />
 
                   <ul>
                     <li className="flex flex-col">

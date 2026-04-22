@@ -59,20 +59,6 @@ const resolveOwnerId = (opportunity) => {
   return owner._id || owner.id || "";
 };
 
-const resolveOwnerName = (opportunity) => {
-  const owner = opportunity?.createdBy;
-
-  if (!owner) {
-    return "Unknown admin";
-  }
-
-  if (typeof owner === "string") {
-    return "Unknown admin";
-  }
-
-  return owner.fullName || owner.email || "Unknown admin";
-};
-
 const resolveResumeUrl = (application) => {
   const filePath = application?.resumeFilePath || application?.resume?.filePath;
 
@@ -93,6 +79,26 @@ const toMultiline = (value) => {
   }
 
   return String(value || "");
+};
+
+const isOpportunityClosed = (opportunity) => {
+  const deadline = opportunity?.deadline;
+
+  if (!deadline) {
+    return false;
+  }
+
+  const date = new Date(deadline);
+
+  if (Number.isNaN(date.getTime())) {
+    return false;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+
+  return date.getTime() < today.getTime();
 };
 
 const AdminDashboard = ({ dashboardType = "admin" }) => {
@@ -132,6 +138,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const [activeSection, setActiveSection] = useState(
     isSuperDashboard ? "Overview" : "Internship",
   );
+  const [closedApplicationView, setClosedApplicationView] =
+    useState("Internship");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [applicationsLoaded, setApplicationsLoaded] = useState(false);
@@ -165,31 +173,38 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     ? `Edit ${form.type === "Global Program" ? "Global Program" : "Internship"}`
     : `Create ${form.type === "Global Program" ? "Global Program" : "Internship"}`;
 
-  const sorted = useMemo(
-    () =>
-      [...opportunities]
-        .filter((item) => {
-          if (isSuperAdmin) {
-            return true;
-          }
-
-          return resolveOwnerId(item) === String(user?.id || "");
-        })
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt || 0).getTime() -
-            new Date(a.createdAt || 0).getTime(),
-        ),
-    [opportunities, isSuperAdmin, user?.id],
-  );
+  // Only show internships created by this super admin in super admin panel
+  // AFTER
+  const sorted = useMemo(() => {
+    const userId = String(user?.id || user?._id || "");
+    return [...opportunities]
+      .filter(
+        (item) =>
+          resolveOwnerId(item) === userId &&
+          (item.type === "Internship" || item.type === "Global Program"),
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || a.updatedAt || 0).getTime(),
+      );
+  }, [opportunities, user?.id]);
 
   const filteredOpportunities = useMemo(() => {
     if (activeSection === "Internship") {
-      return sorted.filter((item) => item.type === "Internship");
+      return sorted.filter(
+        (item) => item.type === "Internship" && !isOpportunityClosed(item),
+      );
     }
 
     if (activeSection === "Global Program") {
-      return sorted.filter((item) => item.type === "Global Program");
+      return sorted.filter(
+        (item) => item.type === "Global Program" && !isOpportunityClosed(item),
+      );
+    }
+
+    if (activeSection === "Closed Application") {
+      return sorted.filter((item) => isOpportunityClosed(item));
     }
 
     return sorted;
@@ -197,8 +212,10 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const isInternshipPanel = activeSection === "Internship";
   const isGlobalProgramPanel = activeSection === "Global Program";
+  const isClosedApplicationPanel = activeSection === "Closed Application";
   const isSuperStatsSection = isSuperDashboard && activeSection === "Overview";
-  const isSuperPostSection = isSuperDashboard && activeSection === "Post Opportunity";
+  const isSuperPostSection =
+    isSuperDashboard && activeSection === "Post Opportunity";
   const isSuperUsersSection = isSuperDashboard && activeSection === "Users";
   const isSuperAdminsSection = isSuperDashboard && activeSection === "Admins";
   const isSuperApprovedRequestsSection =
@@ -209,6 +226,52 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     isSuperUsersSection ||
     isSuperAdminsSection ||
     isSuperApprovedRequestsSection;
+  const closedInternships = sorted.filter(
+    (item) =>
+      item.type === "Internship" &&
+      isOpportunityClosed(item) &&
+      item.title &&
+      item.company,
+  );
+  const closedGlobalPrograms = sorted.filter(
+    (item) =>
+      item.type === "Global Program" &&
+      isOpportunityClosed(item) &&
+      item.title &&
+      item.company,
+  );
+  const closedApplicationItems =
+    closedApplicationView === "Internship"
+      ? closedInternships
+      : closedGlobalPrograms;
+  const closedApplicationTitle =
+    closedApplicationView === "Internship"
+      ? "Closed Internship"
+      : "Closed Global Program";
+  // Only applications for internships created by this super admin
+  const ownedOpportunityIds = useMemo(
+    () =>
+      new Set(
+        sorted.map((item) => String(item.id || "").trim()).filter(Boolean),
+      ),
+    [sorted],
+  );
+  const scopedApplications = useMemo(
+    () =>
+      applications.filter((application) => {
+        const directOpportunityId = String(
+          application.opportunityId ||
+            application.opportunity ||
+            application?.opportunity?._id ||
+            application?.opportunity?.id ||
+            "",
+        ).trim();
+        return (
+          directOpportunityId && ownedOpportunityIds.has(directOpportunityId)
+        );
+      }),
+    [applications, ownedOpportunityIds],
+  );
   const userCount = directory.counts?.users || 0;
   const adminCount = directory.counts?.admins || 0;
   const superAdminCount = directory.counts?.superAdmins || 0;
@@ -221,12 +284,65 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const userPercent = toPercent(userCount);
   const adminPercent = toPercent(adminCount);
   const superAdminPercent = toPercent(superAdminCount);
+  const ownerNameById = useMemo(() => {
+    const entries = [
+      ...(directory.admins || []),
+      ...(directory.superAdmins || []),
+      ...(directory.users || []),
+    ];
+    const map = new Map();
+
+    entries.forEach((entry) => {
+      const id = String(entry?._id || entry?.id || "").trim();
+
+      if (!id) {
+        return;
+      }
+
+      map.set(id, entry.fullName || entry.email || "Unknown admin");
+    });
+
+    const currentUserId = String(user?.id || user?._id || "").trim();
+
+    if (currentUserId && !map.has(currentUserId)) {
+      map.set(currentUserId, user?.fullName || user?.email || "Unknown admin");
+    }
+
+    return map;
+  }, [directory.admins, directory.superAdmins, directory.users, user]);
+  const resolveOwnerName = (opportunity) => {
+    const owner = opportunity?.createdBy;
+
+    if (!owner) {
+      return "Unknown admin";
+    }
+
+    if (typeof owner === "object") {
+      return owner.fullName || owner.email || "Unknown admin";
+    }
+
+    const ownerId = String(owner).trim();
+
+    if (!ownerId) {
+      return "Unknown admin";
+    }
+
+    // Fallback: if createdBy is current user, always show their name/email
+    const currentUserId = String(user?.id || user?._id || "").trim();
+    if (ownerId && currentUserId && ownerId === currentUserId) {
+      return user?.fullName || user?.email || "You";
+    }
+
+    return ownerNameById.get(ownerId) || "Unknown admin";
+  };
 
   const recentApplications = useMemo(() => {
     const sectionApplications =
       activeSection === "Applications"
-        ? applications
-        : applications.filter((item) => item.opportunityType === activeSection);
+        ? scopedApplications
+        : scopedApplications.filter(
+            (item) => item.opportunityType === activeSection,
+          );
 
     return [...sectionApplications]
       .sort(
@@ -235,7 +351,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
           new Date(a.appliedAt || 0).getTime(),
       )
       .slice(0, 5);
-  }, [applications, activeSection]);
+  }, [scopedApplications, activeSection]);
 
   useEffect(() => {
     if (isBootstrapping) {
@@ -348,9 +464,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const handleRequiredSkillChange = (index, value) => {
     setRequiredSkillInputs((prev) =>
-      prev.map((item, currentIndex) =>
-        currentIndex === index ? value : item,
-      ),
+      prev.map((item, currentIndex) => (currentIndex === index ? value : item)),
     );
   };
 
@@ -360,9 +474,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const handleBenefitChange = (index, value) => {
     setBenefitInputs((prev) =>
-      prev.map((item, currentIndex) =>
-        currentIndex === index ? value : item,
-      ),
+      prev.map((item, currentIndex) => (currentIndex === index ? value : item)),
     );
   };
 
@@ -424,8 +536,12 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     const payload = {
       ...form,
       skills: form.skills,
-      requiredSkills: shouldIncludeInternshipCardFields ? requiredSkillsValue : form.requiredSkills,
-      benefits: shouldIncludeInternshipCardFields ? benefitsValue : form.benefits,
+      requiredSkills: shouldIncludeInternshipCardFields
+        ? requiredSkillsValue
+        : form.requiredSkills,
+      benefits: shouldIncludeInternshipCardFields
+        ? benefitsValue
+        : form.benefits,
       deadline: new Date(form.deadline).toISOString(),
       startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
       stipend: form.stipend
@@ -461,7 +577,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
         ? `/super-admin-dashboard/edit-opportunity/${item.id}`
         : `/admin-dashboard/edit-opportunity/${item.id}`,
       {
-      state: { opportunity: item },
+        state: { opportunity: item },
       },
     );
   };
@@ -661,7 +777,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       setError("");
       setPasswordChangeMessage("");
       setChangingPasswordAdminId(adminId);
-      const result = await changeAdminPassword(adminId, newPassword, notifyAdmin);
+      const result = await changeAdminPassword(
+        adminId,
+        newPassword,
+        notifyAdmin,
+      );
       setPasswordChangeMessage(
         result?.message || "Admin password changed successfully.",
       );
@@ -702,20 +822,93 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const menuItems = [
     { key: "Internship", label: "Internships" },
     { key: "Global Program", label: "Global Programs" },
+
     { key: "Applications", label: "Application Forms" },
+    { key: "Closed Application", label: "Closed Application" },
   ];
+
+  const closedApplicationContent = isClosedApplicationPanel ? (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setClosedApplicationView("Internship")}
+          className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+            closedApplicationView === "Internship"
+              ? "bg-[#0B4AA6] text-white"
+              : "bg-white text-slate-700 border border-[#DCE5FA]"
+          }`}
+        >
+          Closed Internship
+        </button>
+        <button
+          type="button"
+          onClick={() => setClosedApplicationView("Global Program")}
+          className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+            closedApplicationView === "Global Program"
+              ? "bg-[#0B4AA6] text-white"
+              : "bg-white text-slate-700 border border-[#DCE5FA]"
+          }`}
+        >
+          Closed Global Program
+        </button>
+      </div>
+
+      <div className="rounded-xl border border-[#E2EAFC] bg-[#F8FBFF] p-4">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h3 className="text-lg font-semibold text-slate-800">
+            {closedApplicationTitle}
+          </h3>
+          <span className="text-xs font-medium text-slate-500">
+            {closedApplicationItems.length} items
+          </span>
+        </div>
+
+        {closedApplicationItems.length === 0 ? (
+          <p className="text-sm text-slate-500">
+            No closed {closedApplicationView.toLowerCase()} found.
+          </p>
+        ) : (
+          <div className="space-y-3 max-h-[42vh] overflow-y-auto pr-1">
+            {closedApplicationItems.map((item) => (
+              <div
+                key={item.id}
+                className="border border-[#E2EAFC] rounded-lg p-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+              >
+                <div className="min-w-0">
+                  <h4 className="font-semibold text-[17px] text-slate-800">
+                    {item.title}
+                  </h4>
+                  <p className="text-sm text-slate-600">
+                    {item.company} • {item.location}
+                  </p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {item.duration} • {item.stipend}
+                  </p>
+                </div>
+                <p className="text-xs font-semibold uppercase text-red-500">
+                  Closed
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
 
   if (isSuperDashboard && isSuperAdmin) {
     menuItems.splice(
       0,
       menuItems.length,
       { key: "Overview", label: "Overview" },
-      { key: "Post Opportunity", label: "Post Opportunity" },
+      // { key: "Post Opportunity", label: "Post Opportunity" },
+
       { key: "Admins", label: "Admins" },
-      
       { key: "Users", label: "Users" },
-     
-      
+      { key: "Internship", label: "Internships" },
+      { key: "Global Program", label: "Global Programs" },
+      { key: "Closed Application", label: "Closed Application" },
     );
   }
 
@@ -733,9 +926,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   return (
     <>
-      
       <div className="min-h-screen bg-[#EEF3FF]">
-        <div className="mx-auto w-full max-w-[1400px] px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
+        <div className="mx-auto w-full max-w-350 px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[250px_minmax(0,1fr)] xl:gap-5">
             <aside className="bg-[#E4EBFB] border border-[#D8E2F7] rounded-2xl p-4 xl:sticky xl:top-6 h-fit">
               <div className="mb-7">
@@ -759,13 +951,18 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                   >
                     {item.key === "Internship" && <FiGrid size={16} />}
                     {item.key === "Global Program" && <FiPieChart size={16} />}
+                    {item.key === "Closed Application" && (
+                      <FiEyeOff size={16} />
+                    )}
                     {item.key === "Applications" && <FiFileText size={16} />}
                     {item.key === "Overview" && <FiPieChart size={16} />}
-                    {item.key === "Post Opportunity" && <FiBriefcase size={16} />}
+                    {item.key === "Post Opportunity" && (
+                      <FiBriefcase size={16} />
+                    )}
                     {item.key === "Admins" && <FiShield size={16} />}
-                    
+
                     {item.key === "Users" && <FiUsers size={16} />}
-                    
+
                     {item.label}
                   </button>
                 ))}
@@ -829,7 +1026,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                     OPERATIONAL OVERVIEW
                   </p>
                 </div>
-                  <div className="w-full sm:w-auto flex items-center gap-3 rounded-xl bg-[#F5F8FF] border border-[#DEE8FF] px-3 py-2">
+                <div className="w-full sm:w-auto flex items-center gap-3 rounded-xl bg-[#F5F8FF] border border-[#DEE8FF] px-3 py-2">
                   <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-900 font-semibold flex items-center justify-center">
                     {(user?.fullName || "A").charAt(0).toUpperCase()}
                   </div>
@@ -918,9 +1115,14 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                     >
                       Post Global Program
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSectionChange("Closed Application")}
+                      className="w-full sm:w-auto px-4 py-2 rounded-lg bg-slate-900 text-white font-semibold"
+                    >
+                      Closed Applications
+                    </button>
                   </div>
-
-                  
                 </div>
               ) : null}
 
@@ -949,22 +1151,22 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                           ? "Overview"
                           : isSuperPostSection
                             ? "Post Opportunity"
-                          : isSuperAdminsSection
-                            ? "Admins"
-                          : isSuperApprovedRequestsSection
-                            ? "Approved Requests"
-                            : "Users"}
+                            : isSuperAdminsSection
+                              ? "Admins"
+                              : isSuperApprovedRequestsSection
+                                ? "Approved Requests"
+                                : "Users"}
                       </h2>
                       <p className="text-sm text-slate-500">
                         {isSuperStatsSection
                           ? "Overview of all account totals."
                           : isSuperPostSection
                             ? "Open the post panel to create internships or global programs."
-                          : isSuperAdminsSection
-                            ? "View and manage admin accounts."
-                          : isSuperApprovedRequestsSection
-                            ? "View already approved admin requests."
-                            : "View and manage user accounts."}
+                            : isSuperAdminsSection
+                              ? "View and manage admin accounts."
+                              : isSuperApprovedRequestsSection
+                                ? "View already approved admin requests."
+                                : "View and manage user accounts."}
                       </p>
                     </div>
                     <button
@@ -1110,7 +1312,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
                                 <th className="py-2 px-3">Name</th>
                                 <th className="py-2 px-3">Email</th>
-                                
+
                                 <th className="py-2 px-3">Status</th>
                                 <th className="py-2 px-3 ">Action</th>
                               </tr>
@@ -1133,7 +1335,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                   <td className="py-2 px-3 text-slate-600 break-all">
                                     {item.email}
                                   </td>
-                                  
+
                                   <td className="py-2 px-3 text-slate-600">
                                     <span
                                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -1149,7 +1351,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                   </td>
                                   <td className="py-2 px-3">
                                     <div className="flex flex-wrap items-center gap-2">
-                                      {item.adminApprovalStatus === "pending" && (
+                                      {item.adminApprovalStatus ===
+                                        "pending" && (
                                         <button
                                           type="button"
                                           onClick={() =>
@@ -1176,7 +1379,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                           handleOpenAdminDashboard(item.id)
                                         }
                                         disabled={
-                                          item.adminApprovalStatus === "pending" ||
+                                          item.adminApprovalStatus ===
+                                            "pending" ||
                                           openingAdminId === item.id ||
                                           deletingUserId === item.id
                                         }
@@ -1202,7 +1406,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                       </button>
                                       <button
                                         type="button"
-                                        onClick={() => handleDeleteAccount(item)}
+                                        onClick={() =>
+                                          handleDeleteAccount(item)
+                                        }
                                         disabled={deletingUserId === item.id}
                                         className="px-2.5 py-1 rounded-md bg-red-600 text-white text-xs font-semibold disabled:opacity-60"
                                       >
@@ -1293,7 +1499,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                           </div>
                                         </div>
                                         <p className="mt-1.5 text-[11px] text-slate-500">
-                                          Password must be at least 8 characters and include letters, numbers, and special characters.
+                                          Password must be at least 8 characters
+                                          and include letters, numbers, and
+                                          special characters.
                                         </p>
                                         <label className="mt-2 flex items-center gap-2 text-xs text-slate-700">
                                           <input
@@ -1304,7 +1512,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                             onChange={handleNotifyAdminToggle}
                                             className="h-4 w-4 rounded border-slate-300 text-slate-900"
                                           />
-                                          Notify admin by email about password change
+                                          Notify admin by email about password
+                                          change
                                         </label>
                                         <div className="mt-2 flex items-center gap-2">
                                           <button
@@ -1313,7 +1522,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                               handleChangeAdminPassword(item.id)
                                             }
                                             disabled={
-                                              changingPasswordAdminId === item.id
+                                              changingPasswordAdminId ===
+                                              item.id
                                             }
                                             className="px-2.5 py-1 rounded-md bg-slate-900 text-white text-xs font-semibold disabled:opacity-60"
                                           >
@@ -1325,7 +1535,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                             type="button"
                                             onClick={handleCancelPasswordEditor}
                                             disabled={
-                                              changingPasswordAdminId === item.id
+                                              changingPasswordAdminId ===
+                                              item.id
                                             }
                                             className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-semibold disabled:opacity-60"
                                           >
@@ -1355,11 +1566,15 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                         </p>
                       ) : (
                         <div className="overflow-x-auto border border-[#E2EAFC] rounded-lg">
-                          <table className="min-w-170 w-full text-sm">
+                          <table className="min-w-[800px] w-full text-sm">
                             <thead>
                               <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
                                 <th className="py-2 px-3">Name</th>
                                 <th className="py-2 px-3">Email</th>
+                                <th className="py-2 px-3">Phone</th>
+                                <th className="py-2 px-3">Qualification</th>
+
+                                <th className="py-2 px-3">Resume</th>
                                 <th className="py-2 px-3">Action</th>
                               </tr>
                             </thead>
@@ -1374,6 +1589,40 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                   </td>
                                   <td className="py-2 px-3 text-slate-600 break-all">
                                     {item.email}
+                                  </td>
+
+                                  <td className="py-2 px-3 text-slate-600">
+                                    {item.whatsappNumber || (
+                                      <span className="text-slate-400">
+                                        N/A
+                                      </span>
+                                    )}
+                                  </td>
+                                  
+                                  <td className="py-2 px-3 text-slate-600">
+                                    {item.latestQualification || (
+                                      <span className="text-slate-400">
+                                        N/A
+                                      </span>
+                                    )}
+                                  </td>
+
+                                  <td className="py-2 px-3">
+                                    {item.resumeFilePath ? (
+                                      <a
+                                        href={`${API_BASE_URL}${item.resumeFilePath.startsWith("/") ? "" : "/"}${item.resumeFilePath}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B4AA6] text-white text-xs font-semibold hover:bg-[#083D8B] transition shadow-sm"
+                                      >
+                                        <FiFileText size={14} />
+                                        View Resume
+                                      </a>
+                                    ) : (
+                                      <span className="text-slate-400">
+                                        N/A
+                                      </span>
+                                    )}
                                   </td>
                                   <td className="py-2 px-3">
                                     <button
@@ -1400,7 +1649,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                     <div>
                       {!showOpportunityForm ? (
                         <div className="text-sm text-slate-500">
-                          Click Post Internship or Post Global Program above to open the form.
+                          Click Post Internship or Post Global Program above to
+                          open the form.
                         </div>
                       ) : null}
                     </div>
@@ -1435,7 +1685,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                     </div>
                   </div>
 
-                  {applications.length === 0 ? (
+                  {scopedApplications.length === 0 ? (
                     <p className="text-slate-500">
                       No applications submitted yet.
                     </p>
@@ -1455,7 +1705,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {applications.map((application) => (
+                          {scopedApplications.map((application) => (
                             <tr
                               key={application.id}
                               className="border-b border-[#EDF2FD] align-top"
@@ -1481,14 +1731,18 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                     <span>{application.resumeFileName}</span>
                                     <button
                                       type="button"
-                                      onClick={() => handleViewResume(application)}
+                                      onClick={() =>
+                                        handleViewResume(application)
+                                      }
                                       className="px-2 py-1 rounded-md bg-slate-100 text-slate-800 text-xs font-semibold hover:bg-slate-200"
                                     >
                                       View Resume
                                     </button>
                                   </div>
                                 ) : (
-                                  <span className="text-slate-400">Not uploaded</span>
+                                  <span className="text-slate-400">
+                                    Not uploaded
+                                  </span>
                                 )}
                               </td>
                               <td className="py-2 pr-3">
@@ -1528,36 +1782,46 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                       <h2 className="text-2xl font-semibold text-slate-800">
                         {activeSection === "Internship"
                           ? "Internship Opportunities"
-                          : "Global Program Opportunities"}
+                          : activeSection === "Global Program"
+                            ? "Global Program Opportunities"
+                            : activeSection === "Closed Application"
+                              ? "Closed Application"
+                              : "Application Forms"}
                       </h2>
                       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
-                        <button
-                          type="button"
-                          onClick={handleOpenCreateForm}
-                          className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-[#0B4AA6] text-white text-sm font-semibold hover:bg-[#083B85]"
-                        >
-                          {activeSection === "Internship"
-                            ? "Create Internship"
-                            : "Create Global Program"}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleExport("csv")}
-                          className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-100 text-slate-900 text-sm font-semibold"
-                        >
-                          Download CSV
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleExport("xlsx")}
-                          className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-900 text-white text-sm font-semibold"
-                        >
-                          Download Excel
-                        </button>
+                        {!isClosedApplicationPanel && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleOpenCreateForm}
+                              className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-[#0B4AA6] text-white text-sm font-semibold hover:bg-[#083B85]"
+                            >
+                              {activeSection === "Internship"
+                                ? "Create Internship"
+                                : "Create Global Program"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleExport("csv")}
+                              className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-100 text-slate-900 text-sm font-semibold"
+                            >
+                              Download CSV
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleExport("xlsx")}
+                              className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-900 text-white text-sm font-semibold"
+                            >
+                              Download Excel
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
 
-                    {filteredOpportunities.length === 0 ? (
+                    {isClosedApplicationPanel ? (
+                      closedApplicationContent
+                    ) : filteredOpportunities.length === 0 ? (
                       <p className="text-slate-500">
                         No opportunities added yet.
                       </p>
@@ -1608,69 +1872,73 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
                   <div
                     className={`grid gap-4 sm:gap-5 items-start ${
-                      showOpportunityForm ? "grid-cols-1 xl:grid-cols-[1.2fr_1fr]" : "grid-cols-1"
+                      showOpportunityForm
+                        ? "grid-cols-1 xl:grid-cols-[1.2fr_1fr]"
+                        : "grid-cols-1"
                     }`}
                   >
-                    <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5 min-w-0">
-                      <div className="flex items-center justify-between mb-3">
-                        <div>
-                          <h2 className="text-2xl font-semibold text-slate-800">
-                            Recent Applications
-                          </h2>
-                          <p className="text-sm text-slate-500">
-                            Latest candidate submissions.
+                    {!isClosedApplicationPanel && (
+                      <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5 min-w-0">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h2 className="text-2xl font-semibold text-slate-800">
+                              Recent Applications
+                            </h2>
+                            <p className="text-sm text-slate-500">
+                              Latest candidate submissions.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleSectionChange("Applications")}
+                            className="text-sm px-3 py-1.5 rounded-md bg-slate-900 text-white font-semibold"
+                          >
+                            View All
+                          </button>
+                        </div>
+                        {recentApplications.length === 0 ? (
+                          <p className="text-slate-500">
+                            No applications submitted yet.
                           </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleSectionChange("Applications")}
-                          className="text-sm px-3 py-1.5 rounded-md bg-slate-900 text-white font-semibold"
-                        >
-                          View All
-                        </button>
-                      </div>
-                      {recentApplications.length === 0 ? (
-                        <p className="text-slate-500">
-                          No applications submitted yet.
-                        </p>
-                      ) : (
-                        <div className="overflow-x-auto">
-                          <table className="min-w-155 w-full text-sm">
-                            <thead>
-                              <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
-                                <th className="py-2 pr-3">Name</th>
-                                <th className="py-2 pr-3">Opportunity</th>
-                                <th className="py-2 pr-3">Type</th>
-                                <th className="py-2 pr-3">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {recentApplications.map((application) => (
-                                <tr
-                                  key={application.id}
-                                  className="border-b border-[#EDF2FD]"
-                                >
-                                  <td className="py-2 pr-3 font-medium text-slate-800">
-                                    {application.name}
-                                  </td>
-                                  <td className="py-2 pr-3 text-slate-700">
-                                    {application.opportunityTitle}
-                                  </td>
-                                  <td className="py-2 pr-3 text-slate-600">
-                                    {application.opportunityType}
-                                  </td>
-                                  <td className="py-2 pr-3">
-                                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-900">
-                                      {application.status || "New"}
-                                    </span>
-                                  </td>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            <table className="min-w-155 w-full text-sm">
+                              <thead>
+                                <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
+                                  <th className="py-2 pr-3">Name</th>
+                                  <th className="py-2 pr-3">Opportunity</th>
+                                  <th className="py-2 pr-3">Type</th>
+                                  <th className="py-2 pr-3">Status</th>
                                 </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
+                              </thead>
+                              <tbody>
+                                {recentApplications.map((application) => (
+                                  <tr
+                                    key={application.id}
+                                    className="border-b border-[#EDF2FD]"
+                                  >
+                                    <td className="py-2 pr-3 font-medium text-slate-800">
+                                      {application.name}
+                                    </td>
+                                    <td className="py-2 pr-3 text-slate-700">
+                                      {application.opportunityTitle}
+                                    </td>
+                                    <td className="py-2 pr-3 text-slate-600">
+                                      {application.opportunityType}
+                                    </td>
+                                    <td className="py-2 pr-3">
+                                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-900">
+                                        {application.status || "New"}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {showOpportunityForm && (
                       <form
@@ -1683,7 +1951,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               {title}
                             </h2>
                             <p className="text-xs text-slate-500 mt-1">
-                              Fields marked <span className="text-rose-600">*</span> are required.
+                              Fields marked{" "}
+                              <span className="text-rose-600">*</span> are
+                              required.
                             </p>
                           </div>
                           <button
@@ -1766,7 +2036,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                           {form.type === "Internship" && (
                             <label className="flex flex-col gap-1 text-sm text-slate-700">
                               <span>
-                                Work Mode <span className="text-rose-600">*</span>
+                                Work Mode{" "}
+                                <span className="text-rose-600">*</span>
                               </span>
                               <select
                                 name="workMode"
@@ -1825,7 +2096,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                             <>
                               <label className="flex flex-col gap-1 text-sm text-slate-700">
                                 <span>
-                                  Work Mode <span className="text-rose-600">*</span>
+                                  Work Mode{" "}
+                                  <span className="text-rose-600">*</span>
                                 </span>
                                 <select
                                   name="workMode"
@@ -1855,7 +2127,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
                           <label className="flex flex-col gap-1 text-sm text-slate-700 col-span-2">
                             <span>
-                              Description <span className="text-rose-600">*</span>
+                              Description{" "}
+                              <span className="text-rose-600">*</span>
                             </span>
                             <textarea
                               name="description"
@@ -1872,10 +2145,12 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               <div className="flex items-start justify-between gap-3">
                                 <div>
                                   <span className="block text-sm font-medium text-slate-700">
-                                    Required Skills <span className="text-rose-600">*</span>
+                                    Required Skills{" "}
+                                    <span className="text-rose-600">*</span>
                                   </span>
                                   <p className="text-xs text-slate-500 mt-1">
-                                    Add at least 3 required skills. Use Add Skill for more.
+                                    Add at least 3 required skills. Use Add
+                                    Skill for more.
                                   </p>
                                 </div>
                                 <button
@@ -1889,15 +2164,24 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
                               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {requiredSkillInputs.map((skill, index) => (
-                                  <label key={`dashboard-required-skill-${index}`} className="flex flex-col gap-1 text-sm text-slate-700">
+                                  <label
+                                    key={`dashboard-required-skill-${index}`}
+                                    className="flex flex-col gap-1 text-sm text-slate-700"
+                                  >
                                     <span>
-                                      Skill {index + 1} {index < 3 ? <span className="text-rose-600">*</span> : null}
+                                      Skill {index + 1}{" "}
+                                      {index < 3 ? (
+                                        <span className="text-rose-600">*</span>
+                                      ) : null}
                                     </span>
                                     <input
                                       type="text"
                                       value={skill}
                                       onChange={(event) =>
-                                        handleRequiredSkillChange(index, event.target.value)
+                                        handleRequiredSkillChange(
+                                          index,
+                                          event.target.value,
+                                        )
                                       }
                                       placeholder={`Skill ${index + 1}`}
                                       className="border border-[#D6E2FC] rounded-lg px-3 py-2"
@@ -1927,10 +2211,12 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               <div className="flex items-start justify-between gap-3">
                                 <div>
                                   <span className="block text-sm font-medium text-slate-700">
-                                    Benefits <span className="text-rose-600">*</span>
+                                    Benefits{" "}
+                                    <span className="text-rose-600">*</span>
                                   </span>
                                   <p className="text-xs text-slate-500 mt-1">
-                                    Add at least 4 benefits. Use Add Benefit for more.
+                                    Add at least 4 benefits. Use Add Benefit for
+                                    more.
                                   </p>
                                 </div>
                                 <button
@@ -1944,15 +2230,24 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
                               <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
                                 {benefitInputs.map((benefit, index) => (
-                                  <label key={`dashboard-benefit-${index}`} className="flex flex-col gap-1 text-sm text-slate-700">
+                                  <label
+                                    key={`dashboard-benefit-${index}`}
+                                    className="flex flex-col gap-1 text-sm text-slate-700"
+                                  >
                                     <span>
-                                      Benefit {index + 1} {index < 4 ? <span className="text-rose-600">*</span> : null}
+                                      Benefit {index + 1}{" "}
+                                      {index < 4 ? (
+                                        <span className="text-rose-600">*</span>
+                                      ) : null}
                                     </span>
                                     <input
                                       type="text"
                                       value={benefit}
                                       onChange={(event) =>
-                                        handleBenefitChange(index, event.target.value)
+                                        handleBenefitChange(
+                                          index,
+                                          event.target.value,
+                                        )
                                       }
                                       placeholder={`Benefit ${index + 1}`}
                                       className="border border-[#D6E2FC] rounded-lg px-3 py-2"

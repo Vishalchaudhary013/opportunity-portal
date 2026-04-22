@@ -322,7 +322,7 @@ const Global = () => {
                       className="flex gap-2 items-center"
                       onClick={() => {
                         if (!user) {
-                          navigate(\"/signup\");
+                          navigate("/signup");
                         } else {
                           setSelectedOpportunity(data);
                         }

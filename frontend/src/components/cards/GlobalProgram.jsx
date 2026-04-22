@@ -48,78 +48,81 @@ const GlobalProgram = ({ limit }) => {
             {visibleGlobalPrograms.map((data) => (
               <div
                 key={data.id}
-                className="p-5 border border-black/10 rounded-xl group hover:shadow hover:transition hover:scale-101"
+                className="flex h-full flex-col rounded-xl border border-black/10 p-5 group hover:shadow hover:transition hover:scale-101"
               >
-                <ul className="flex gap-3 items-start mb-5 min-w-0">
-                  <li>
-                    <img
-                      src={data.logo}
-                      alt=""
-                      className="h-10 w-10 rounded-lg"
+                <div className="flex-1">
+                  <ul className="mb-5 flex min-w-0 items-start gap-3">
+                    <li>
+                      <img
+                        src={data.logo}
+                        alt=""
+                        className="h-10 w-10 rounded-lg"
+                      />
+                    </li>
+                    <li className="min-w-0 leading-4.5">
+                      <h3 className="wrap-break-word text-[15.5px] font-medium group-hover:text-[#155DFC]">
+                        {data.title}
+                      </h3>
+                      <span className="wrap-break-word text-[14.5px] font-medium text-black/65">
+                        {data.company}
+                      </span>
+                    </li>
+                  </ul>
+
+                  <div className="mb-3 grid grid-cols-1 gap-x-2 gap-y-2 text-[14px] font-medium text-black/55 sm:grid-cols-2 sm:text-[14.5px]">
+                    <div className="flex items-center gap-1 ">
+                      <CiLocationOn />
+                      <span className="truncate">{data.location}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <IoMdTime />
+                      {data.duration}
+                    </div>
+
+                    <div className="flex items-center gap-1">
+                      <MdAttachMoney />
+                      {data.stipend}
+                    </div>
+
+                    <div className="flex items-center gap-1 ">
+                      <CiCalendar />
+                      {new Date(data.deadline).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="mb-3 flex items-center gap-4">
+                    <ImPower
+                      size={10}
+                      className="flex h-9 w-9 items-center justify-center rounded-lg bg-black/5 p-2"
                     />
-                  </li>
-                  <li className="leading-4.5 min-w-0">
-                    <h3 className="text-[15.5px] font-medium group-hover:text-[#155DFC] wrap-break-word">
-                      {data.title}
-                    </h3>
-                    <span className="text-[14.5px] font-medium text-black/65 wrap-break-word">
-                      {data.company}
-                    </span>
-                  </li>
-                </ul>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-2 text-[14px] sm:text-[14.5px] mb-3 font-medium text-black/55">
-                  <div className="flex items-center gap-1 ">
-                    <CiLocationOn />
-                    <span className="truncate">{data.location}</span>
+                    <ul>
+                      <li className="text-[14.5px] font-medium text-black/55">
+                        Program Category
+                      </li>
+                      <li className="text-[16px] font-medium">
+                        {data.programType}
+                      </li>
+                    </ul>
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <IoMdTime />
-                    {data.duration}
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <MdAttachMoney />
-                    {data.stipend}
-                  </div>
-
-                  <div className="flex items-center gap-1 ">
-                    <CiCalendar />
-                    {new Date(data.deadline).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
+                  <div className="mb-6 flex items-center gap-4">
+                    <HiOutlineShieldCheck className="flex h-9 w-9 items-center justify-center rounded-lg bg-black/5 p-2" />
+                    <ul>
+                      <li className="text-[14.5px] font-medium text-black/55">
+                        Eligibility
+                      </li>
+                      <li className="text-sm font-medium">{data.eligibility}</li>
+                    </ul>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 mb-3">
-                  <ImPower
-                    size={10}
-                    className="w-9 h-9 rounded-lg p-2 flex items-center justify-center bg-black/5"
-                  />
-                  <ul>
-                    <li className="text-[14.5px] font-medium text-black/55">
-                      Program Category
-                    </li>
-                    <li className="text-[16px] font-medium">
-                      {data.programType}
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="flex items-center gap-4 mb-6">
-                  <HiOutlineShieldCheck className="w-9 h-9 rounded-lg p-2 flex items-center justify-center bg-black/5" />
-                  <ul>
-                    <li className="text-[14.5px] font-medium text-black/55">
-                      Eligibility
-                    </li>
-                    <li className="text-sm font-medium">{data.eligibility}</li>
-                  </ul>
-                </div>
-                <div className="flex bg-slate-900 font-medium text-base sm:text-xl rounded-xl text-white justify-center py-2">
+                <div className="mt-auto flex w-full rounded-xl bg-slate-900 font-medium text-base text-white transition hover:bg-slate-800 sm:text-xl">
                   <button
-                    className="flex gap-2 items-center"
+                    className="flex w-full items-center justify-center gap-2 px-4 py-3"
                     onClick={() => {
                       if (!user) {
                         navigate("/signup");

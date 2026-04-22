@@ -4,6 +4,7 @@ import { CiLocationOn } from "react-icons/ci";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import {
   formatStipendText,
+  isInternshipOpen,
   resolveWorkMode,
 } from "../utils/internshipCardData";
 
@@ -23,6 +24,7 @@ const FavoritesPage = () => {
       opportunities.filter(
         (item) =>
           item.type === "Internship" &&
+          isInternshipOpen(item) &&
           savedInternshipIds.includes(String(item.id || "").trim()),
       ),
     [opportunities, savedInternshipIds],

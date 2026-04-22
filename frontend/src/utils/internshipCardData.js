@@ -47,6 +47,22 @@ const hasUnpaidKeyword = (value) =>
     String(value || ""),
   );
 
+const formatAmount = (value) => {
+  const numericValue = Number(
+    String(value || "")
+      .replace(/,/g, "")
+      .trim(),
+  );
+
+  if (!Number.isFinite(numericValue)) {
+    return String(value || "");
+  }
+
+  return new Intl.NumberFormat("en-IN", {
+    maximumFractionDigits: 2,
+  }).format(numericValue);
+};
+
 const isUnpaidInternship = (item) => {
   const stipendType = String(item?.stipendType || "")
     .trim()
@@ -55,6 +71,13 @@ const isUnpaidInternship = (item) => {
   const details = item?.stipendDetails || {};
   const min = Number(details.min);
   const max = Number(details.max);
+  const numericStipend = Number(stipendText.replace(/[^\d.]/g, ""));
+  const hasExplicitNumericStipend =
+    Number.isFinite(numericStipend) && numericStipend > 0;
+
+  if (hasExplicitNumericStipend) {
+    return false;
+  }
 
   if (stipendType === "unpaid") {
     return true;
@@ -119,30 +142,51 @@ export const formatStipendText = (item) => {
   const max = Number(details.max);
   const symbol = resolveCurrencySymbol(details.currency || "INR");
 
-  if (Number.isFinite(min) && Number.isFinite(max)) {
-    return `${symbol}${max}`;
-  }
-
   if (stipendText && stipendText.toLowerCase() !== "not disclosed") {
     const normalizedText = stipendText
       .replace(/\bINR\b/gi, "₹")
       .replace(/\bRs\.?\b/gi, "₹");
 
+    const rangeMatches = normalizedText.match(/\d+(?:\.\d+)?/g) || [];
+    const hasRangeSeparator = /\s[-–]\s|\bto\b/i.test(normalizedText);
+
+    if (hasRangeSeparator && rangeMatches.length >= 2) {
+      const lastMatch = rangeMatches[rangeMatches.length - 1];
+      const lastMatchIndex = normalizedText.lastIndexOf(lastMatch);
+      const rangeSuffix =
+        lastMatchIndex >= 0
+          ? normalizedText.slice(lastMatchIndex + lastMatch.length)
+          : "";
+
+      return `${symbol}${formatAmount(rangeMatches[rangeMatches.length - 1])}${rangeSuffix}`.trim();
+    }
+
+    const formattedText = normalizedText.replace(
+      /(\d[\d,]*(?:\.\d+)?)/g,
+      (match) => formatAmount(match),
+    );
+
     if (hasCurrencyIndicator(normalizedText)) {
-      return normalizedText;
+      return formattedText;
     }
 
     const matches = normalizedText.match(/\d+(?:\.\d+)?/g) || [];
 
     if (matches.length >= 2) {
-      return `₹${matches[0]}`;
+      return `₹${formatAmount(matches[0])}`;
     }
 
     if (matches.length === 1) {
-      return `₹${matches[0]}`;
+      return `₹${formatAmount(matches[0])}`;
     }
 
-    return normalizedText;
+    if (normalizedText) {
+      return normalizedText;
+    }
+  }
+
+  if (Number.isFinite(min) && Number.isFinite(max) && (min > 0 || max > 0)) {
+    return `${symbol}${formatAmount(max)}`;
   }
 
   return "Not disclosed";
@@ -208,4 +252,24 @@ export const formatDeadlineStatus = (deadline) => {
   }
 
   return `${daysLeft} days left`;
+};
+
+export const isInternshipOpen = (item) => {
+  const deadline = item?.deadline;
+
+  if (!deadline) {
+    return true;
+  }
+
+  const date = new Date(deadline);
+
+  if (Number.isNaN(date.getTime())) {
+    return true;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+
+  return date.getTime() >= today.getTime();
 };

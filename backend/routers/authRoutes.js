@@ -1,4 +1,5 @@
 import express from "express";
+import resumeUpload from "../middleware/resumeUpload.js";
 import {
   approveAdminAccess,
   adminLogin,
@@ -26,7 +27,7 @@ import { protect, requireSuperAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/signup", signup);
+router.post("/signup", resumeUpload.single("resume"), signup);
 router.post("/user-signup", userSignup);
 router.post("/admin-signup", adminSignup);
 router.post("/super-admin-signup", superAdminSignup);

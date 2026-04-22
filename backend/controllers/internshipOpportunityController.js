@@ -340,7 +340,7 @@ export const updateInternship = async (req, res, next) => {
       },
       payload,
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
       },
     ).populate({ path: "createdBy", select: "fullName email role" });

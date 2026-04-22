@@ -103,14 +103,14 @@ const Hero = () => {
               />
             </div>
           </div>
-          <div className="px-2 sm:px-4 lg:flex lg:items-center lg:gap-5">
+          <div className=" sm:pl-4 lg:flex lg:items-center lg:justify-between">
             <h2 className="text-xl font-semibold text-gray-800 lg:w-60 lg:shrink-0">
               What are you looking for?
             </h2>
-            <div className="mt-4 flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-nowrap lg:mt-0">
+            <div className="mt-4 flex  flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-nowrap lg:mt-0">
               <Link
-                to="/intership"
-                className="flex w-full flex-1 items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
+                to="/internship"
+                className="flex w-full  items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
               >
                 <LuRocket
                   size={25}
@@ -125,7 +125,7 @@ const Hero = () => {
               </Link>
               <Link
                 to="/bootcamps"
-                className="flex w-full flex-1 items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
+                className="flex w-full  items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
               >
                 <FaArrowTrendUp
                   size={25}
@@ -141,7 +141,7 @@ const Hero = () => {
 
               <Link
                 to="/jobs"
-                className="flex w-full flex-1 items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
+                className="flex w-full  items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
               >
                 <TbSwitch3
                   size={25}
@@ -157,7 +157,7 @@ const Hero = () => {
 
               <Link
                 to="/global-program"
-                className="flex w-full flex-1 items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
+                className="flex w-full  items-center gap-2 rounded-lg border border-black/10 bg-white p-3 sm:w-[48%] lg:w-auto"
               >
                 <AiOutlineGlobal
                   size={25}
