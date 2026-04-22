@@ -295,7 +295,8 @@ const initializeWebClient = () => {
 
   webClient.on("qr", (qr) => {
     webClientReady = false;
-    console.log("WhatsApp Web QR received. Scan in terminal to authenticate.");
+    console.log("WhatsApp Web QR received. Scan in terminal or open this link to scan:");
+    console.log(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`);
     qrcode.generate(qr, { small: true });
   });
 
