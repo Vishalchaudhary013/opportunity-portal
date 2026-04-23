@@ -319,29 +319,48 @@ const sendPhoneOtp = async ({ user, code }) => {
     `It expires in ${OTP_EXPIRES_IN_MINUTES} minutes.`,
   ].join("\n");
 
-  const whatsappResult = await sendWhatsAppText({
-    to: user.phoneNumber || user.whatsappNumber,
-    body,
-  });
+  const toNumber = user.phoneNumber || user.whatsappNumber;
+  let whatsappResult;
+
+  if (process.env.WHATSAPP_PROVIDER === "meta-cloud") {
+    // For Meta Cloud API, we use a template for the first message (OTP)
+    // The user must configure WHATSAPP_CLOUD_OTP_TEMPLATE_NAME in .env
+    const templateName = process.env.WHATSAPP_CLOUD_OTP_TEMPLATE_NAME || "otp_verification";
+    const isHelloWorld = templateName === "hello_world";
+
+    whatsappResult = await sendWhatsAppText({
+      to: toNumber,
+      template: {
+        name: templateName,
+        language: { code: "en_US" },
+        components: isHelloWorld
+          ? []
+          : [
+              {
+                type: "body",
+                parameters: [
+                  { type: "text", text: user.fullName || "User" },
+                  { type: "text", text: code },
+                  { type: "text", text: String(OTP_EXPIRES_IN_MINUTES) },
+                ],
+              },
+            ],
+      },
+    });
+  } else {
+    whatsappResult = await sendWhatsAppText({
+      to: toNumber,
+      body,
+    });
+  }
 
   if (whatsappResult.sent) {
     return whatsappResult;
   }
 
-  const emailFallback = await sendTransactionalEmail({
-    to: user.email,
-    subject: "Phone verification code",
-    text: body,
-    html: `<div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;"><p>${body
-      .split("\n")
-      .join("<br />")}</p></div>`,
-  });
-
   return {
-    sent: emailFallback.sent,
-    message: emailFallback.sent
-      ? "Phone verification code was sent to your email because phone delivery is unavailable."
-      : whatsappResult.message || emailFallback.message,
+    sent: false,
+    message: whatsappResult.message || "WhatsApp delivery failed and no email fallback is configured for phone OTP.",
   };
 };
 
@@ -500,10 +519,10 @@ const authenticateUser = async ({ email, password, allowedRoles = null }) => {
 
   if (
     ["user", "admin"].includes(user.role) &&
-    (!user.isEmailVerified || !user.isPhoneVerified)
+    (!user.isEmailVerified /* || !user.isPhoneVerified */) // Commented out phone requirement
   ) {
     const error = new Error(
-      "Please verify your email and phone number with OTP before login.",
+      "Please verify your email with OTP before login.", // Removed phone from message
     );
     error.statusCode = 403;
     throw error;
@@ -655,7 +674,8 @@ const issueInitialVerificationCodes = async (userId) => {
 
   const [emailResult, phoneResult] = await Promise.all([
     sendEmailOtp({ user, code: emailCode, reason: "email_verification" }),
-    sendPhoneOtp({ user, code: phoneCode }),
+    // sendPhoneOtp({ user, code: phoneCode }), // Commented out phone OTP
+    Promise.resolve({ sent: true, message: "Phone OTP bypassed (commented out)" }),
   ]);
 
   return {
@@ -745,40 +765,9 @@ export const signup = async (req, res, next) => {
       result.user.id,
     );
 
-    let registrationNotificationDispatch = {
-      email: { sent: false, message: "Registration email not sent." },
-      whatsapp: {
-        sent: false,
-        message: "Registration WhatsApp message not sent.",
-      },
-    };
-
-    try {
-      registrationNotificationDispatch =
-        await sendRegistrationSuccessNotifications({
-          user: result.user,
-          accountLabel: "student",
-        });
-    } catch (notificationError) {
-      registrationNotificationDispatch = {
-        email: {
-          sent: false,
-          message:
-            notificationError?.message || "Registration email dispatch failed.",
-        },
-        whatsapp: {
-          sent: false,
-          message:
-            notificationError?.message ||
-            "Registration WhatsApp dispatch failed.",
-        },
-      };
-    }
-
     res.status(201).json({
       ...result,
       verificationDispatch,
-      registrationNotificationDispatch,
       message:
         "Account created. Please verify your email and phone number to secure your account.",
     });
@@ -887,41 +876,10 @@ export const adminSignup = async (req, res, next) => {
       };
     }
 
-    let registrationNotificationDispatch = {
-      email: { sent: false, message: "Registration email not sent." },
-      whatsapp: {
-        sent: false,
-        message: "Registration WhatsApp message not sent.",
-      },
-    };
-
-    try {
-      registrationNotificationDispatch =
-        await sendRegistrationSuccessNotifications({
-          user: result.user,
-          accountLabel: "admin",
-        });
-    } catch (notificationError) {
-      registrationNotificationDispatch = {
-        email: {
-          sent: false,
-          message:
-            notificationError?.message || "Registration email dispatch failed.",
-        },
-        whatsapp: {
-          sent: false,
-          message:
-            notificationError?.message ||
-            "Registration WhatsApp dispatch failed.",
-        },
-      };
-    }
-
     res.status(201).json({
       ...result,
       token: "",
       verificationDispatch,
-      registrationNotificationDispatch,
       accessRequestNotificationDispatch,
       message:
         "Admin account created and sent for super admin approval. Please verify your email and phone number. Login will be enabled after approval.",
@@ -1161,7 +1119,7 @@ export const verifyEmailCode = async (req, res, next) => {
       return;
     }
 
-    await User.updateOne(
+    const updatedUser = await User.findOneAndUpdate(
       { _id: user._id },
       {
         $set: {
@@ -1170,12 +1128,27 @@ export const verifyEmailCode = async (req, res, next) => {
           emailVerificationCodeExpiresAt: null,
         },
       },
+      { returnDocument: "after" },
     );
+
+    let registrationNotificationDispatch = null;
+    if (updatedUser.isEmailVerified /* && updatedUser.isPhoneVerified */) { // Commented out phone check
+      try {
+        registrationNotificationDispatch =
+          await sendRegistrationSuccessNotifications({
+            user: updatedUser,
+            accountLabel: updatedUser.role === "admin" ? "admin" : "student",
+          });
+      } catch (e) {
+        console.error("Failed to send welcome notification after email verification:", e);
+      }
+    }
 
     res.status(200).json({
       message: "Email verified successfully.",
+      registrationNotificationDispatch,
       user: {
-        ...sanitizeUser(user),
+        ...sanitizeUser(updatedUser),
         isEmailVerified: true,
       },
     });
@@ -1252,7 +1225,7 @@ export const verifyPhoneCode = async (req, res, next) => {
       return;
     }
 
-    await User.updateOne(
+    const updatedUser = await User.findOneAndUpdate(
       { _id: user._id },
       {
         $set: {
@@ -1261,12 +1234,27 @@ export const verifyPhoneCode = async (req, res, next) => {
           phoneVerificationCodeExpiresAt: null,
         },
       },
+      { returnDocument: "after" },
     );
+
+    let registrationNotificationDispatch = null;
+    if (updatedUser.isEmailVerified && updatedUser.isPhoneVerified) {
+      try {
+        registrationNotificationDispatch =
+          await sendRegistrationSuccessNotifications({
+            user: updatedUser,
+            accountLabel: updatedUser.role === "admin" ? "admin" : "student",
+          });
+      } catch (e) {
+        console.error("Failed to send welcome notification after phone verification:", e);
+      }
+    }
 
     res.status(200).json({
       message: "Phone verified successfully.",
+      registrationNotificationDispatch,
       user: {
-        ...sanitizeUser(user),
+        ...sanitizeUser(updatedUser),
         isPhoneVerified: true,
       },
     });
@@ -1465,7 +1453,12 @@ export const getWhatsAppStatus = async (req, res) => {
 
 export const getUserDirectory = async (req, res, next) => {
   try {
-    const users = await User.find({})
+    const users = await User.find({
+      $or: [
+        { role: "super_admin" },
+        { isEmailVerified: true /*, isPhoneVerified: true */ }, // Commented out phone requirement for directory
+      ],
+    })
       .select(
         "_id fullName email role whatsappNumber phoneNumber createdAt adminApprovalStatus adminApprovedAt isEmailVerified isPhoneVerified latestQualification resumeFilePath resumeFileName",
       )
@@ -1482,7 +1475,7 @@ export const getUserDirectory = async (req, res, next) => {
         item.role === "admin" ? item.adminApprovalStatus || "approved" : null,
       adminApprovedAt: item.adminApprovedAt || null,
       isEmailVerified: Boolean(item.isEmailVerified),
-      isPhoneVerified: Boolean(item.isPhoneVerified),
+      isPhoneVerified: true, // Commented out requirement: was Boolean(item.isPhoneVerified)
       createdAt: item.createdAt,
       latestQualification: item.latestQualification || "",
       resumeFilePath: item.resumeFilePath || "",

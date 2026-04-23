@@ -1,16 +1,15 @@
-import qrcode from "qrcode-terminal";
-import WhatsAppWeb from "whatsapp-web.js";
-import fs from "fs";
-import { execSync } from "child_process";
-
-const { Client, LocalAuth } = WhatsAppWeb;
-
 const normalizeValue = (value) => String(value || "").trim();
 
 const getProvider = () =>
   normalizeValue(
-    process.env.WHATSAPP_PROVIDER || "whatsapp-web-js",
+    process.env.WHATSAPP_PROVIDER || "meta-cloud",
   ).toLowerCase();
+
+const metaConfigured = () =>
+  Boolean(
+    normalizeValue(process.env.WHATSAPP_CLOUD_ACCESS_TOKEN) &&
+      normalizeValue(process.env.WHATSAPP_CLOUD_PHONE_NUMBER_ID),
+  );
 
 const getWhatsAppSender = () => {
   const from = normalizeValue(process.env.TWILIO_WHATSAPP_FROM);
@@ -49,378 +48,23 @@ const normalizePhoneNumber = (value) => {
 const twilioConfigured = () =>
   Boolean(
     normalizeValue(process.env.TWILIO_ACCOUNT_SID) &&
-    normalizeValue(process.env.TWILIO_AUTH_TOKEN) &&
-    getWhatsAppSender(),
+      normalizeValue(process.env.TWILIO_AUTH_TOKEN) &&
+      getWhatsAppSender(),
   );
-
-let webClient = null;
-let webClientReady = false;
-let webClientInitializing = false;
-let webClientLastError = "";
-let webClientRetryCount = 0;
-let webClientRetryTimer = null;
-let webClientLockRecoveryAttempted = false;
-let webClientUsingFallbackSession = false;
-let protocolErrorCrashGuardInstalled = false;
-
-const WEB_CLIENT_MAX_RETRIES = Number(
-  process.env.WHATSAPP_WEB_MAX_RETRIES || 5,
-);
-const WEB_CLIENT_RETRY_DELAY_MS = Number(
-  process.env.WHATSAPP_WEB_RETRY_DELAY_MS || 4000,
-);
-
-const getWebClientAuthConfig = () => {
-  const baseClientId = normalizeValue(
-    process.env.WHATSAPP_WEB_CLIENT_ID || "internship-backend",
-  );
-  const clientId = webClientUsingFallbackSession
-    ? `${baseClientId}-fallback`
-    : baseClientId;
-  const dataPath = normalizeValue(
-    process.env.WHATSAPP_WEB_SESSION_PATH || ".wwebjs_auth",
-  );
-
-  return {
-    clientId,
-    dataPath,
-    sessionPath: `${dataPath}/session-${clientId}`,
-  };
-};
-
-const clearStaleChromiumLockFiles = () => {
-  try {
-    const { sessionPath } = getWebClientAuthConfig();
-
-    if (!fs.existsSync(sessionPath)) {
-      return false;
-    }
-
-    const lockFileNames = [
-      "SingletonLock",
-      "SingletonSocket",
-      "SingletonCookie",
-    ];
-
-    let removedAny = false;
-    for (const fileName of lockFileNames) {
-      const filePath = `${sessionPath}/${fileName}`;
-      if (fs.existsSync(filePath)) {
-        fs.rmSync(filePath, { force: true });
-        removedAny = true;
-      }
-    }
-
-    return removedAny;
-  } catch (error) {
-    console.error(
-      "Failed to clear stale WhatsApp Web lock files:",
-      error?.message || error,
-    );
-    return false;
-  }
-};
-
-const terminateSessionBoundBrowserProcesses = () => {
-  if (process.platform !== "win32") {
-    return false;
-  }
-
-  try {
-    const { dataPath } = getWebClientAuthConfig();
-    const normalizedPath = dataPath.replace(/\\/g, "/").toLowerCase();
-
-    const command = [
-      "$ErrorActionPreference = 'SilentlyContinue'",
-      "$killed = 0",
-      "$processes = Get-CimInstance Win32_Process",
-      "$targets = $processes | Where-Object {",
-      "  ($_.Name -in @('chrome.exe','msedge.exe')) -and",
-      "  $_.CommandLine -and",
-      `  ($_.CommandLine.ToLower().Contains('${normalizedPath}'))`,
-      "}",
-      "foreach ($proc in $targets) {",
-      "  Stop-Process -Id $proc.ProcessId -Force -ErrorAction SilentlyContinue",
-      "  $killed++",
-      "}",
-      "Write-Output $killed",
-    ].join("; ");
-
-    const result = execSync(`powershell -NoProfile -Command \"${command}\"`, {
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    });
-
-    const killed = Number(String(result || "0").trim());
-    return Number.isFinite(killed) && killed > 0;
-  } catch {
-    return false;
-  }
-};
-
-const resolveChromeExecutablePath = () => {
-  const envPath = normalizeValue(process.env.WHATSAPP_WEB_CHROME_PATH);
-  if (envPath && fs.existsSync(envPath)) {
-    return envPath;
-  }
-
-  if (process.platform !== "win32") {
-    const linuxCandidates = [
-      "/usr/bin/google-chrome",
-      "/usr/bin/google-chrome-stable",
-      "/usr/bin/chromium-browser",
-      "/usr/bin/chromium",
-    ];
-    const foundLinux = linuxCandidates.find((candidate) =>
-      fs.existsSync(candidate),
-    );
-    if (foundLinux) return foundLinux;
-  }
-
-  const windowsCandidates = [
-    "C:/Program Files/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
-    "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
-    "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
-  ];
-
-  const found = windowsCandidates.find((candidate) => fs.existsSync(candidate));
-  return found || "";
-};
-
-const scheduleWebClientReinitialize = (reason) => {
-  if (getProvider() !== "whatsapp-web-js") {
-    return;
-  }
-
-  if (webClientReady || webClientInitializing) {
-    return;
-  }
-
-  const lockConflict = String(reason || "")
-    .toLowerCase()
-    .includes("browser is already running");
-
-  if (lockConflict) {
-    if (!webClientLockRecoveryAttempted) {
-      webClientLockRecoveryAttempted = true;
-      const killed = terminateSessionBoundBrowserProcesses();
-      const cleared = clearStaleChromiumLockFiles();
-
-      if (killed && cleared) {
-        console.warn(
-          "WhatsApp Web lock detected. Terminated stale browser session and cleared lock files; retrying initialization.",
-        );
-      } else if (killed) {
-        console.warn(
-          "WhatsApp Web lock detected. Terminated stale browser session; retrying initialization.",
-        );
-      } else if (cleared) {
-        console.warn(
-          "WhatsApp Web lock detected. Cleared stale Chromium lock files and retrying initialization.",
-        );
-      } else {
-        console.warn(
-          "WhatsApp Web lock detected. Retrying initialization once to recover session lock.",
-        );
-      }
-    } else {
-      if (!webClientUsingFallbackSession) {
-        webClientUsingFallbackSession = true;
-        webClientLockRecoveryAttempted = false;
-        console.warn(
-          "WhatsApp Web primary session remains locked. Switching to fallback session id and retrying.",
-        );
-      } else {
-        console.error(
-          "WhatsApp Web lock persists. Stop stale Chrome/Edge processes using .wwebjs_auth and restart backend.",
-        );
-        return;
-      }
-    }
-  }
-
-  if (webClientRetryCount >= WEB_CLIENT_MAX_RETRIES) {
-    console.error(
-      "WhatsApp Web initialization retries exhausted.",
-      reason || "",
-    );
-    return;
-  }
-
-  if (webClientRetryTimer) {
-    return;
-  }
-
-  webClientRetryCount += 1;
-  webClientRetryTimer = setTimeout(() => {
-    webClientRetryTimer = null;
-    webClient = null;
-    webClientInitializing = false;
-    initializeWebClient();
-  }, WEB_CLIENT_RETRY_DELAY_MS);
-};
-
-const initializeWebClient = () => {
-  if (
-    webClient ||
-    webClientInitializing ||
-    getProvider() !== "whatsapp-web-js"
-  ) {
-    return;
-  }
-
-  webClientInitializing = true;
-  webClientLastError = "";
-
-  webClient = new Client({
-    authStrategy: new LocalAuth({
-      clientId: getWebClientAuthConfig().clientId,
-      dataPath: getWebClientAuthConfig().dataPath,
-    }),
-    puppeteer: {
-      executablePath: resolveChromeExecutablePath() || undefined,
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--no-zygote",
-      ],
-    },
-    takeoverOnConflict: true,
-    takeoverTimeoutMs: 0,
-  });
-
-  webClient.on("qr", (qr) => {
-    webClientReady = false;
-    console.log("WhatsApp Web QR received. Scan in terminal or open this link to scan:");
-    console.log(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qr)}`);
-    qrcode.generate(qr, { small: true });
-  });
-
-  webClient.on("ready", () => {
-    webClientReady = true;
-    webClientInitializing = false;
-    webClientLastError = "";
-    webClientRetryCount = 0;
-    webClientLockRecoveryAttempted = false;
-    if (webClientUsingFallbackSession) {
-      console.warn(
-        "WhatsApp Web connected using fallback session id. You may need to scan QR once for this session.",
-      );
-    }
-    console.log("WhatsApp Web client is ready.");
-  });
-
-  webClient.on("authenticated", () => {
-    console.log("WhatsApp Web client authenticated.");
-  });
-
-  webClient.on("auth_failure", (message) => {
-    webClientReady = false;
-    webClientInitializing = false;
-    webClientLastError = String(message || "Authentication failed.");
-    console.error("WhatsApp Web auth failed:", message);
-    webClient = null;
-    scheduleWebClientReinitialize(message);
-  });
-
-  webClient.on("disconnected", (reason) => {
-    webClientReady = false;
-    webClientInitializing = false;
-    webClientLastError = `Disconnected: ${String(reason || "unknown reason")}`;
-    console.warn("WhatsApp Web disconnected:", reason);
-    webClient = null;
-    scheduleWebClientReinitialize(reason);
-  });
-
-  webClient.initialize().catch((error) => {
-    webClientInitializing = false;
-    webClientReady = false;
-    webClientLastError = String(error?.message || "Initialization failed.");
-    console.error(
-      "Failed to initialize WhatsApp Web client:",
-      error.message,
-      "Set WHATSAPP_WEB_CHROME_PATH in .env if Chrome path is custom.",
-    );
-
-    webClient = null;
-    scheduleWebClientReinitialize(error?.message || "init_error");
-  });
-};
-
-const installProtocolErrorCrashGuard = () => {
-  if (protocolErrorCrashGuardInstalled) {
-    return;
-  }
-
-  protocolErrorCrashGuardInstalled = true;
-
-  process.on("uncaughtException", (error) => {
-    const message = String(error?.message || "");
-    const stack = String(error?.stack || "");
-
-    const isKnownWhatsAppProtocolError =
-      message.includes("Network.getResponseBody") &&
-      (stack.includes("whatsapp-web.js") || stack.includes("puppeteer"));
-
-    if (!isKnownWhatsAppProtocolError) {
-      console.error("Unhandled uncaught exception:", error);
-      process.exit(1);
-      return;
-    }
-
-    webClientReady = false;
-    webClientInitializing = false;
-    webClientLastError = message;
-    webClient = null;
-
-    console.error(
-      "Recovered from WhatsApp Web protocol error. Reinitializing client:",
-      message,
-    );
-
-    scheduleWebClientReinitialize(message);
-  });
-};
-
-const toWhatsAppWebChatId = (recipient) => {
-  const normalized = normalizePhoneNumber(recipient);
-  if (!normalized) {
-    return "";
-  }
-  return `${normalized.replace("+", "")}@c.us`;
-};
 
 export const isWhatsAppConfigured = () => {
   const provider = getProvider();
-  if (provider === "whatsapp-web-js") {
-    return true;
-  }
   if (provider === "twilio") {
     return twilioConfigured();
+  }
+  if (provider === "meta-cloud") {
+    return metaConfigured();
   }
   return false;
 };
 
 export const getWhatsAppRuntimeStatus = () => {
   const provider = getProvider();
-
-  if (provider === "whatsapp-web-js") {
-    return {
-      provider,
-      configured: true,
-      connected: webClientReady,
-      initializing: webClientInitializing,
-      requiresQr: !webClientReady,
-      message: webClientReady
-        ? "WhatsApp Web is connected."
-        : "Scan QR in backend terminal to connect WhatsApp Web.",
-      lastError: webClientLastError,
-    };
-  }
 
   if (provider === "twilio") {
     const configured = twilioConfigured();
@@ -437,42 +81,29 @@ export const getWhatsAppRuntimeStatus = () => {
     };
   }
 
+  if (provider === "meta-cloud") {
+    const configured = metaConfigured();
+    return {
+      provider,
+      configured,
+      connected: configured,
+      initializing: false,
+      requiresQr: false,
+      message: configured
+        ? "Meta WhatsApp Cloud API is configured."
+        : "Meta Cloud API credentials (token or phone ID) are missing.",
+      lastError: "",
+    };
+  }
+
   return {
     provider,
     configured: false,
     connected: false,
     initializing: false,
     requiresQr: false,
-    message: "Invalid WHATSAPP_PROVIDER. Use whatsapp-web-js or twilio.",
+    message: "Invalid WHATSAPP_PROVIDER. Use meta-cloud or twilio.",
     lastError: "",
-  };
-};
-
-const sendWithWhatsAppWeb = async ({ to, body }) => {
-  initializeWebClient();
-
-  const chatId = toWhatsAppWebChatId(to);
-  if (!chatId) {
-    return {
-      sent: false,
-      message:
-        "WhatsApp notifications are skipped because no valid recipient number was provided.",
-    };
-  }
-
-  if (!webClient || !webClientReady) {
-    return {
-      sent: false,
-      message:
-        "WhatsApp Web is not ready yet. Scan the QR code shown in backend terminal and retry.",
-    };
-  }
-
-  await webClient.sendMessage(chatId, String(body || ""));
-
-  return {
-    sent: true,
-    message: "WhatsApp message sent successfully via whatsapp-web.js.",
   };
 };
 
@@ -528,27 +159,96 @@ const sendWithTwilio = async ({ to, body }) => {
   };
 };
 
-const sendWhatsAppMessage = async ({ to, body }) => {
-  const provider = getProvider();
-
-  if (provider === "whatsapp-web-js") {
-    return sendWithWhatsAppWeb({ to, body });
+const sendWithMetaCloudApi = async ({ to, body, template }) => {
+  if (!metaConfigured()) {
+    return {
+      sent: false,
+      message:
+        "WhatsApp notifications are skipped because Meta Cloud API settings are not configured.",
+    };
   }
+
+  const recipient = normalizePhoneNumber(to).replace("+", "");
+  if (!recipient) {
+    return {
+      sent: false,
+      message:
+        "WhatsApp notifications are skipped because no valid recipient number was provided.",
+    };
+  }
+
+  const accessToken = normalizeValue(process.env.WHATSAPP_CLOUD_ACCESS_TOKEN);
+  const phoneNumberId = normalizeValue(
+    process.env.WHATSAPP_CLOUD_PHONE_NUMBER_ID,
+  );
+  const endpoint = `https://graph.facebook.com/v21.0/${phoneNumberId}/messages`;
+
+  let payload = {
+    messaging_product: "whatsapp",
+    to: recipient,
+  };
+
+  if (template) {
+    payload.type = "template";
+    payload.template = {
+      name: template.name,
+      language: template.language || { code: "en_US" },
+    };
+
+    // Only add components if parameters are provided
+    if (template.components && template.components.length > 0) {
+      payload.template.components = template.components;
+    }
+  } else {
+    payload.type = "text";
+    payload.text = { body: String(body || "") };
+  }
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      `Meta Cloud API send failed with status ${response.status}: ${data.error?.message || JSON.stringify(data)}`,
+    );
+  }
+
+  return {
+    sent: true,
+    message: `WhatsApp message sent successfully via Meta Cloud API${template ? " (template)" : ""}.`,
+    id: data.messages?.[0]?.id,
+  };
+};
+
+const sendWhatsAppMessage = async ({ to, body, template }) => {
+  const provider = getProvider();
 
   if (provider === "twilio") {
     return sendWithTwilio({ to, body });
   }
 
+  if (provider === "meta-cloud") {
+    return sendWithMetaCloudApi({ to, body, template });
+  }
+
   return {
     sent: false,
     message:
-      "WhatsApp notifications are skipped because WHATSAPP_PROVIDER is invalid. Use whatsapp-web-js or twilio.",
+      "WhatsApp notifications are skipped because WHATSAPP_PROVIDER is invalid. Use meta-cloud or twilio.",
   };
 };
 
-export const sendWhatsAppText = async ({ to, body }) => {
+export const sendWhatsAppText = async ({ to, body, template }) => {
   try {
-    return await sendWhatsAppMessage({ to, body });
+    return await sendWhatsAppMessage({ to, body, template });
   } catch (error) {
     return {
       sent: false,
@@ -615,6 +315,5 @@ export const sendApplicationWhatsAppNotifications = async ({
 };
 
 export const bootWhatsAppProvider = () => {
-  installProtocolErrorCrashGuard();
-  initializeWebClient();
+  // WhatsApp Web initialization removed. Meta Cloud and Twilio don't need persistent background processes.
 };

@@ -22,7 +22,7 @@ const Signup = () => {
   const [emailCode, setEmailCode] = useState("");
   const [phoneCode, setPhoneCode] = useState("");
   const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [isPhoneVerified, setIsPhoneVerified] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState(true); // Commented out requirement: was false
   const [studentForm, setStudentForm] = useState({
     firstName: "",
     lastName: "",
@@ -140,7 +140,7 @@ const Signup = () => {
       setEmailCode("");
       setPhoneCode("");
       setIsEmailVerified(false);
-      setIsPhoneVerified(false);
+      setIsPhoneVerified(true);
       setSuccess("Student account created. Check your email and phone for verification codes.");
     } catch (apiError) {
       setError(
@@ -192,7 +192,7 @@ const Signup = () => {
       setEmailCode("");
       setPhoneCode("");
       setIsEmailVerified(false);
-      setIsPhoneVerified(false);
+      setIsPhoneVerified(true);
       setSuccess("Employer account created. Check your email and phone for verification codes.");
     } catch (apiError) {
       setError(
@@ -388,6 +388,7 @@ const Signup = () => {
                     </div>
                   </form>
 
+                  {/* 
                   <form onSubmit={handleVerifyPhone} className="mb-6">
                     <label className="font-medium text-gray-700 block mb-1.5 text-[15px]">
                       Phone verification code
@@ -410,6 +411,7 @@ const Signup = () => {
                       </button>
                     </div>
                   </form>
+                  */}
 
                   <button
                     type="button"
