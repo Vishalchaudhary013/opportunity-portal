@@ -20,16 +20,18 @@ const initialFormState = {
   publishedUrl: "",
 };
 
-export const FormBuilderProvider = ({ children, programId }) => {
+export const FormBuilderProvider = ({ children, programId, internshipId: propInternshipId }) => {
+  const initialInternshipId = programId || propInternshipId || null;
   const [formState, setFormState] = useState({
     ...initialFormState,
-    internshipId: programId || null,
+    internshipId: initialInternshipId,
   });
   const [activeFieldId, setActiveFieldId] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState("builder"); // "builder" or "properties"
 
   // Registry for handlers that need local component context
   const [handlers, setHandlers] = useState({
@@ -45,7 +47,7 @@ export const FormBuilderProvider = ({ children, programId }) => {
   const resetFormBuilder = useCallback(() => {
     setFormState({
       ...initialFormState,
-      internshipId: programId || null,
+      internshipId: initialInternshipId,
     });
     setActiveFieldId(null);
   }, [programId]);
@@ -89,6 +91,7 @@ export const FormBuilderProvider = ({ children, programId }) => {
 
   const setActiveField = useCallback((id) => {
     setActiveFieldId(id);
+    setSidebarTab("properties");
   }, []);
 
   // Helpers for canvas layout
@@ -141,6 +144,8 @@ export const FormBuilderProvider = ({ children, programId }) => {
     setIsPublishing,
     handlers,
     registerHandlers,
+    sidebarTab,
+    setSidebarTab,
   };
 
   return (

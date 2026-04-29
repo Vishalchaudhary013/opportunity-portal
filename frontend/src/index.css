@@ -72,7 +72,8 @@ select option:focus {
 }
 
 .edeco-rotator-inner > div {
-  height: 26px;
+  
+  height: 26.5px;
   line-height: 31px;
   font-size: 13px;
   font-weight: 600;

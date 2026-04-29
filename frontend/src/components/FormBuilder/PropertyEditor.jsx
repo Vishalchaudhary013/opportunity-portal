@@ -106,22 +106,18 @@ const PropertyEditor = () => {
 
   if (!activeField) {
     return (
-      <div className="w-72 bg-white border-l border-gray-200 overflow-auto">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Properties</h2>
+      <div className="p-8 flex flex-col items-center justify-center text-center">
+        <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+          <Icons.Edit className="text-gray-300 h-6 w-6" />
         </div>
-        <div className="p-4 flex items-center justify-center h-full text-gray-500 text-sm">
-          Select a field to edit its properties
-        </div>
+        <p className="text-sm text-gray-500 font-medium">No Field Selected</p>
+        <p className="text-xs text-gray-400 mt-1">Select a field on the canvas to edit its properties</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border-l border-gray-200 overflow-auto">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Properties</h2>
-      </div>
+    <div className="bg-white">
       <div className="p-4">
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-1">Field Type</label>

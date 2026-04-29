@@ -3,7 +3,9 @@ import FormBuilder from "./FormBuilder";
 
 const ApplicationFormBuilder = ({ programId }) => {
   return (
-    <FormBuilder />
+    <div className="h-full">
+      <FormBuilder />
+    </div>
   );
 };
 

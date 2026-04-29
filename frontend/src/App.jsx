@@ -76,6 +76,10 @@ const App = () => {
           path="/admin-dashboard/build-form/:id"
           element={<ApplicationFormBuilderPage />}
         />
+        <Route
+          path="/super-admin-dashboard/build-form/:id"
+          element={<ApplicationFormBuilderPage />}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
      {!showNavBar ? null : <Footer />}

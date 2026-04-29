@@ -1,11 +1,18 @@
 import React from 'react';
 import { Icons } from './ui/ui-icons';
 import { useFormBuilder } from '../../context/FormBuilderContext';
+import PropertyEditor from './PropertyEditor';
 
 const ComponentsPanel = () => {
-  const { addField } = useFormBuilder();
+  const { addField, sidebarTab, setSidebarTab } = useFormBuilder();
   
-  const formComponents = [
+  const adminControls = [
+    { type: 'bannerUpload', label: 'Banner Upload', icon: <Icons.BannerUpload /> },
+    { type: 'pdfUpload', label: 'PDF Upload', icon: <Icons.PdfUpload /> },
+    { type: 'carouselUpload', label: 'Carousel Upload', icon: <Icons.CarouselUpload /> }
+  ];
+
+  const formFields = [
     { type: 'textInput', label: 'Text Input', icon: <Icons.TextInput /> },
     { type: 'textArea', label: 'Text Area', icon: <Icons.TextArea /> },
     { type: 'checkbox', label: 'Checkbox', icon: <Icons.Checkbox /> },
@@ -15,14 +22,10 @@ const ComponentsPanel = () => {
     { type: 'toggle', label: 'Toggle Switch', icon: <Icons.Toggle /> },
     { type: 'fileUpload', label: 'File Upload', icon: <Icons.FileUpload /> },
     { type: 'number', label: 'Number Input', icon: <Icons.Number /> },
-    // { type: 'gender', label: 'Gender', icon: <Icons.Radio />}, // Added the new fields
     { type: 'email', label: 'Email Input', icon: <Icons.Email /> },
     { type: 'mobileWithCheckbox', label: 'Mobile with Checkbox', icon: <Icons.Number /> },
-    { type: 'mediaUpload', label: 'Audio/Video Upload', icon: <Icons.MediaUpload /> },
+   
     { type: 'resumeUpload', label: 'Resume Upload', icon: <Icons.FileUpload />},
-    { type: 'bannerUpload', label: 'Banner Upload', icon: <Icons.BannerUpload /> },
-    { type: 'pdfUpload', label: 'PDF Upload', icon: <Icons.PdfUpload /> },
-    { type: 'carouselUpload', label: 'Carousel Upload', icon: <Icons.CarouselUpload /> }
   ];
   
   const handleDragStart = (e, component) => {
@@ -39,37 +42,91 @@ const ComponentsPanel = () => {
   };
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 overflow-auto">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Form Components</h2>
+    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm z-10">
+      {/* Tabs */}
+      <div className="flex border-b border-gray-200">
+        <button
+          onClick={() => setSidebarTab('builder')}
+          className={`flex-1 py-3 text-sm font-semibold transition-all duration-200 border-b-2 ${
+            sidebarTab === 'builder'
+              ? 'text-blue-600 border-blue-600 bg-blue-50/30'
+              : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Form Builder
+        </button>
+        <button
+          onClick={() => setSidebarTab('properties')}
+          className={`flex-1 py-3 text-sm font-semibold transition-all duration-200 border-b-2 ${
+            sidebarTab === 'properties'
+              ? 'text-blue-600 border-blue-600 bg-blue-50/30'
+              : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Properties
+        </button>
       </div>
-      <div className="p-4 space-y-3">
-        {formComponents.map(component => (
-          <div
-            key={component.type}
-            className={`form-component bg-white border border-gray-200 rounded-md p-3 shadow-sm cursor-move hover:border-primary-400 ${
-              component.type === 'bannerUpload' || component.type === 'pdfUpload' || component.type === 'carouselUpload' ? 'bg-primary-50 border-primary-300' : ''
-            }`}
-            draggable="true"
-            data-type={component.type}
-            onDragStart={(e) => handleDragStart(e, component)}
-            onDragEnd={handleDragEnd}
-            onClick={() => handleComponentClick(component)}
-          >
-            <div className="flex items-center">
-              <div className={`mr-2 ${component.type === 'bannerUpload' || component.type === 'pdfUpload' || component.type === 'carouselUpload' ? 'text-primary-500' : 'text-gray-400'}`}>
-                {component.icon}
+
+      <div className="flex-1 overflow-y-auto custom-scrollbar">
+        {sidebarTab === 'builder' ? (
+          <div className="p-5">
+            <div className="mb-8">
+              <h3 className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-4">Form Components</h3>
+              
+              <div className="space-y-6">
+                {/* Admin Controls Section */}
+                <div>
+                  <h4 className="text-[10px] font-bold text-gray-500 uppercase mb-3 px-1">Admin Controls</h4>
+                  <div className="space-y-2">
+                    {adminControls.map(component => (
+                      <div
+                        key={component.type}
+                        draggable="true"
+                        onDragStart={(e) => handleDragStart(e, component)}
+                        onDragEnd={handleDragEnd}
+                        onClick={() => handleComponentClick(component)}
+                        className="flex items-center gap-3 p-3 bg-[#F0F7FF] border border-[#D0E5FF] rounded-lg cursor-move hover:border-blue-400 hover:shadow-md transition-all group active:scale-[0.98]"
+                      >
+                        <div className="text-blue-600 bg-white p-1.5 rounded-md shadow-sm border border-blue-100 group-hover:scale-110 transition-transform">
+                          {component.icon}
+                        </div>
+                        <span className="text-sm font-medium text-blue-800 tracking-tight">
+                          {component.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Form Fields Section */}
+                <div>
+                  <h4 className="text-[10px] font-bold text-gray-500 uppercase mb-3 px-1">Form Fields</h4>
+                  <div className="space-y-2">
+                    {formFields.map(component => (
+                      <div
+                        key={component.type}
+                        draggable="true"
+                        onDragStart={(e) => handleDragStart(e, component)}
+                        onDragEnd={handleDragEnd}
+                        onClick={() => handleComponentClick(component)}
+                        className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg cursor-move hover:border-blue-200 hover:bg-gray-50 hover:shadow-sm transition-all group active:scale-[0.98]"
+                      >
+                        <div className="text-gray-400 group-hover:text-blue-500 transition-colors">
+                          {component.icon}
+                        </div>
+                        <span className="text-sm font-medium text-gray-700 tracking-tight">
+                          {component.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <span className={`text-sm ${
-                component.type === 'bannerUpload' || component.type === 'pdfUpload' || component.type === 'carouselUpload'
-                  ? 'text-primary-700 font-medium' 
-                  : 'text-gray-700'
-              }`}>
-                {component.label}
-              </span>
             </div>
           </div>
-        ))}
+        ) : (
+          <PropertyEditor />
+        )}
       </div>
     </div>
   );

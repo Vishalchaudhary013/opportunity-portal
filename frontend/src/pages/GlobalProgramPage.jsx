@@ -260,9 +260,14 @@ const Global = () => {
                       <h3 className="text-[15.5px] font-medium group-hover:text-[#155DFC] wrap-break-word">
                         {data.title}
                       </h3>
-                      <span className="text-[14.5px] font-medium text-black/65 wrap-break-word">
-                        {data.company}
-                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[14.5px] font-medium text-black/65 wrap-break-word">
+                          {data.company}
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[9px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap">
+                          {data.programType || "Global Program"}
+                        </span>
+                      </div>
                     </li>
                   </ul>
 

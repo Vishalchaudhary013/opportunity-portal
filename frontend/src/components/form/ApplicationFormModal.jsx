@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useOpportunities } from "../../context/OpportunitiesContext";
 import FormComponents from "../FormBuilder/FormComponents";
-import apiClient from "../../services/apiClient";
-import { Icons } from "../FormBuilder/ui/ui-icons";
+import apiClient, { API_BASE_URL } from "../../services/apiClient";
+import Icons from "../FormBuilder/ui/ui-icons";
+import ImageCarousel from "../FormBuilder/ui/image-carousel";
 
 const ApplicationFormModal = ({
   isOpen,
@@ -40,7 +41,22 @@ const ApplicationFormModal = ({
   // Fetch dynamic form if opportunity has formId
   useEffect(() => {
     const fetchDynamicForm = async () => {
-      const rawFormId = opportunity?.formId || opportunity?.form;
+      let rawFormId = opportunity?.formId || opportunity?.form;
+
+      // If no formId present on the passed opportunity, try fetching the
+      // latest internship from the server (covers situation where form was
+      // just attached but local object is stale).
+      if (!rawFormId && opportunity?.id) {
+        try {
+          const resp = await apiClient.get(`/api/internships/${opportunity.id}`);
+          const latest = resp.data;
+          rawFormId = latest?.formId || latest?.form;
+        } catch (err) {
+          // ignore; we'll fall back to legacy
+          console.warn("Could not refresh internship to find attached form", err);
+        }
+      }
+
       if (!isOpen || !rawFormId) {
         setDynamicForm(null);
         return;
@@ -51,10 +67,16 @@ const ApplicationFormModal = ({
         const formId = typeof rawFormId === 'object' ? (rawFormId._id || rawFormId.id) : rawFormId;
         const response = await apiClient.get(`/api/forms/public/${formId}`);
         if (response.data) {
-          setDynamicForm(response.data);
+          const fetchedForm = response.data;
+          console.log("📥 FETCHED DYNAMIC FORM:", fetchedForm);
+          setDynamicForm(fetchedForm);
+          
           // Initialize values with default values from fields
           const initialValues = {};
-          response.data.fields?.forEach(field => {
+          const fields = fetchedForm.formSchema?.fields || fetchedForm.fields || [];
+          console.log("📋 FORM FIELDS FOUND:", fields);
+          
+          fields.forEach(field => {
             if (field.defaultValue !== undefined) {
               initialValues[field.id] = field.defaultValue;
             }
@@ -119,6 +141,13 @@ const ApplicationFormModal = ({
     setResumeFile(null);
     setError("");
     setSuccess("");
+  };
+
+  const resolveAssetUrl = (path) => {
+    if (!path) return "";
+    if (path.startsWith("http") || path.startsWith("data:")) return path;
+    const normalized = path.startsWith("/") ? path : `/${path}`;
+    return `${API_BASE_URL}${normalized}`;
   };
 
   const handleClose = () => {
@@ -191,226 +220,186 @@ const ApplicationFormModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl flex flex-col border border-black/10">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 sticky top-0 z-10">
-          <div>
-            <h2 className="text-xl font-bold text-gray-800">
-              {dynamicForm ? dynamicForm.name : "Application Form"}
-            </h2>
-            <p className="text-sm text-gray-500 mt-0.5">
-              Applying for: <span className="font-medium text-gray-700">{opportunityTitle}</span>
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="p-2 rounded-full hover:bg-gray-200 transition-colors"
-          >
-            <Icons.X size={20} className="text-gray-500" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 bg-[#F8FAFC] flex flex-col overflow-hidden animate-in fade-in duration-300">
+      {/* FULL PAGE SCROLLABLE CONTENT */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar flex  flex-col">
+        
+       
+        
 
-        <div className="p-6 overflow-y-auto">
-          {isLoadingForm ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-gray-500 font-medium">Loading form details...</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {dynamicForm ? (
-                /* Dynamic Form Rendering */
-                <div className="grid grid-cols-12 gap-6">
-                  {dynamicForm.description && (
-                    <div className="col-span-12 p-4 bg-blue-50/50 border border-blue-100 rounded-xl text-blue-800 text-sm italic">
-                      {dynamicForm.description}
+        {/* MODAL CONTENT LAYOUT */}
+        {(() => {
+          const fields = dynamicForm?.formSchema?.fields || dynamicForm?.fields || [];
+          
+          // A component is considered 'left' if position is explicitly 'left' OR if it's undefined (defaulting to left)
+          const hasLeftComponent = fields.some(f => 
+            ['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(f.type) && 
+            (f.position === 'left' || !f.position)
+          );
+          
+          const hasSpecialComponent = fields.some(f => ['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(f.type));
+
+          return (
+            <div className={`flex-1 flex flex-col ${hasLeftComponent ? 'md:flex-row' : 'flex-col'}`}>
+              
+              {/* SPECIAL COMPONENT SECTION (Banner/PDF/Carousel) */}
+              {hasSpecialComponent && (
+                <div className={`${
+                  hasLeftComponent
+                    ? 'w-full md:w-1/2 h-[300px] md:h-screen p-3  sticky top-0'
+                    : 'w-full h-[300px] sm:h-[450px] lg:h-[500px]'
+                }  overflow-hidden`}>
+                  {fields.map(field => {
+                    if (!['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(field.type)) return null;
+                    
+                    if (field.type === 'bannerUpload') {
+                      const bannerSrc = resolveAssetUrl(field.bannerUrl || field.value?.preview);
+                      if (!bannerSrc) return null;
+                      return (
+                        <img 
+                          key={field.id}
+                          src={bannerSrc} 
+                          alt="Form Banner" 
+                          className="w-full p-0.5 rounded-xl h-full object-cover"
+                          onError={(e) => { e.target.style.display = 'none'; }}
+                        />
+                      );
+                    }
+                    
+                    if (field.type === 'pdfUpload') {
+                      return (
+                        <div key={field.id} className="w-full h-full flex items-center justify-center bg-blue-50">
+                          <div className="text-center p-8">
+                            <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                              <Icons.PdfUpload size={40} />
+                            </div>
+                            <h3 className="text-xl font-bold text-blue-900">PDF Document Included</h3>
+                            <p className="text-blue-600 mt-2">This application form includes a document for your reference.</p>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    if (field.type === 'carouselUpload') {
+                      const carouselImages = (field.images || []).map(img => ({
+                        ...img,
+                        src: resolveAssetUrl(img.src || img.preview || img.dataUrl)
+                      }));
+                      return (
+                        <ImageCarousel 
+                          key={field.id}
+                          images={carouselImages}
+                          autoAdvanceTime={field.autoAdvanceTime || 20000}
+                          showDots={field.showDots !== false}
+                          maxImages={field.maxImages || 8}
+                          className="w-full h-full"
+                        />
+                      );
+                    }
+
+                    return null;
+                  })}
+                </div>
+              )}
+
+              {/* FORM FIELDS SECTION */}
+              <div className="flex-1 flex flex-col items-center py-6 px-4 overflow-y-auto">
+                <div className="w-full max-w-[800px] border border-black/10 rounded-xl p-5 bg-white shadow-sm animate-in slide-in-from-bottom-8 duration-500 mx-auto">
+                  
+                  <div className="text-center mb-12">
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                      {dynamicForm ? dynamicForm.name : "Application Form"}
+                    </h2>
+                    {dynamicForm?.description && (
+                      <p className="text-slate-500 mt-2 font-medium">
+                        {dynamicForm.description}
+                      </p>
+                    )}
+                  </div>
+
+                  {isLoadingForm ? (
+                    <div className="flex flex-col items-center justify-center py-20 gap-4">
+                      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Form...</p>
                     </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-8">
+                      {dynamicForm && (
+                        <div className="grid grid-cols-12 gap-x-6 gap-y-6">
+                          {fields
+                            .filter(f => !['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(f.type))
+                            .map((field) => (
+                              <div
+                                key={field.id}
+                                className={field.width === "half" ? "col-span-12 md:col-span-6" : "col-span-12"}
+                              >
+                                {!field.hideLabel && (
+                                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                                    {field.label}
+                                    {field.required && <span className="text-rose-500 ml-1">*</span>}
+                                  </label>
+                                )}
+                                {field.helperText && (
+                                  <p className="text-xs text-slate-400 mb-2 italic">
+                                    {field.helperText}
+                                  </p>
+                                )}
+                                <div className="relative">
+                                  <FormComponents
+                                    field={{
+                                      ...field,
+                                      value: formValues[field.id]
+                                    }}
+                                    isPreview={true}
+                                    onChange={(id, value) => setFormValues(prev => ({ ...prev, [id]: value }))}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                      
+                      {/* Status Messages */}
+                      {error && (
+                        <div className="p-6 rounded-3xl bg-rose-50 border border-rose-100 text-rose-600 font-bold flex items-center gap-4 animate-in shake duration-500">
+                          <div className="w-8 h-8 rounded-full bg-rose-500 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-rose-200">
+                            !
+                          </div>
+                          {error}
+                        </div>
+                      )}
+                      {success && (
+                        <div className="p-6 rounded-3xl bg-emerald-50 border border-emerald-100 text-emerald-700 font-bold flex items-center gap-4 animate-in slide-in-from-right duration-500">
+                          <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-200">
+                            <Icons.Check size={18} />
+                          </div>
+                          {success}
+                        </div>
+                      )}
+
+                      {/* Submit Action */}
+                      <div className="pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-8">
+                        
+                        <button
+                          type="submit"
+                          disabled={submitting}
+                          className="w-full sm:flex-1 px-12 py-3 rounded-xl bg-[#0B4AA6] text-white font-semibold  text-xl shadow-2xl shadow-blue-200 hover:bg-[#083D8B] hover:-translate-y-1.5 transition-all active:scale-95 disabled:opacity-50 disabled:translate-y-0"
+                        >
+                          {submitting ? (
+                            <div className="flex items-center justify-center gap-4">
+                              <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                              <span className="tracking-widest uppercase text-sm">Processing...</span>
+                            </div>
+                          ) : "SUBMIT APPLICATION"}
+                        </button>
+                      </div>
+                    </form>
                   )}
-                  {dynamicForm.fields?.map((field) => (
-                    <div
-                      key={field.id}
-                      className={field.width === "half" ? "col-span-12 md:col-span-6" : "col-span-12"}
-                    >
-                      {!field.hideLabel && (
-                        <label className="block text-sm font-semibold text-gray-700 mb-1.5 flex items-center gap-1">
-                          {field.label}
-                          {field.required && <span className="text-red-500">*</span>}
-                        </label>
-                      )}
-                      {field.helperText && (
-                        <p className="text-[11px] text-gray-500 mb-2 italic">
-                          {field.helperText}
-                        </p>
-                      )}
-                      <FormComponents
-                        field={{
-                          ...field,
-                          value: formValues[field.id]
-                        }}
-                        isPreview={true}
-                        onChange={handleDynamicValueChange}
-                      />
-                    </div>
-                  ))}
                 </div>
-              ) : (
-                /* Legacy Form Rendering (Fallback) */
-                <div className="space-y-6">
-                  <section>
-                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
-                      Basic Details
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-gray-700">Full Name</label>
-                        <input
-                          name="name"
-                          value={legacyForm.name}
-                          onChange={handleLegacyInputChange}
-                          placeholder="John Doe"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-gray-700">Email Address</label>
-                        <input
-                          type="email"
-                          name="email"
-                          value={legacyForm.email}
-                          onChange={handleLegacyInputChange}
-                          placeholder="john@example.com"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                        <input
-                          name="phone"
-                          value={legacyForm.phone}
-                          onChange={handleLegacyInputChange}
-                          placeholder="+91 0000000000"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-gray-700">College Name</label>
-                        <input
-                          name="college"
-                          value={legacyForm.college}
-                          onChange={handleLegacyInputChange}
-                          placeholder="University Name"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </section>
-
-                  <section>
-                    <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                      <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
-                      Academic & Professional
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-gray-700">Degree</label>
-                        <input
-                          name="degree"
-                          value={legacyForm.degree}
-                          onChange={handleLegacyInputChange}
-                          placeholder="e.g. B.Tech CS"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-sm font-medium text-gray-700">Year of Study</label>
-                        <input
-                          name="year"
-                          value={legacyForm.year}
-                          onChange={handleLegacyInputChange}
-                          placeholder="e.g. 3rd Year"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                      <div className="col-span-2 space-y-1.5">
-                        <label className="text-sm font-medium text-gray-700">Key Skills</label>
-                        <input
-                          name="skills"
-                          value={legacyForm.skills}
-                          onChange={handleLegacyInputChange}
-                          placeholder="e.g. React, Node.js, Python"
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-blue-500 transition-all outline-none"
-                          required
-                        />
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">Upload Resume</h3>
-                    <div className="relative border-2 border-dashed border-gray-300 rounded-xl p-6 bg-white hover:border-blue-400 transition-colors">
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleResumeChange}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        required
-                      />
-                      <div className="flex flex-col items-center text-center">
-                        <Icons.PdfUpload size={32} className="text-gray-400 mb-2" />
-                        <p className="text-sm font-medium text-gray-700">
-                          {resumeFile ? resumeFile.name : "Click or drag to upload PDF"}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">Maximum size 10MB</p>
-                      </div>
-                    </div>
-                  </section>
-                </div>
-              )}
-
-              {error && (
-                <div className="p-4 bg-red-50 border border-red-100 rounded-xl flex items-center gap-3 text-red-700 text-sm animate-shake">
-                  <Icons.AlertCircle size={18} />
-                  {error}
-                </div>
-              )}
-
-              {success && (
-                <div className="p-4 bg-green-50 border border-green-100 rounded-xl flex items-center gap-3 text-green-700 text-sm">
-                  <Icons.CheckCircle size={18} />
-                  {success}
-                </div>
-              )}
-
-              <div className="flex gap-3 justify-end pt-4">
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className={`px-8 py-2.5 rounded-xl font-bold text-white shadow-lg transition-all ${
-                    submitting ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 active:scale-95"
-                  }`}
-                >
-                  {submitting ? "Submitting..." : "Submit Application"}
-                </button>
               </div>
-            </form>
-          )}
-        </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

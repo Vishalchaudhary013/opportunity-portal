@@ -169,6 +169,12 @@ const internshipOpportunitySchema = new mongoose.Schema(
       ref: "Form",
       default: null,
     },
+    submissionIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Application",
+      },
+    ],
   },
   {
     timestamps: true,

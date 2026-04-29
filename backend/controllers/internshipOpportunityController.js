@@ -1,5 +1,7 @@
 import InternshipOpportunity from "../models/internshipOpportunityModel.js";
 import xlsx from "xlsx";
+import ExcelJS from "exceljs";
+import Application from "../models/applicationModel.js";
 
 const OPPORTUNITY_TYPE = "Internship";
 
@@ -207,74 +209,71 @@ const normalizePayload = (body, logoFile) => {
   };
 };
 
-const mapRows = (opportunities) =>
+const mapRows = (opportunities, responseCounts = {}) =>
   opportunities.map((item) => ({
-    title: item.title,
-    company: item.company,
-    description: item.description,
-    requiredSkills: (item.requiredSkills || []).join(" | "),
-    whoCanApply: (item.whoCanApply || []).join(" | "),
-    benefits: (item.benefits || []).join(" | "),
-    department: item.department || "",
-    functionalRole: item.functionalRole || "",
-    companyType: item.companyType || "",
-    companySize: item.companySize || "",
-    foundedYear: item.foundedYear || "",
-    industry: item.industry || "",
-    listing: item.listing || "",
-    internshipType: item.internshipType || "",
-    stipendType: item.stipendType || "Paid",
-    website: item.website || "",
-    location: item.location,
-    duration: item.duration,
-    stipend: item.stipend,
-    stipendMin: item.stipendDetails?.min,
-    stipendMax: item.stipendDetails?.max,
-    stipendCurrency: item.stipendDetails?.currency || "",
-    stipendPeriod: item.stipendDetails?.period || "",
-    workMode: item.workMode || "",
-    cardTags: (item.cardTags || []).join(", "),
-    type: item.type,
-    skills: (item.skills || []).join(", "),
-    deadline: item.deadline
+    "Name": item.title,
+    "Company": item.company,
+    "Location": item.location,
+    "Responses": responseCounts[item._id.toString()] || 0,
+    "Date": item.deadline
       ? new Date(item.deadline).toISOString().split("T")[0]
       : "",
-    startDate: item.startDate
-      ? new Date(item.startDate).toISOString().split("T")[0]
-      : "",
-    logo: item.logo || "",
-    createdAt: item.createdAt ? new Date(item.createdAt).toISOString() : "",
+    "Status": item.listing === "active" ? "Active" : "Closed",
   }));
 
-const sendFile = (res, format, workbook) => {
+const sendFile = async (res, format, rows, filename) => {
   if (format === "xlsx") {
-    const fileBuffer = xlsx.write(workbook, {
-      type: "buffer",
-      bookType: "xlsx",
-    });
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Data");
 
-    res.setHeader(
-      "Content-Type",
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    );
-    res.setHeader(
-      "Content-Disposition",
-      'attachment; filename="internships.xlsx"',
-    );
+    if (rows.length > 0) {
+      // Add headers
+      const headers = Object.keys(rows[0]);
+      const headerRow = worksheet.addRow(headers);
+      
+      // Style headers: Bold and centered
+      headerRow.eachCell((cell) => {
+        cell.font = { bold: true };
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE9ECEF' }
+        };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.border = { bottom: { style: 'thin' } };
+      });
+
+      // Add data rows
+      rows.forEach(rowData => {
+        worksheet.addRow(Object.values(rowData));
+      });
+
+      // Auto-width columns
+      worksheet.columns.forEach(column => {
+        let maxLength = 0;
+        column.eachCell({ includeEmpty: true }, (cell) => {
+          const columnLength = cell.value ? cell.value.toString().length : 10;
+          if (columnLength > maxLength) maxLength = columnLength;
+        });
+        column.width = maxLength < 12 ? 12 : maxLength > 50 ? 50 : maxLength + 2;
+      });
+    }
+
+    const fileBuffer = await workbook.xlsx.writeBuffer();
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}.xlsx"`);
     res.status(200).send(fileBuffer);
     return;
   }
 
-  const fileBuffer = xlsx.write(workbook, {
-    type: "buffer",
-    bookType: "csv",
-  });
+  // Fallback to xlsx for CSV
+  const worksheet = xlsx.utils.json_to_sheet(rows);
+  const workbook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workbook, worksheet, "Data");
+  const fileBuffer = xlsx.write(workbook, { type: "buffer", bookType: "csv" });
 
   res.setHeader("Content-Type", "text/csv");
-  res.setHeader(
-    "Content-Disposition",
-    'attachment; filename="internships.csv"',
-  );
+  res.setHeader("Content-Disposition", `attachment; filename="${filename}.csv"`);
   res.status(200).send(fileBuffer);
 };
 
@@ -390,12 +389,20 @@ export const exportInternships = async (req, res, next) => {
       createdAt: -1,
     });
 
-    const rows = mapRows(opportunities);
-    const worksheet = xlsx.utils.json_to_sheet(rows);
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, "Internships");
+    // Get application counts for each opportunity
+    const opportunityIds = opportunities.map(o => o._id);
+    const counts = await Application.aggregate([
+      { $match: { opportunity: { $in: opportunityIds } } },
+      { $group: { _id: "$opportunity", count: { $sum: 1 } } }
+    ]);
 
-    sendFile(res, format, workbook);
+    const responseCounts = {};
+    counts.forEach(c => {
+      responseCounts[c._id.toString()] = c.count;
+    });
+
+    const rows = mapRows(opportunities, responseCounts);
+    await sendFile(res, format, rows, "internships");
   } catch (error) {
     next(error);
   }
@@ -409,7 +416,7 @@ export const attachForm = async (req, res, next) => {
     const internship = await InternshipOpportunity.findOneAndUpdate(
       { _id: internshipId, ...getOwnerFilter(req) },
       { formId },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     if (!internship) {

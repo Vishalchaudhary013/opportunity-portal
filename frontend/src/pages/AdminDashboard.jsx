@@ -147,6 +147,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const [requiredSkillInputs, setRequiredSkillInputs] = useState(["", "", ""]);
   const [benefitInputs, setBenefitInputs] = useState(["", "", "", ""]);
   const [activeSection, setActiveSection] = useState("Internship");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [closedApplicationView, setClosedApplicationView] =
@@ -181,6 +183,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const [approvingAdminId, setApprovingAdminId] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
   const [currentStep, setCurrentStep] = useState(1);
+  const [filterOpportunityId, setFilterOpportunityId] = useState(null);
+  const [selectedApplication, setSelectedApplication] = useState(null);
 
   // visiblePasswords: { [adminId]: true | "loading" | "error" | decryptedPassword }
   const [visiblePasswords, setVisiblePasswords] = useState({});
@@ -315,12 +319,36 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
             application?.opportunity?.id ||
             "",
         ).trim();
-        return (
-          directOpportunityId && ownedOpportunityIds.has(directOpportunityId)
-        );
+
+        const matchesOwnership = directOpportunityId && ownedOpportunityIds.has(directOpportunityId);
+        
+        if (filterOpportunityId) {
+          return matchesOwnership && directOpportunityId === filterOpportunityId;
+        }
+
+        return matchesOwnership;
       }),
-    [applications, ownedOpportunityIds],
+    [applications, ownedOpportunityIds, filterOpportunityId],
   );
+
+  // Pagination Logic
+  const totalPages = Math.ceil(scopedApplications.length / itemsPerPage);
+  const paginatedApplications = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return scopedApplications.slice(startIndex, startIndex + itemsPerPage);
+  }, [scopedApplications, currentPage, itemsPerPage]);
+
+  const totalClosedPages = Math.ceil(closedApplicationItems.length / itemsPerPage);
+  const paginatedClosedItems = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return closedApplicationItems.slice(startIndex, startIndex + itemsPerPage);
+  }, [closedApplicationItems, currentPage, itemsPerPage]);
+
+  // Reset page on filter/section change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeSection, filterOpportunityId, closedApplicationView]);
+
   const userCount = directory.counts?.users || 0;
   const adminCount = directory.counts?.admins || 0;
   const superAdminCount = directory.counts?.superAdmins || 0;
@@ -635,7 +663,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
         setShowSuccessMessage(true);
         setTimeout(() => {
           setShowSuccessMessage(false);
-          navigate(`/admin-dashboard/build-form/${editingId}`);
+          const path = isSuperDashboard ? `/super-admin-dashboard/build-form/${editingId}` : `/admin-dashboard/build-form/${editingId}`;
+          navigate(path);
         }, 3000);
         return;
       }
@@ -646,7 +675,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       setTimeout(() => {
         setShowSuccessMessage(false);
         const createdId = res.id || res._id;
-        navigate(`/admin-dashboard/build-form/${createdId}`);
+        const path = isSuperDashboard ? `/super-admin-dashboard/build-form/${createdId}` : `/admin-dashboard/build-form/${createdId}`;
+        navigate(path);
       }, 3000);
     } catch (apiError) {
       setError(getApiErrorMessage(apiError, "Failed to save opportunity."));
@@ -686,7 +716,10 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     // 3. Update state to show form
     setForm({
       ...formattedForm,
-      formId: typeof item.formId === 'object' ? item.formId._id : item.formId
+      formId:
+        item && item.formId && typeof item.formId === "object"
+          ? item.formId._id
+          : item.formId,
     });
     setEditingId(item.id || item._id);
     setCurrentStep(1);
@@ -701,8 +734,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   };
 
   const handleViewResponses = (id) => {
-    // Navigate to build-form page to see responses/submissions
-    navigate(`/admin-dashboard/build-form/${id}`);
+    setFilterOpportunityId(id);
+    setActiveSection("Applications");
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id) => {
@@ -770,6 +804,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     if (section === "Internship" || section === "Global Program") {
       setForm((prev) => ({ ...prev, type: section }));
     }
+    // Clear filter when changing section manually
+    setFilterOpportunityId(null);
   };
 
   const refreshDirectory = async () => {
@@ -982,7 +1018,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     { key: "Internship", label: "Internships" },
     { key: "Global Program", label: "Global Programs" },
 
-    { key: "Applications", label: "Application Forms" },
+   
     { key: "Closed Application", label: "Closed Application" },
   ];
 
@@ -1070,7 +1106,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EDF2FD]">
-                {closedApplicationItems.map((item) => (
+                {paginatedClosedItems.map((item) => (
                   <tr
                     key={item.id}
                     className="hover:bg-slate-50/50 transition-colors"
@@ -1124,6 +1160,34 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
             </table>
           </div>
         )}
+
+        {/* Pagination Controls for Closed Applications */}
+        {totalClosedPages > 1 && (
+          <div className="mt-6 flex items-center  justify-center border-t border-[#EDF2FD] p-4 bg-white rounded-b-xl">
+            
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <div className="flex items-center px-4">
+                <span className="text-sm font-medium text-slate-700">
+                  Page {currentPage} of {totalClosedPages}
+                </span>
+              </div>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalClosedPages))}
+                disabled={currentPage === totalClosedPages}
+                className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   ) : null;
@@ -1139,6 +1203,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       { key: "Users", label: "Users" },
       { key: "Internship", label: "Internships" },
       { key: "Global Program", label: "Global Programs" },
+      
       { key: "Closed Application", label: "Closed Application" },
     );
   }
@@ -1228,43 +1293,45 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
               )}
 
               {/* PREMIUM HEADER */}
-              <div className="bg-white border border-[#DCE5FA] rounded-2xl px-6 py-4 flex items-center justify-between shadow-sm mb-5">
-                <div className="flex items-center gap-8">
-                  {/* LOGO */}
-                 
-                  
-                  
-                  
-                  <div>
-                    <h1 className="text-xl font-bold text-slate-800">
-                      {isSuperDashboard
-                        ? "Super Admin Control"
-                        : "Admin Dashboard"}
-                    </h1>
-                    <p className="text-[10px] tracking-[0.1em] text-slate-400 font-bold uppercase">
-                      Operational Excellence
-                    </p>
+              {activeSection === "Overview" && (
+                <div className="bg-white border border-[#DCE5FA] rounded-2xl px-6 py-4 flex items-center justify-between shadow-sm mb-5">
+                  <div className="flex items-center gap-8">
+                    {/* LOGO */}
+                   
+                    
+                    
+                    
+                    <div>
+                      <h1 className="text-xl font-bold text-slate-800">
+                        {isSuperDashboard
+                          ? "Super Admin Control"
+                          : "Admin Dashboard"}
+                      </h1>
+                      <p className="text-[10px] tracking-[0.1em] text-slate-400 font-bold uppercase">
+                        Operational Excellence
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3 rounded-xl bg-[#F5F8FF] border border-[#DEE8FF] px-3 py-1.5">
-                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
-                      {(user?.fullName || "A").charAt(0).toUpperCase()}
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3 rounded-xl bg-[#F5F8FF] border border-[#DEE8FF] px-3 py-1.5">
+                      <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                        {(user?.fullName || "A").charAt(0).toUpperCase()}
+                      </div>
+                      <div className="hidden sm:block">
+                        <p className="text-xs font-bold text-slate-800 leading-tight">
+                          {user?.fullName || "Admin"}
+                        </p>
+                        <p className="text-[10px] text-slate-500 uppercase font-semibold">
+                          {isSuperDashboard ? "Super Admin" : "Admin"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="hidden sm:block">
-                      <p className="text-xs font-bold text-slate-800 leading-tight">
-                        {user?.fullName || "Admin"}
-                      </p>
-                      <p className="text-[10px] text-slate-500 uppercase font-semibold">
-                        {isSuperDashboard ? "Super Admin" : "Admin"}
-                      </p>
-                    </div>
+                    
+                    
                   </div>
-                  
-                  
                 </div>
-              </div>
+              )}
 
               {!showOpportunityForm && isSuperStatsSection ? (
                 <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
@@ -1958,6 +2025,17 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                     <div>
                       <h2 className="text-2xl font-semibold text-slate-800">
                         Application Forms
+                        {filterOpportunityId && (
+                          <span className="ml-3 text-sm font-normal text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                            Filtered for: {filteredOpportunities.find(o => (o.id || o._id) === filterOpportunityId)?.title || "Selected Opportunity"}
+                            <button 
+                              onClick={() => setFilterOpportunityId(null)}
+                              className="ml-2 text-blue-800 hover:text-blue-900 font-bold"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        )}
                       </h2>
                       <p className="text-sm text-slate-500">
                         Review and manage submitted applications.
@@ -1986,89 +2064,123 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                       No applications submitted yet.
                     </p>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-245 w-full text-sm">
-                        <thead>
-                          <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
-                            <th className="py-2 pr-3">Applicant</th>
-                            <th className="py-2 pr-3">Email</th>
-                            <th className="py-2 pr-3">Phone</th>
-                            <th className="py-2 pr-3">Opportunity</th>
-                            <th className="py-2 pr-3">Type</th>
-                            <th className="py-2 pr-3">Resume</th>
-                            <th className="py-2 pr-3">Status</th>
-                            <th className="py-2 pr-3">Applied At</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {scopedApplications.map((application) => (
-                            <tr
-                              key={application.id}
-                              className="border-b border-[#EDF2FD] align-top"
-                            >
-                              <td className="py-2 pr-3 font-medium text-slate-800 wrap-break-word">
-                                {application.name}
-                              </td>
-                              <td className="py-2 pr-3 text-slate-600 break-all">
-                                {application.email}
-                              </td>
-                              <td className="py-2 pr-3 text-slate-600">
-                                {application.phone}
-                              </td>
-                              <td className="py-2 pr-3 text-slate-700">
-                                {application.opportunityTitle}
-                              </td>
-                              <td className="py-2 pr-3 text-slate-700">
-                                {application.opportunityType}
-                              </td>
-                              <td className="py-2 pr-3 text-slate-700">
-                                {application.resumeFileName ? (
-                                  <div className="flex items-center gap-2">
-                                    <span>{application.resumeFileName}</span>
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleViewResume(application)
-                                      }
-                                      className="px-2 py-1 rounded-md bg-slate-100 text-slate-800 text-xs font-semibold hover:bg-slate-200"
-                                    >
-                                      View Resume
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <span className="text-slate-400">
-                                    Not uploaded
-                                  </span>
-                                )}
-                              </td>
-                              <td className="py-2 pr-3">
-                                <select
-                                  value={application.status || "New"}
-                                  onChange={(event) =>
-                                    handleStatusChange(
-                                      application.id,
-                                      event.target.value,
-                                    )
-                                  }
-                                  className="border border-slate-300 rounded-md px-2 py-1 bg-white text-slate-700"
-                                >
-                                  <option value="New">New</option>
-                                  <option value="Shortlisted">
-                                    Shortlisted
-                                  </option>
-                                  <option value="Rejected">Rejected</option>
-                                </select>
-                              </td>
-                              <td className="py-2 pr-3 text-slate-600">
-                                {new Date(
-                                  application.appliedAt,
-                                ).toLocaleString()}
-                              </td>
+                    <>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-245 w-full text-sm">
+                          <thead>
+                            <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
+                              <th className="py-2 pr-3">Applicant</th>
+                              <th className="py-2 pr-3">Email</th>
+                              <th className="py-2 pr-3">Phone</th>
+                              <th className="py-2 pr-3">Opportunity</th>
+                              <th className="py-2 pr-3">Type</th>
+                              <th className="py-2 pr-3">Resume</th>
+                              <th className="py-2 pr-3">Status</th>
+                              <th className="py-2 pr-3">Applied At</th>
+                              
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            {paginatedApplications.map((application) => (
+                              <tr
+                                key={application.id}
+                                className="border-b border-[#EDF2FD] align-top"
+                              >
+                                <td className="py-2 pr-3 font-medium text-slate-800 wrap-break-word">
+                                  {application.name}
+                                </td>
+                                <td className="py-2 pr-3 text-slate-600 break-all">
+                                  {application.email}
+                                </td>
+                                <td className="py-2 pr-3 text-slate-600">
+                                  {application.phone}
+                                </td>
+                                <td className="py-2 pr-3 text-slate-700">
+                                  {application.opportunityTitle}
+                                </td>
+                                <td className="py-2 pr-3 text-slate-700">
+                                  {application.opportunityType}
+                                </td>
+                                <td className="py-2 pr-3 text-slate-700">
+                                  {application.resumeFileName ? (
+                                    <div className="flex items-center gap-2">
+                                      <span>{application.resumeFileName}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleViewResume(application)
+                                        }
+                                        className="px-2 py-1 rounded-md bg-slate-100 text-slate-800 text-xs font-semibold hover:bg-slate-200"
+                                      >
+                                        View Resume
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-slate-400">
+                                      Not uploaded
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-2 pr-3">
+                                  <select
+                                    value={application.status || "New"}
+                                    onChange={(event) =>
+                                      handleStatusChange(
+                                        application.id,
+                                        event.target.value,
+                                      )
+                                    }
+                                    className="rounded-lg border border-[#DCE5FA] bg-[#F8FAFF] px-2 py-1 text-xs font-medium text-slate-700 outline-none focus:border-blue-400"
+                                  >
+                                    <option value="New">New</option>
+                                    <option value="Shortlisted">
+                                      Shortlisted
+                                    </option>
+                                    <option value="Rejected">Rejected</option>
+                                  </select>
+                                </td>
+                                <td className="py-2 pr-3 text-slate-600">
+                                  {new Date(
+                                    application.appliedAt,
+                                  ).toLocaleString()}
+                                </td>
+                                
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="mt-6 flex items-center justify-between border-t border-[#EDF2FD] pt-4">
+                          <p className="text-sm text-slate-500">
+                            Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium">{Math.min(currentPage * itemsPerPage, scopedApplications.length)}</span> of <span className="font-medium">{scopedApplications.length}</span> results
+                          </p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              disabled={currentPage === 1}
+                              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Previous
+                            </button>
+                            <div className="flex items-center px-4">
+                              <span className="text-sm font-medium text-slate-700">
+                                Page {currentPage} of {totalPages}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              disabled={currentPage === totalPages}
+                              className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Next
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               ) : (
@@ -2197,22 +2309,29 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
                                   {/*Responses button*/}
                                   <td className="py-3 px-4 text-center">
-  {item.submissionIds && item.submissionIds.length > 0 ? (
-    <button
-      onClick={() => handleViewResponses(item.id)}
-      className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-2 justify-center"
-      title="View Responses"
-    >
-      <span>{item.submissionIds.length}</span>
-      <FiEye size={16} />
-    </button>
-  ) : (
-    <span className="text-slate-300 flex items-center gap-2 justify-center">
-      <span>0</span>
-      <FiEye size={16} />
-    </span>
-  )}
-</td>
+                                    {(() => {
+                                      const responseCount = applications.filter(app => {
+                                        const oppId = String(app.opportunityId || app.opportunity?._id || app.opportunity || "");
+                                        return oppId === String(item.id || item._id);
+                                      }).length;
+
+                                      return responseCount > 0 ? (
+                                        <button
+                                          onClick={() => handleViewResponses(item.id || item._id)}
+                                          className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-2 justify-center mx-auto group"
+                                          title="View Responses"
+                                        >
+                                          <span className="font-bold">{responseCount}</span>
+                                          <FiEye size={16} className="group-hover:scale-110 transition-transform" />
+                                        </button>
+                                      ) : (
+                                        <span className="text-slate-300 flex items-center gap-2 justify-center">
+                                          <span>0</span>
+                                          <FiEye size={16} />
+                                        </span>
+                                      );
+                                    })()}
+                                  </td>
 
                                 
                                   
@@ -2246,7 +2365,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 )}
 
                     {showOpportunityForm && (
-                      <div className="bg-white rounded-3xl border border-[#DCE5FA] overflow-hidden flex flex-col xl:flex-row min-h-[600px] shadow-sm">
+                      <div className="bg-white rounded-xl border border-[#DCE5FA] overflow-hidden flex flex-col xl:flex-row min-h-[600px] shadow-sm">
                         {/* LEFT STEPPER SIDEBAR */}
                         <div className="w-full xl:w-[230px] bg-white border-r border-[#E2EAFC] p-8 flex flex-col">
                           <h2 className="text-xl font-bold text-slate-800 mb-6">
@@ -2288,7 +2407,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               type="button"
                               onClick={() => {
                                 if (editingId) {
-                                  navigate(`/admin-dashboard/build-form/${editingId}`);
+                                  const path = isSuperDashboard ? `/super-admin-dashboard/build-form/${editingId}` : `/admin-dashboard/build-form/${editingId}`;
+                                  navigate(path);
                                 } else {
                                   // For new opportunities, save first
                                   alert("Please save the opportunity details first before building the form.");
@@ -2323,7 +2443,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                         </div>
 
                         {/* RIGHT FORM CONTENT */}
-                        <div className="flex-1 p-8 bg-[#F8FBFF]/50 overflow-y-auto custom-scrollbar max-h-[calc(100vh-10rem)]">
+                        <div className="flex-1 p-8 pb-6 bg-[#F8FBFF]/50 overflow-y-auto custom-scrollbar max-h-[94vh]">
                           {/* <div className="flex items-center justify-between mb-8">
                             <h3 className="text-2xl font-bold text-slate-800">
                               {currentStep === 1 ? "Program Details" : "Application Form Setup"}
@@ -2414,24 +2534,26 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                         className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                                       />
                                     </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Start Date <span className="text-rose-600">*</span></span>
-                                      <input
-                                        type="date"
-                                        name="startDate"
-                                        value={form.startDate}
-                                        onChange={handleChange}
-                                        min={new Date().toISOString().split("T")[0]}
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        required
-                                      />
-                                    </label>
+                                    
                                     <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                                       <span>Deadline <span className="text-rose-600">*</span></span>
                                       <input
                                         type="date"
                                         name="deadline"
                                         value={form.deadline}
+                                        onChange={handleChange}
+                                        min={new Date().toISOString().split("T")[0]}
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        required
+                                      />
+                                    </label>
+
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Start Date <span className="text-rose-600">*</span></span>
+                                      <input
+                                        type="date"
+                                        name="startDate"
+                                        value={form.startDate}
                                         onChange={handleChange}
                                         min={new Date().toISOString().split("T")[0]}
                                         className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
@@ -2630,10 +2752,10 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                   </label>
                                 </div>
 
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
-                                  <h4 className="text-md font-bold text-slate-800">Benefits</h4>
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-3">
+                                  <h4 className="text-md font-bold text-slate-800">Perks & Benefits <span className="text-sm font-medium">(Use commas or new lines)</span></h4>
                                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                    <span>Perks & Benefits (Use commas or new lines)</span>
+                                    
                                     <textarea
                                       name="benefits"
                                       value={form.benefits}
@@ -2729,9 +2851,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                             { label: "Company Founded", value: form.foundedYear || "-" },
                             { label: "Company Type", value: form.companyType || "-" }
                           ].map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                            <div key={idx} className="flex flex-col gap-1 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
                               <span className="text-sm font-medium text-slate-500">{item.label}</span>
-                              <span className="text-sm font-semibold text-slate-800 text-right max-w-[60%] truncate">{item.value}</span>
+                              <div className={`text-sm font-semibold text-slate-800 ${item.label.toLowerCase().includes('description') || item.label.toLowerCase().includes('criteria') ? 'whitespace-pre-wrap' : 'truncate'}`}>
+                                {item.value}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -2760,13 +2884,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                   {/* SUCCESS MESSAGE */}
                   {showSuccessMessage && (
                     <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[110] animate-in slide-in-from-top duration-300">
-                      <div className="bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-emerald-400">
-                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                          <FiCheck className="text-white" size={20} />
-                        </div>
+                      <div className="bg-green-100 text-green-500 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-emerald-400">
+                       
                         <div>
                           <p className="font-bold">Successfully Published!</p>
-                          <p className="text-xs text-emerald-100">Your opportunity is now live on the portal.</p>
+                          <p className="text-xs text-green-500">Your opportunity is now live on the portal.</p>
                         </div>
                       </div>
                     </div>
@@ -2775,6 +2897,104 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
               )}
             </main>
           </div>
+      {/* SUBMISSION DETAILS MODAL */}
+      {selectedApplication && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-[#F8FBFF]">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Form Submission Details</h3>
+                <p className="text-xs text-slate-500 mt-1">Submitted by {selectedApplication.name}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedApplication(null)}
+                className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              <div className="space-y-6">
+                {/* Standard Fields Section */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100">
+                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Applicant Name</p>
+                    <p className="text-slate-800 font-bold">{selectedApplication.name}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100">
+                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Applied At</p>
+                    <p className="text-slate-800 font-bold">{new Date(selectedApplication.appliedAt).toLocaleDateString()}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Address</p>
+                    <p className="text-slate-700 font-medium break-all">{selectedApplication.email}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phone Number</p>
+                    <p className="text-slate-700 font-medium">{selectedApplication.phone}</p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Opportunity</p>
+                  <p className="text-slate-800 font-bold">{selectedApplication.opportunityTitle} ({selectedApplication.opportunityType})</p>
+                </div>
+
+                {selectedApplication.resumeFileName && (
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between">
+                    <div>
+                      <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Resume / CV</p>
+                      <p className="text-emerald-900 font-bold text-sm truncate max-w-[200px]">{selectedApplication.resumeFileName}</p>
+                    </div>
+                    <button
+                      onClick={() => handleViewResume(selectedApplication)}
+                      className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-sm transition-all flex items-center gap-2"
+                    >
+                      <FiFileText size={14} />
+                      View Document
+                    </button>
+                  </div>
+                )}
+
+                <div className="h-px bg-slate-100 my-2"></div>
+
+                {/* Dynamic Form Responses */}
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                  <div className="w-1.5 h-4 bg-blue-600 rounded-full"></div>
+                  Form Responses
+                </h4>
+
+                <div className="space-y-3">
+                  {selectedApplication.formData && Object.entries(selectedApplication.formData).length > 0 ? (
+                    Object.entries(selectedApplication.formData).map(([label, value]) => (
+                      <div key={label} className="p-4 rounded-2xl bg-white border border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
+                        <p className="text-slate-700 font-medium break-words whitespace-pre-wrap">
+                          {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value || 'N/A')}
+                        </p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <p className="text-slate-400 text-xs italic">No additional form data submitted.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+              <button
+                onClick={() => setSelectedApplication(null)}
+                className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all"
+              >
+                Close Details
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
         </div>
       </div>
     </>

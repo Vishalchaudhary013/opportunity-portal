@@ -8,6 +8,7 @@ import {
 } from "../utils/mailer.js";
 import { sendApplicationWhatsAppNotifications } from "../utils/whatsapp.js";
 import xlsx from "xlsx";
+import ExcelJS from "exceljs";
 
 const findOpportunityByTypeAndId = async (opportunityType, opportunityId) => {
   if (!opportunityId) {
@@ -135,6 +136,19 @@ export const submitApplication = async (req, res, next) => {
       },
     });
 
+    // Link application to opportunity
+    if (opportunityId) {
+      if (payload.opportunityType === "Internship") {
+        await InternshipOpportunity.findByIdAndUpdate(opportunityId, {
+          $push: { submissionIds: application._id }
+        });
+      } else if (payload.opportunityType === "Global Program") {
+        await GlobalProgramOpportunity.findByIdAndUpdate(opportunityId, {
+          $push: { submissionIds: application._id }
+        });
+      }
+    }
+
     let emailConfirmation = {
       sent: false,
       message:
@@ -249,36 +263,60 @@ export const exportApplications = async (req, res, next) => {
 
     const applications = await Application.find(filter).sort({ createdAt: -1 });
 
-    const rows = applications.map((item) => ({
-      name: item.name,
-      email: item.email,
-      phone: item.phone,
-      college: item.college,
-      degree: item.degree,
-      year: item.year,
-      skills: item.skills,
-      experience: item.experience,
-      portfolio: item.portfolio || "",
-      linkedin: item.linkedin || "",
-      whySelectYou: item.whySelectYou,
-      opportunityTitle: item.opportunityTitle,
-      opportunityType: item.opportunityType,
-      company: item.company || "",
-      resumeFileName: item.resume?.fileName || "",
-      resumePath: item.resume?.filePath || "",
-      status: item.status,
-      appliedAt: item.createdAt ? new Date(item.createdAt).toISOString() : "",
-    }));
-
-    const worksheet = xlsx.utils.json_to_sheet(rows);
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, "Applications");
+    const rows = applications.map((item) => {
+      return {
+        "Applicant": item.name,
+        "Email": item.email,
+        "Phone": item.phone,
+        "Opportunity": item.opportunityTitle || "N/A",
+        "Type": item.opportunityType || "N/A",
+        "Status": item.status || "New",
+        "Applied At": new Date(item.createdAt).toLocaleString(),
+      };
+    });
 
     if (format === "xlsx") {
-      const fileBuffer = xlsx.write(workbook, {
-        type: "buffer",
-        bookType: "xlsx",
-      });
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Applications");
+
+      if (rows.length > 0) {
+        // Add headers
+        const headers = Object.keys(rows[0]);
+        const headerRow = worksheet.addRow(headers);
+        
+        // Style headers: Bold and centered
+        headerRow.eachCell((cell) => {
+          cell.font = { bold: true };
+          cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE9ECEF' } // Light gray background
+          };
+          cell.alignment = { vertical: 'middle', horizontal: 'center' };
+          cell.border = {
+            bottom: { style: 'thin' }
+          };
+        });
+
+        // Add data rows
+        rows.forEach(rowData => {
+          worksheet.addRow(Object.values(rowData));
+        });
+
+        // Auto-width columns
+        worksheet.columns.forEach(column => {
+          let maxLength = 0;
+          column.eachCell({ includeEmpty: true }, (cell) => {
+            const columnLength = cell.value ? cell.value.toString().length : 10;
+            if (columnLength > maxLength) {
+              maxLength = columnLength;
+            }
+          });
+          column.width = maxLength < 12 ? 12 : maxLength > 50 ? 50 : maxLength + 2;
+        });
+      }
+
+      const fileBuffer = await workbook.xlsx.writeBuffer();
       res.setHeader(
         "Content-Type",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -291,6 +329,10 @@ export const exportApplications = async (req, res, next) => {
       return;
     }
 
+    // Fallback to xlsx for CSV
+    const worksheet = xlsx.utils.json_to_sheet(rows);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, "Applications");
     const fileBuffer = xlsx.write(workbook, {
       type: "buffer",
       bookType: "csv",

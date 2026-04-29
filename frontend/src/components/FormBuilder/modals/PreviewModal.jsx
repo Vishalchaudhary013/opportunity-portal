@@ -4,6 +4,7 @@ import { Icons } from '../ui/ui-icons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { useFormBuilder } from '../../../context/FormBuilderContext';
 import ImageCarousel from '../ui/image-carousel';
+import { API_BASE_URL } from '../../../services/apiClient';
 
 const PreviewModal = ({ onClose, formFields, formName }) => {
   const { formState } = useFormBuilder();
@@ -92,6 +93,13 @@ const PreviewModal = ({ onClose, formFields, formName }) => {
   const bannerId = bannerField?.id;
 const pdfId = pdfField?.id;
 
+  const resolveAssetUrl = (path) => {
+    if (!path) return "";
+    if (path.startsWith("http") || path.startsWith("data:")) return path;
+    const normalized = path.startsWith("/") ? path : `/${path}`;
+    return `${API_BASE_URL}${normalized}`;
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-white overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div className="relative mt-3">
@@ -137,7 +145,7 @@ const pdfId = pdfField?.id;
                   {bannerField && (bannerField?.bannerUrl || formValues?.[bannerId]?.preview) ? (
                     <div className="w-full h-full">
                       <img 
-                        src={formValues?.[bannerId]?.preview || bannerField.bannerUrl} 
+                        src={resolveAssetUrl(formValues?.[bannerId]?.preview || bannerField.bannerUrl)} 
                         alt="Form Banner" 
                         className="w-full h-full object-fill px-3 py-2"
                       />

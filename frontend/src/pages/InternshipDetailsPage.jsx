@@ -71,21 +71,21 @@ const getMapEmbedUrl = (value) => {
 const getBenefitIcon = (benefit) => {
   const normalized = String(benefit || "").trim().toLowerCase();
 
-  if (normalized.includes("mentor")) {
-    return FiUserCheck;
-  }
+  // if (normalized.includes("mentor")) {
+  //   return FiUserCheck;
+  // }
 
-  if (normalized.includes("certificate") || normalized.includes("certification")) {
-    return FiAward;
-  }
+  // if (normalized.includes("certificate") || normalized.includes("certification")) {
+  //   return FiAward;
+  // }
 
-  if (normalized.includes("network")) {
-    return FiShare2;
-  }
+  // if (normalized.includes("network")) {
+  //   return FiShare2;
+  // }
 
-  if (normalized.includes("ppo") || normalized.includes("placement") || normalized.includes("opportunity")) {
-    return FiTrendingUp;
-  }
+  // if (normalized.includes("ppo") || normalized.includes("placement") || normalized.includes("opportunity")) {
+  //   return FiTrendingUp;
+  // }
 
   return FiCheckCircle;
 };
@@ -282,7 +282,7 @@ const InternshipDetailsPage = () => {
               <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Job Description</h2>
                 <p
-                  className="text-slate-700 mt-3 text-[15px]"
+                  className="text-slate-700 mt-3 text-[15px] whitespace-pre-wrap"
                   style={
                     shouldShowDescriptionToggle && !isDescriptionExpanded
                       ? {

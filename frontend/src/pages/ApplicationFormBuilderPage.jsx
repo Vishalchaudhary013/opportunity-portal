@@ -4,6 +4,7 @@ import ApplicationFormBuilder from "../components/FormBuilder/ApplicationFormBui
 import { FiArrowLeft, FiEdit2, FiGrid, FiPieChart, FiEyeOff, FiFileText, FiBriefcase, FiShield, FiUsers, FiLogOut } from "react-icons/fi";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import { useFormBuilder, FormBuilderProvider } from "../context/FormBuilderContext";
+import { Toaster } from "../components/FormBuilder/ui/toaster";
 
 /**
  * Inner component that consumes the FormBuilder context.
@@ -40,11 +41,12 @@ const ApplicationFormBuilderPageContent = () => {
   }
 
   const handleSidebarClick = (key) => {
+    const dashboardPath = isSuperAdmin ? "/super-admin-dashboard" : "/admin-dashboard";
     if (key === "Program Details") {
-      navigate("/admin-dashboard", { state: { editId: id, activeSection: "Internship" } });
+      navigate(dashboardPath, { state: { editId: id, activeSection: "Internship" } });
       return;
     }
-    navigate("/admin-dashboard", { state: { activeSection: key } });
+    navigate(dashboardPath, { state: { activeSection: key } });
   };
 
   const handleLogout = async () => {
@@ -156,6 +158,7 @@ const ApplicationFormBuilderPageContent = () => {
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 };

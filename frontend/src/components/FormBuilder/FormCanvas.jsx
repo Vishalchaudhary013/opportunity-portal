@@ -124,11 +124,11 @@ const FormCanvas = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto bg-gray-50 relative">
-      <div className="p-3 max-w-4xl mx-auto">
+    <div className="flex-1 overflow-y-auto bg-[#F8FAFC] relative flex flex-col">
+      <div className="p-3 max-w-6xl mx-auto flex-1 w-full flex flex-col">
         {hasBannerComponent || hasPdfComponent || hasCarouselComponent ? (
           // Special component-enabled form layout (banner or PDF)
-          <div className="bg-white rounded-lg shadow-sm mb-6">
+          <div className=" rounded-xl  mb-6 flex-1 flex flex-col">
             {/* ... banner layout code unchanged ... */}
             <div className={`${
   (bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top')
@@ -541,12 +541,11 @@ const FormCanvas = () => {
 </div>
 
           </div>
-        ) 
-: (
+        ) : (
           <div 
             id="formCanvas" 
             ref={formCanvasRef}
-            className="grid grid-cols-12 gap-4 items-stretch bg-white rounded-lg shadow-sm p-6"
+            className="grid grid-cols-12 gap-4 items-stretch bg-white rounded-xl shadow-sm p-8 flex-1"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}

@@ -14,7 +14,6 @@ const applicationSchema = new mongoose.Schema(
     },
     opportunityType: {
       type: String,
-      enum: ["Internship", "Global Program"],
       required: true,
     },
     company: {
@@ -40,27 +39,32 @@ const applicationSchema = new mongoose.Schema(
     },
     college: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
       trim: true,
     },
     degree: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
       trim: true,
     },
     year: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
       trim: true,
     },
     skills: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
       trim: true,
     },
     experience: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
       trim: true,
     },
     portfolio: {
@@ -75,31 +79,41 @@ const applicationSchema = new mongoose.Schema(
     },
     whySelectYou: {
       type: String,
-      required: true,
+      required: false,
+      default: "",
       trim: true,
     },
     resume: {
       fileName: {
         type: String,
-        required: true,
+        required: false,
       },
       filePath: {
         type: String,
-        required: true,
+        required: false,
       },
       mimeType: {
         type: String,
-        required: true,
+        required: false,
       },
       size: {
         type: Number,
-        required: true,
+        required: false,
       },
     },
     status: {
       type: String,
       enum: ["New", "Shortlisted", "Rejected"],
       default: "New",
+    },
+    formResponse: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "FormResponse",
+      default: null,
+    },
+    formData: {
+      type: Object,
+      default: {},
     },
   },
   {

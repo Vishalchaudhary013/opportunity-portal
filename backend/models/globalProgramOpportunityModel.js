@@ -67,6 +67,17 @@ const globalProgramOpportunitySchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    formId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Form",
+      default: null,
+    },
+    submissionIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Application",
+      },
+    ],
   },
   {
     timestamps: true,

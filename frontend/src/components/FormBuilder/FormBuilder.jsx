@@ -78,47 +78,58 @@ console.log("📥 RESOLVED internshipId:", internshipId);
 
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { loadOpportunities } = useOpportunities();
+  const { loadOpportunities, isSuperAdmin } = useOpportunities();
 
   // Load form data if editing existing form
-useEffect(() => {
-  const loadForm = async () => {
-    if (formId) {
-      try {
-        const response = await apiClient.get(`/api/forms/${formId}`);
-        const formData = response.data;
+  useEffect(() => {
+    const loadForm = async () => {
+      let activeFormId = formId;
 
-        setFormState(prev => ({
-          ...prev,
-          id: formData._id || formData.id,
-          name: formData.name,
-          description: formData.description,
-          fields: formData.formSchema?.fields || [],
-          status: formData.status
-        }));
-      } catch (error) {
-        toast({
-          title: 'Error',
-          description: 'Failed to load form',
-          variant: 'destructive'
-        });
+      // If no formId is passed directly, try to find it via the internshipId
+      if (!activeFormId && internshipId) {
+        try {
+          const intResponse = await apiClient.get(`/api/internships/${internshipId}`);
+          if (intResponse.data?.formId) {
+            activeFormId = typeof intResponse.data.formId === 'object' 
+              ? intResponse.data.formId._id 
+              : intResponse.data.formId;
+          }
+        } catch (error) {
+          console.error("Failed to fetch internship for formId:", error);
+        }
       }
-    } else {
-  resetFormBuilder();
 
-  if (internshipId) {
-    console.log("♻️ RESET KE BAAD SET internshipId:", internshipId);
+      if (activeFormId) {
+        try {
+          const response = await apiClient.get(`/api/forms/${activeFormId}`);
+          const formData = response.data;
 
-    setFormState(prev => ({
-      ...prev,
-      internshipId
-    }));
-  }
-}
-  };
+          setFormState(prev => ({
+            ...prev,
+            id: formData._id || formData.id,
+            name: formData.name,
+            description: formData.description,
+            fields: formData.formSchema?.fields || [],
+            status: formData.status,
+            internshipId: internshipId || prev.internshipId
+          }));
+        } catch (error) {
+          toast({
+            title: 'Error',
+            description: 'Failed to load form',
+            variant: 'destructive'
+          });
+        }
+      } else {
+        resetFormBuilder();
+        if (internshipId) {
+          setFormState(prev => ({ ...prev, internshipId }));
+        }
+      }
+    };
 
-  loadForm();
-}, [formId, setFormState, resetFormBuilder, toast]);
+    loadForm();
+  }, [formId, internshipId, setFormState, resetFormBuilder, toast]);
 
  const handleSaveDraft = useCallback(async () => {
   console.log("Save draft started");
@@ -410,15 +421,19 @@ const handlePublish = useCallback(async () => {
     }));
 
     toast({
-      title: "Successfully Published! 🎉",
-      description: "Your application form is now live and linked to the internship. Redirecting to dashboard...",
+      title: "Successfully Published! ",
+      description: "Your application form  linked to the internship.",
       variant: "success",
-      duration: 3000
+      duration: 2500,
     });
 
     setTimeout(() => {
-      navigate("/admin-dashboard");
-    }, 3000);
+      if (isSuperAdmin) {
+        navigate("/super-admin-dashboard");
+      } else {
+        navigate("/admin-dashboard");
+      }
+    }, 2500);
 
   } catch (error) {
     console.error("❌ PUBLISH ERROR:", error);
@@ -466,10 +481,9 @@ const handlePublish = useCallback(async () => {
         onPublish={handlePublish}
       />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden bg-[#F8FAFC]">
         <ComponentsPanel />
         <FormCanvas />
-        <PropertyEditor />
       </div>
 
       {showPreviewModal && (

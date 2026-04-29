@@ -2,6 +2,10 @@ import Form from "../models/Form.js";
 import FormResponse from "../models/FormResponse.js";
 import mongoose from "mongoose";
 
+import Application from "../../models/applicationModel.js";
+import InternshipOpportunity from "../../models/internshipOpportunityModel.js";
+import GlobalProgramOpportunity from "../../models/globalProgramOpportunityModel.js";
+
 // ================= CREATE FORM =================
 export const createForm = async (req, res) => {
   try {
@@ -137,7 +141,7 @@ export const updateForm = async (req, res) => {
     ...formData,
     companyName: formData.companyName || ""
   },
-  { new: true }
+  { returnDocument: "after" }
 );
 
     res.json({
@@ -195,7 +199,7 @@ export const publishForm = async (req, res) => {
       status: "published",
       publishedUrl: `public-form/${req.params.id}`
     },
-    { new: true }
+    { returnDocument: "after" }
   );
 
   res.json(form);
@@ -213,53 +217,160 @@ export const deleteForm = async (req, res) => {
 
 export const submitForm = async (req, res) => {
   try {
-    console.log("📩 BODY:", req.body);
-    console.log("📦 FILES:", req.files);
-
     const formId = req.params.id;
+    const { 
+      opportunityId, 
+      opportunityTitle, 
+      opportunityType, 
+      company 
+    } = req.body;
 
-    let data = {};
-    let filesData = {};
-
-    // ✅ FIXED DATA PARSE
-    if (req.body.data) {
-      data = req.body.data;
+    // ✅ Fetch Form Schema to identify field mappings
+    const form = await Form.findById(formId);
+    if (!form) {
+      return res.status(404).json({ message: "Form not found" });
     }
 
-    // optional cleanup
-    Object.keys(data).forEach(key => {
-      if (data[key] === "true") data[key] = true;
-      else if (data[key] === "false") data[key] = false;
-    });
+    let data = { ...req.body };
+    let filesData = {};
 
-    // ✅ FILES
+    // Remove metadata from data object
+    delete data.opportunityId;
+    delete data.opportunityTitle;
+    delete data.opportunityType;
+    delete data.company;
+    delete data.formId;
+
+    // ✅ Handle Files
     if (req.files && req.files.length > 0) {
       req.files.forEach(file => {
-        const fieldId = file.fieldname
-          .replace("files[", "")
-          .replace("]", "");
+        const fieldId = file.fieldname.includes('[') 
+          ? file.fieldname.split('[')[1].split(']')[0]
+          : file.fieldname;
 
-        filesData[fieldId] = file.path;
+        filesData[fieldId] = {
+          fileName: file.originalname,
+          filePath: `/uploads/${file.filename}`,
+          mimeType: file.mimetype,
+          size: file.size,
+          previewUrl: `/uploads/${file.filename}`
+        };
+        data[fieldId] = filesData[fieldId].filePath;
       });
     }
 
-    console.log("🔥 FINAL DATA:", data);
+    // ✅ Map fields based on Label
+    let applicantName = "Anonymous";
+    let firstName = "";
+    let lastName = "";
+    let applicantEmail = "no-email@provided.com";
+    let applicantPhone = "N/A";
+    let identifiedResume = null;
 
-    const response = await FormResponse.create({
+    const fields = form.formSchema?.fields || [];
+    fields.forEach(field => {
+      const label = String(field.label || "").toLowerCase();
+      const type = String(field.type || "").toLowerCase();
+      const value = data[field.id];
+      const file = filesData[field.id];
+
+      // Handle standard text fields
+      if (value) {
+        if (label.includes("first name")) {
+          firstName = value;
+        } else if (label.includes("last name")) {
+          lastName = value;
+        } else if (label.includes("full name")) {
+          applicantName = value;
+        } else if (label.includes("name") || label.includes("applicant")) {
+          if (applicantName === "Anonymous") applicantName = value;
+        } else if (label.includes("email") || label.includes("mail") || type === "email") {
+          applicantEmail = value;
+        } else if (
+          label.includes("phone") || 
+          label.includes("mobile") || 
+          label.includes("contact") || 
+          label.includes("whatsapp") || 
+          label.includes("number") ||
+          type === "mobilewithcheckbox"
+        ) {
+          applicantPhone = value;
+        }
+      }
+
+      // Handle file fields (Resume/CV)
+      if (file) {
+        if (label.includes("resume") || label.includes("cv") || label.includes("document") || label.includes("file")) {
+          identifiedResume = file;
+        }
+      }
+    });
+
+    // Combine names if split
+    if (firstName || lastName) {
+      applicantName = `${firstName} ${lastName}`.trim();
+    }
+
+    // Final fallback to direct keys if label matching failed
+    if (applicantName === "Anonymous") applicantName = data.name || data.fullName || data.applicantName || applicantName;
+    if (applicantEmail === "no-email@provided.com") applicantEmail = data.email || data.emailAddress || applicantEmail;
+    if (applicantPhone === "N/A") applicantPhone = data.phone || data.phoneNumber || data.mobile || applicantPhone;
+
+    // If user is logged in, use their details as ultimate fallback
+    if (req.user) {
+      if (applicantName === "Anonymous") applicantName = req.user.fullName || applicantName;
+      if (applicantEmail === "no-email@provided.com") applicantEmail = req.user.email || applicantEmail;
+      if (applicantPhone === "N/A") applicantPhone = req.user.whatsappNumber || applicantPhone;
+    }
+
+    // ✅ Create FormResponse
+    const formResponse = await FormResponse.create({
       formId,
       data,
       files: filesData
     });
 
+    // ✅ Create Application
+    const application = await Application.create({
+      opportunity: opportunityId && mongoose.Types.ObjectId.isValid(opportunityId) ? opportunityId : null,
+      opportunityTitle: opportunityTitle || "Dynamic Form Submission",
+      opportunityType: opportunityType || "Internship",
+      company: company || "",
+      name: applicantName,
+      email: applicantEmail,
+      phone: applicantPhone,
+      formData: data,
+      formResponse: formResponse._id,
+      resume: identifiedResume || filesData.resume || filesData.pdfUpload || filesData.fileUpload || Object.values(filesData)[0] || {
+        fileName: "No File Uploaded",
+        filePath: "",
+        mimeType: "application/pdf",
+        size: 0
+      }
+    });
+
+    // ✅ Link to Opportunity for Response Count
+    if (opportunityId && mongoose.Types.ObjectId.isValid(opportunityId)) {
+      if (opportunityType === "Internship") {
+        await InternshipOpportunity.findByIdAndUpdate(opportunityId, {
+          $push: { submissionIds: application._id }
+        });
+      } else if (opportunityType === "Global Program") {
+        await GlobalProgramOpportunity.findByIdAndUpdate(opportunityId, {
+          $push: { submissionIds: application._id }
+        });
+      }
+    }
+
     res.json({
       success: true,
-      message: "Submitted",
-      data: response
+      message: "Application submitted successfully",
+      data: application
     });
 
   } catch (err) {
-    console.log("❌ ERROR:", err);
-    res.status(500).json({ message: "Submission failed" });
+    console.log("❌ SUBMISSION ERROR:", err);
+    res.status(500).json({ message: "Submission failed", error: err.message });
   }
 };
 

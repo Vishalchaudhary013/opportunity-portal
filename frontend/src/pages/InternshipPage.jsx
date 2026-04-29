@@ -388,9 +388,14 @@ const InternshipPage = () => {
                         >
                           {item.title}
                         </Link>
-                        <p className="mt-1 truncate text-[15px] text-[#4B5563]">
-                          {item.company || "Company"}
-                        </p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="truncate text-[15px] text-[#4B5563]">
+                            {item.company || "Company"}
+                          </p>
+                          <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider border border-blue-100 whitespace-nowrap">
+                            {item.internshipType || "Internship"}
+                          </span>
+                        </div>
 
                         <div className="mt-3 flex flex-wrap items-center gap-3 text-[14px] text-[#374151]">
                           <span className="inline-flex items-center gap-1.5">

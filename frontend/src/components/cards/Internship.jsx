@@ -16,15 +16,63 @@ import {
   isInternshipOpen,
   resolveWorkMode,
 } from "../../utils/internshipCardData";
+import {
+  Briefcase,
+  Cpu,
+  LineChart,
+  Code,
+  Monitor,
+  User,
+  HeartPulse,
+  Globe,
+  Users,
+  Palette,
+  FlaskConical,
+  Sigma,
+} from "lucide-react";
 
 const Internship = ({ limit }) => {
+  const [selectedCategory, setSelectedCategory] = React.useState(null);
+
+  const categories = [
+    { name: "Business", icon: <Briefcase size={16} /> },
+    { name: "Artificial Intelligence", icon: <Cpu size={16} /> },
+    { name: "Data Science", icon: <LineChart size={16} /> },
+    { name: "Computer Science", icon: <Code size={16} /> },
+    { name: "Information Technology", icon: <Monitor size={16} /> },
+    { name: "Personal Development", icon: <User size={16} /> },
+    { name: "Healthcare", icon: <HeartPulse size={16} /> },
+    { name: "Language Learning", icon: <Globe size={16} /> },
+    { name: "Social Sciences", icon: <Users size={16} /> },
+    { name: "Arts and Humanities", icon: <Palette size={16} /> },
+    { name: "Physical Science", icon: <FlaskConical size={16} /> },
+    { name: "Math & Logic", icon: <Sigma size={16} /> },
+  ];
+
   const { opportunities, isInternshipSaved, toggleSavedInternship } =
     useOpportunities();
-  const intershipData = opportunities.filter(
-    (item) => item.type === "Internship" && isInternshipOpen(item),
-  );
-  const visibleInternships =
-    typeof limit === "number" ? intershipData.slice(0, limit) : intershipData;
+
+  const intershipData = React.useMemo(() => {
+    return opportunities
+      .filter((item) => item.type === "Internship" && isInternshipOpen(item))
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+  }, [opportunities]);
+
+  const visibleInternships = React.useMemo(() => {
+    let data = intershipData;
+    if (selectedCategory) {
+      const query = selectedCategory.toLowerCase();
+      data = data.filter(
+        (item) =>
+          (item.industry && item.industry.toLowerCase().includes(query)) ||
+          (item.functionalRole &&
+            item.functionalRole.toLowerCase().includes(query)) ||
+          (item.title && item.title.toLowerCase().includes(query)),
+      );
+    }
+    return typeof limit === "number" ? data.slice(0, limit) : data;
+  }, [intershipData, selectedCategory, limit]);
+
   return (
     <>
       <div className="bg-[#F8FAFC]">
@@ -49,6 +97,28 @@ const Internship = ({ limit }) => {
               </li>
             </ul>
           </div>
+          <div className="flex flex-wrap gap-3 mb-[40px]">
+            {categories.map((cat, index) => (
+              <button
+                type="button"
+                key={index}
+                onClick={() =>
+                  setSelectedCategory(
+                    selectedCategory === cat.name ? null : cat.name,
+                  )
+                }
+                className={`flex items-center gap-2 px-[15px] py-[6px] border rounded-full text-[12px] transition-all duration-200 ${
+                  selectedCategory === cat.name
+                    ? "bg-blue-600 text-white border-blue-600 shadow-md transform scale-105"
+                    : "bg-[#F0F6FF] text-slate-700 border-[#D6E2FC] hover:bg-blue-50"
+                }`}
+              >
+                {cat.icon}
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {visibleInternships.map((data) => (
               <Link

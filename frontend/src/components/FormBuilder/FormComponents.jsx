@@ -13,6 +13,7 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
       return (
         <input 
           type="text" 
+          value={field.value || ''}
           placeholder={field.placeholder || ''}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
           disabled={!isPreview}
@@ -27,6 +28,7 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
     case 'textArea':
       return (
         <textarea 
+          value={field.value || ''}
           placeholder={field.placeholder || ''}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
           rows={field.rows || 3}
@@ -63,6 +65,7 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
     case 'select':
       return (
         <select 
+          value={field.value || ''}
           className="mt-1 block w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
           disabled={!isPreview}
           onChange={(e) => onChange(field.id, e.target.value)}
@@ -84,6 +87,7 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
     case 'radio':
       return (
         <RadioGroup 
+          value={field.value || ''}
           className="mt-2 space-y-2" 
           disabled={!isPreview}
           inline={false}
@@ -129,6 +133,7 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
       return (
         <input 
           type="date" 
+          value={field.value || ''}
           className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm"
           disabled={!isPreview}
           onChange={(e) => onChange(field.id, e.target.value)}
@@ -262,42 +267,6 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
       );
 
     case 'resumeUpload': {
-      const fileInputRef = React.useRef(null);
-
-      const handleButtonClick = () => {
-        if (fileInputRef.current) {
-          console.log("File input ref found, clicking input");
-          fileInputRef.current.click();
-        } else {
-          console.error("File input ref not found");
-        }
-      };
-
-      const handleFileChange = (e) => {
-        const file = e.target.files?.[0];
-        if (file) {
-          console.log("File selected:", file.name);
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            if (event.target?.result) {
-              const fileData = {
-                file,
-                fileName: file.name,
-                fileType: file.type,
-                previewUrl: URL.createObjectURL(file),
-                dataUrl: event.target.result,
-              };
-              console.log("File successfully processed:", file.name);
-              if (onChange) onChange(field.id, fileData);
-            }
-          };
-          reader.onerror = () => {
-            console.error("Error reading file:", file.name);
-          };
-          reader.readAsDataURL(file);
-        }
-      };
-
       return (
         <div className="flex flex-col items-center justify-center px-4 py-6 bg-white rounded-md">
           <h2 className="text-lg font-medium text-gray-800 text-center mb-6">
@@ -309,19 +278,39 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
             <div className="flex flex-col items-center">
               <button
                 type="button"
-                onClick={handleButtonClick}
+                onClick={() => {
+                  const input = document.getElementById(`file-upload-${field.id}`);
+                  if (input) input.click();
+                }}
                 className="px-6 py-3 bg-[#00332b] text-white rounded-full text-sm font-medium hover:bg-[#00443c] transition"
               >
                 Upload resume
               </button>
               <input
-                ref={fileInputRef}
                 id={`file-upload-${field.id}`}
                 name={`file-upload-${field.id}`}
                 type="file"
                 className="hidden"
                 disabled={!isPreview}
-                onChange={handleFileChange}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      if (event.target?.result) {
+                        const fileData = {
+                          file,
+                          fileName: file.name,
+                          fileType: file.type,
+                          previewUrl: URL.createObjectURL(file),
+                          dataUrl: event.target.result,
+                        };
+                        if (onChange) onChange(field.id, fileData);
+                      }
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
                 required={field.required}
                 accept={
                   field.allowedTypes ||
@@ -556,16 +545,47 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
       );
 
     case 'bannerUpload':
-      // This is handled in the FormCanvas component
-      return null;
-
+      if (!isPreview) return null;
+      return (
+        <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm h-40 bg-gray-50">
+          <img 
+            src={field.bannerUrl || field.value?.preview} 
+            alt="Banner" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      );
+    
     case 'pdfUpload':
-      // This is handled in the FormCanvas component
-      return null;
+      if (!isPreview) return null;
+      return (
+        <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+          <div className="p-2 bg-white rounded-md shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-blue-900 truncate">Attached PDF Document</p>
+            <p className="text-xs text-blue-600">Included in application</p>
+          </div>
+        </div>
+      );
 
     case 'carouselUpload':
-      // This is handled in the FormCanvas component
-      return null;
+      if (!isPreview) return null;
+      return (
+        <div className="flex gap-2 overflow-x-auto py-2 custom-scrollbar">
+          {(field.images || []).map((img, idx) => (
+            <div key={idx} className="h-20 w-20 flex-shrink-0 rounded-md border border-gray-200 overflow-hidden shadow-sm">
+              <img src={img.preview} alt={`Slide ${idx + 1}`} className="w-full h-full object-cover" />
+            </div>
+          ))}
+          {(!field.images || field.images.length === 0) && (
+            <p className="text-xs text-gray-400 italic">No images in carousel</p>
+          )}
+        </div>
+      );
 
     default:
       return <p className="text-sm text-gray-500">Unknown field type: {field.type}</p>;

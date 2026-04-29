@@ -7,6 +7,8 @@ import internshipRoutes from "./routers/internshipRoutes.js";
 import globalProgramRoutes from "./routers/globalProgramRoutes.js";
 import applicationRoutes from "./routers/applicationRoutes.js";
 import authRoutes from "./routers/authRoutes.js";
+import formRoutes from "./formBuilder/routes/formRoutes.js";
+import submissionRoutes from "./formBuilder/routes/submissionRoutes.js";
 import { isMailConfigured } from "./utils/mailer.js";
 import {
   bootWhatsAppProvider,
@@ -32,6 +34,8 @@ app.use("/api/internships", internshipRoutes);
 app.use("/api/global-programs", globalProgramRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/forms", formRoutes);
+app.use("/api/submissions", submissionRoutes);
 
 
 
