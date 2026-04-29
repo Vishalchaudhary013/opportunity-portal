@@ -400,3 +400,28 @@ export const exportInternships = async (req, res, next) => {
     next(error);
   }
 };
+
+export const attachForm = async (req, res, next) => {
+  try {
+    const { formId } = req.body;
+    const internshipId = req.params.id;
+
+    const internship = await InternshipOpportunity.findOneAndUpdate(
+      { _id: internshipId, ...getOwnerFilter(req) },
+      { formId },
+      { new: true }
+    );
+
+    if (!internship) {
+      res.status(404).json({ message: "Internship not found or unauthorized" });
+      return;
+    }
+
+    res.status(200).json({ 
+      message: "Form attached successfully", 
+      internship 
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -106,6 +106,8 @@ export const authAPI = {
       message: "Email availability checks are not configured.",
     },
   }),
+  getDecryptedAdminPassword: async (adminId) =>
+    apiClient.get(`/api/auth/admins/${adminId}/decrypted-password`),
 };
 
 export default authAPI;

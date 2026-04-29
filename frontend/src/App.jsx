@@ -16,6 +16,7 @@ import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import ProfilePage from "./pages/ProfilePage";
 import FavoritesPage from "./pages/FavoritesPage";
+import ApplicationFormBuilderPage from "./pages/ApplicationFormBuilderPage";
 
 const App = () => {
    const location = useLocation();
@@ -24,11 +25,11 @@ const App = () => {
     location.pathname.startsWith("/admin-dashboard") ||
     location.pathname.startsWith("/super-admin-dashboard");
 
-  const hideFooter = hideLayout.includes(location.pathname) || isAdminRoute;
+  const showNavBar = !hideLayout.includes(location.pathname) && !isAdminRoute;
 
   return (
     <>
-     {!hideLayout.includes(location.pathname) && <NavBar />}
+     {showNavBar && <NavBar />}
      
       <Routes>
         <Route path="/" element={<Home />} />
@@ -71,9 +72,13 @@ const App = () => {
           path="/super-admin-dashboard"
           element={<SuperAdminDashboard />}
         />
+        <Route
+          path="/admin-dashboard/build-form/:id"
+          element={<ApplicationFormBuilderPage />}
+        />
         <Route path="*" element={<NotFound />} />
       </Routes>
-     {!hideFooter && <Footer />}
+     {!showNavBar ? null : <Footer />}
 
 
     </>

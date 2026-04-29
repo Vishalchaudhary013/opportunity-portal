@@ -164,6 +164,11 @@ const internshipOpportunitySchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    formId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Form",
+      default: null,
+    },
   },
   {
     timestamps: true,

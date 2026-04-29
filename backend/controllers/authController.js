@@ -1,3 +1,4 @@
+// All imports at the top
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import User from "../models/userModel.js";
@@ -7,6 +8,30 @@ import {
   getWhatsAppRuntimeStatus,
   sendWhatsAppText,
 } from "../utils/whatsapp.js";
+import { encrypt, decrypt } from "../utils/encryption.js";
+
+// Decrypt admin password for super admin only
+export const getDecryptedAdminPassword = async (req, res) => {
+  try {
+    if (!req.user || req.user.role !== "super_admin") {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    const admin = await User.findById(req.params.id).select(
+      "encryptedPassword role",
+    );
+    if (!admin || admin.role !== "admin") {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    if (!admin.encryptedPassword) {
+      return res.status(400).json({ message: "Password not available for decryption" });
+    }
+    const decrypted = decrypt(admin.encryptedPassword);
+    res.json({ password: decrypted });
+  } catch (error) {
+    console.error("Decryption error:", error);
+    res.status(500).json({ message: "Error decrypting password" });
+  }
+};
 
 const PASSWORD_RULE_MESSAGE =
   "Password must be at least 8 characters and include letters, numbers, and special characters.";
@@ -147,7 +172,8 @@ const sendEmailOtp = async ({ user, code, reason }) => {
 
   return {
     sent: Boolean(result?.sent),
-    message: result?.message || (result?.sent ? "OTP sent." : "OTP delivery failed."),
+    message:
+      result?.message || (result?.sent ? "OTP sent." : "OTP delivery failed."),
   };
 };
 
@@ -325,7 +351,8 @@ const sendPhoneOtp = async ({ user, code }) => {
   if (process.env.WHATSAPP_PROVIDER === "meta-cloud") {
     // For Meta Cloud API, we use a template for the first message (OTP)
     // The user must configure WHATSAPP_CLOUD_OTP_TEMPLATE_NAME in .env
-    const templateName = process.env.WHATSAPP_CLOUD_OTP_TEMPLATE_NAME || "otp_verification";
+    const templateName =
+      process.env.WHATSAPP_CLOUD_OTP_TEMPLATE_NAME || "otp_verification";
     const isHelloWorld = templateName === "hello_world";
 
     whatsappResult = await sendWhatsAppText({
@@ -360,7 +387,9 @@ const sendPhoneOtp = async ({ user, code }) => {
 
   return {
     sent: false,
-    message: whatsappResult.message || "WhatsApp delivery failed and no email fallback is configured for phone OTP.",
+    message:
+      whatsappResult.message ||
+      "WhatsApp delivery failed and no email fallback is configured for phone OTP.",
   };
 };
 
@@ -519,7 +548,7 @@ const authenticateUser = async ({ email, password, allowedRoles = null }) => {
 
   if (
     ["user", "admin"].includes(user.role) &&
-    (!user.isEmailVerified /* || !user.isPhoneVerified */) // Commented out phone requirement
+    !user.isEmailVerified /* || !user.isPhoneVerified */ // Commented out phone requirement
   ) {
     const error = new Error(
       "Please verify your email with OTP before login.", // Removed phone from message
@@ -566,6 +595,10 @@ const registerUser = async ({
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
+  let encryptedPassword = "";
+  if (role === "admin") {
+    encryptedPassword = encrypt(password);
+  }
 
   const user = await User.create({
     accountType: accountType || role || "student",
@@ -591,6 +624,7 @@ const registerUser = async ({
     username: username || "",
     agreeToWhatsAppUpdates: Boolean(agreeToWhatsAppUpdates),
     agreeToTerms: Boolean(agreeToTerms),
+    encryptedPassword,
   });
 
   const token = generateToken({ id: user._id, role: user.role });
@@ -675,7 +709,10 @@ const issueInitialVerificationCodes = async (userId) => {
   const [emailResult, phoneResult] = await Promise.all([
     sendEmailOtp({ user, code: emailCode, reason: "email_verification" }),
     // sendPhoneOtp({ user, code: phoneCode }), // Commented out phone OTP
-    Promise.resolve({ sent: true, message: "Phone OTP bypassed (commented out)" }),
+    Promise.resolve({
+      sent: true,
+      message: "Phone OTP bypassed (commented out)",
+    }),
   ]);
 
   return {
@@ -1132,7 +1169,8 @@ export const verifyEmailCode = async (req, res, next) => {
     );
 
     let registrationNotificationDispatch = null;
-    if (updatedUser.isEmailVerified /* && updatedUser.isPhoneVerified */) { // Commented out phone check
+    if (updatedUser.isEmailVerified /* && updatedUser.isPhoneVerified */) {
+      // Commented out phone check
       try {
         registrationNotificationDispatch =
           await sendRegistrationSuccessNotifications({
@@ -1140,7 +1178,10 @@ export const verifyEmailCode = async (req, res, next) => {
             accountLabel: updatedUser.role === "admin" ? "admin" : "student",
           });
       } catch (e) {
-        console.error("Failed to send welcome notification after email verification:", e);
+        console.error(
+          "Failed to send welcome notification after email verification:",
+          e,
+        );
       }
     }
 
@@ -1246,7 +1287,10 @@ export const verifyPhoneCode = async (req, res, next) => {
             accountLabel: updatedUser.role === "admin" ? "admin" : "student",
           });
       } catch (e) {
-        console.error("Failed to send welcome notification after phone verification:", e);
+        console.error(
+          "Failed to send welcome notification after phone verification:",
+          e,
+        );
       }
     }
 
@@ -1460,7 +1504,7 @@ export const getUserDirectory = async (req, res, next) => {
       ],
     })
       .select(
-        "_id fullName email role whatsappNumber phoneNumber createdAt adminApprovalStatus adminApprovedAt isEmailVerified isPhoneVerified latestQualification resumeFilePath resumeFileName",
+        "_id fullName email role whatsappNumber phoneNumber createdAt adminApprovalStatus adminApprovedAt isEmailVerified isPhoneVerified latestQualification resumeFilePath resumeFileName organizationName organizationType plainPassword",
       )
       .sort({ createdAt: -1 });
 
@@ -1471,6 +1515,9 @@ export const getUserDirectory = async (req, res, next) => {
       role: item.role,
       whatsappNumber: item.whatsappNumber || "",
       phoneNumber: item.phoneNumber || "",
+      organizationName: item.organizationName || "",
+      organizationType: item.organizationType || "",
+      plainPassword: item.plainPassword || "",
       adminApprovalStatus:
         item.role === "admin" ? item.adminApprovalStatus || "approved" : null,
       adminApprovedAt: item.adminApprovedAt || null,
@@ -1587,12 +1634,14 @@ export const changeAdminPassword = async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const encryptedPassword = encrypt(newPassword);
 
     await User.updateOne(
       { _id: adminUser._id },
       {
         $set: {
           password: hashedPassword,
+          encryptedPassword: encryptedPassword,
           passwordResetCodeHash: "",
           passwordResetCodeExpiresAt: null,
         },

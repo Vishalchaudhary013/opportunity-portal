@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   FiBriefcase,
   FiEye,
@@ -12,6 +12,11 @@ import {
   FiShield,
   FiCheckCircle,
   FiUsers,
+  FiExternalLink,
+  FiKey,
+  FiTrash2,
+  FiCheck,
+  FiEdit2,
 } from "react-icons/fi";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import NavBar from "../components/NavBar";
@@ -33,7 +38,9 @@ const initialForm = {
   website: "",
   location: "",
   duration: "",
+  durationUnit: "Months",
   stipend: "",
+  isUnpaid: false,
   stipendCurrency: "INR",
   workMode: "In Office",
   cardTags: "",
@@ -44,6 +51,8 @@ const initialForm = {
   logo: "",
   programType: "",
   eligibility: "",
+  internshipType: "",
+  formId: null,
 };
 
 const resolveOwnerId = (opportunity) => {
@@ -103,6 +112,7 @@ const isOpportunityClosed = (opportunity) => {
 
 const AdminDashboard = ({ dashboardType = "admin" }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const isSuperDashboard = dashboardType === "super";
   const {
     opportunities,
@@ -121,6 +131,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     changeAdminPassword,
     approveAdminAccess,
     getWhatsAppStatus,
+    getDecryptedAdminPassword,
     impersonateAdmin,
     stopImpersonation,
     isImpersonating,
@@ -135,9 +146,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const [showOpportunityForm, setShowOpportunityForm] = useState(false);
   const [requiredSkillInputs, setRequiredSkillInputs] = useState(["", "", ""]);
   const [benefitInputs, setBenefitInputs] = useState(["", "", "", ""]);
-  const [activeSection, setActiveSection] = useState(
-    isSuperDashboard ? "Overview" : "Internship",
-  );
+  const [activeSection, setActiveSection] = useState("Internship");
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [closedApplicationView, setClosedApplicationView] =
     useState("Internship");
   const [error, setError] = useState("");
@@ -168,6 +179,44 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const [passwordChangeMessage, setPasswordChangeMessage] = useState("");
   const [adminApprovalMessage, setAdminApprovalMessage] = useState("");
   const [approvingAdminId, setApprovingAdminId] = useState("");
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  // visiblePasswords: { [adminId]: true | "loading" | "error" | decryptedPassword }
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+
+  // Fetch decrypted password for super admin
+  const fetchDecryptedPassword = async (adminId) => {
+    try {
+      setVisiblePasswords((prev) => ({ ...prev, [adminId]: "loading" }));
+      const data = await getDecryptedAdminPassword(adminId);
+      setVisiblePasswords((prev) => ({ ...prev, [adminId]: data.password }));
+    } catch (apiError) {
+      const message = getApiErrorMessage(apiError);
+      if (message === "Password not available for decryption") {
+        setVisiblePasswords((prev) => ({ ...prev, [adminId]: "N/A" }));
+      } else {
+        setVisiblePasswords((prev) => ({ ...prev, [adminId]: "error" }));
+      }
+    }
+  };
+
+  // Handle navigation state (e.g. from Form Builder back to Program Details)
+  useEffect(() => {
+    if (location.state?.editId && opportunities.length > 0) {
+      const item = opportunities.find(o => (o.id || o._id) === location.state.editId);
+      if (item) {
+        handleEdit(item);
+      }
+      // Clear the state so it doesn't reopen on every render
+      navigate(location.pathname, { replace: true, state: { ...location.state, editId: null } });
+    }
+    if (location.state?.activeSection) {
+      setActiveSection(location.state.activeSection);
+      // Clear the state
+      navigate(location.pathname, { replace: true, state: { ...location.state, activeSection: null } });
+    }
+  }, [location.state, opportunities, navigate, location.pathname]);
 
   const title = editingId
     ? `Edit ${form.type === "Global Program" ? "Global Program" : "Internship"}`
@@ -458,8 +507,19 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   }, [isAdmin, getWhatsAppStatus, getApiErrorMessage]);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = event.target;
+    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+  };
+
+  const handleLogoChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setForm((prev) => ({ ...prev, logo: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleRequiredSkillChange = (index, value) => {
@@ -470,6 +530,10 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const addRequiredSkillInput = () => {
     setRequiredSkillInputs((prev) => [...prev, ""]);
+  };
+
+  const removeRequiredSkillInput = (index) => {
+    setRequiredSkillInputs((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleBenefitChange = (index, value) => {
@@ -498,27 +562,41 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     const nextType =
       activeSection === "Global Program" ? "Global Program" : "Internship";
 
-    navigate(
-      isSuperDashboard
-        ? nextType === "Global Program"
-          ? "/super-admin-dashboard/create-global-program"
-          : "/super-admin-dashboard/create-internship"
-        : nextType === "Global Program"
-          ? "/admin-dashboard/create-global-program"
-          : "/admin-dashboard/create-internship",
-    );
+    setForm({
+      ...initialForm,
+      type: nextType,
+    });
+    setEditingId(null);
+    setCurrentStep(1);
+    setShowOpportunityForm(true);
   };
 
   const handleSuperCreateInternship = () => {
-    navigate("/super-admin-dashboard/create-internship");
+    setForm({
+      ...initialForm,
+      type: "Internship",
+    });
+    setEditingId(null);
+    setCurrentStep(1);
+    setShowOpportunityForm(true);
   };
 
   const handleSuperCreateGlobalProgram = () => {
-    navigate("/super-admin-dashboard/create-global-program");
+    setForm({
+      ...initialForm,
+      type: "Global Program",
+    });
+    setEditingId(null);
+    setCurrentStep(1);
+    setShowOpportunityForm(true);
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
+    setShowPreviewModal(true);
+  };
+
+  const handleConfirmSubmit = async () => {
     setError("");
     setBusy(true);
 
@@ -528,10 +606,6 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       .map((skill) => String(skill || "").trim())
       .filter(Boolean)
       .join(", ");
-    const benefitsValue = benefitInputs
-      .map((benefit) => String(benefit || "").trim())
-      .filter(Boolean)
-      .join(", ");
 
     const payload = {
       ...form,
@@ -539,9 +613,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       requiredSkills: shouldIncludeInternshipCardFields
         ? requiredSkillsValue
         : form.requiredSkills,
-      benefits: shouldIncludeInternshipCardFields
-        ? benefitsValue
-        : form.benefits,
+      benefits: form.benefits,
       deadline: new Date(form.deadline).toISOString(),
       startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
       stipend: form.stipend
@@ -556,39 +628,124 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     };
 
     try {
+      let res;
       if (editingId) {
-        await updateOpportunity(editingId, payload);
-        resetForm();
+        res = await updateOpportunity(editingId, payload);
+        setShowPreviewModal(false);
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+          navigate(`/admin-dashboard/build-form/${editingId}`);
+        }, 3000);
         return;
       }
 
-      await addOpportunity(payload);
-      resetForm();
+      res = await addOpportunity(payload);
+      setShowPreviewModal(false);
+      setShowSuccessMessage(true);
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        const createdId = res.id || res._id;
+        navigate(`/admin-dashboard/build-form/${createdId}`);
+      }, 3000);
     } catch (apiError) {
       setError(getApiErrorMessage(apiError, "Failed to save opportunity."));
+      setShowPreviewModal(false);
     } finally {
       setBusy(false);
     }
   };
 
   const handleEdit = (item) => {
-    navigate(
-      isSuperDashboard
-        ? `/super-admin-dashboard/edit-opportunity/${item.id}`
-        : `/admin-dashboard/edit-opportunity/${item.id}`,
-      {
-        state: { opportunity: item },
-      },
-    );
+    // 1. Prepare the form data from the item
+    const formattedForm = {
+      ...initialForm,
+      ...item,
+      // Handle date formatting for input fields (YYYY-MM-DD)
+      deadline: item.deadline ? new Date(item.deadline).toISOString().split('T')[0] : "",
+      startDate: item.startDate ? new Date(item.startDate).toISOString().split('T')[0] : "",
+      // Stipend handling: strip currency symbols if they were prepended
+      stipend: String(item.stipend || "").replace(/[₹$]/g, "").trim(),
+      stipendCurrency: String(item.stipend || "").includes("$") ? "USD" : "INR",
+      isUnpaid: String(item.stipend || "").toLowerCase().includes("unpaid") || item.stipend === "0" || !item.stipend,
+    };
+
+    // 2. Set arrays for dynamic inputs
+    const skillsArray = Array.isArray(item.requiredSkills) 
+      ? item.requiredSkills 
+      : String(item.requiredSkills || "").split(/,|\n/).map(s => s.trim()).filter(Boolean);
+    
+    setRequiredSkillInputs(skillsArray.length > 0 ? skillsArray : ["", "", ""]);
+
+    const benefitsArray = Array.isArray(item.benefits) 
+      ? item.benefits 
+      : String(item.benefits || "").split(/,|\n/).map(b => b.trim()).filter(Boolean);
+    
+    setBenefitInputs(benefitsArray.length > 0 ? benefitsArray : ["", "", "", ""]);
+
+    // 3. Update state to show form
+    setForm({
+      ...formattedForm,
+      formId: typeof item.formId === 'object' ? item.formId._id : item.formId
+    });
+    setEditingId(item.id || item._id);
+    setCurrentStep(1);
+    setShowOpportunityForm(true);
+
+    if (isSuperDashboard) {
+      setActiveSection("Post Opportunity");
+    }
+
+    // 4. Scroll to top/form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleViewResponses = (id) => {
+    // Navigate to build-form page to see responses/submissions
+    navigate(`/admin-dashboard/build-form/${id}`);
   };
 
   const handleDelete = async (id) => {
+    const confirmed = window.confirm("Are you sure you want to delete this opportunity?");
+    if (!confirmed) return;
     try {
       setError("");
       await deleteOpportunity(id);
     } catch (apiError) {
       setError(getApiErrorMessage(apiError, "Failed to delete opportunity."));
     }
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedIds.length} selected opportunities?`);
+    if (!confirmed) return;
+
+    setBusy(true);
+    try {
+      setError("");
+      // Using Promise.all for bulk deletion
+      await Promise.all(selectedIds.map(id => deleteOpportunity(id)));
+      setSelectedIds([]);
+    } catch (apiError) {
+      setError(getApiErrorMessage(apiError, "Failed to delete some opportunities."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleSelectAll = (items) => {
+    if (selectedIds.length === items.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(items.map((item) => item.id));
+    }
+  };
+
+  const handleSelectItem = (id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id],
+    );
   };
 
   const handleViewResume = (application) => {
@@ -605,6 +762,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const handleSectionChange = (section) => {
     setActiveSection(section);
     setEditingId(null);
+    setSelectedIds([]);
+    setCurrentStep(1);
     setShowOpportunityForm(false);
     setRequiredSkillInputs(["", "", ""]);
     setBenefitInputs(["", "", "", ""]);
@@ -829,33 +988,51 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const closedApplicationContent = isClosedApplicationPanel ? (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setClosedApplicationView("Internship")}
-          className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
-            closedApplicationView === "Internship"
-              ? "bg-[#0B4AA6] text-white"
-              : "bg-white text-slate-700 border border-[#DCE5FA]"
-          }`}
-        >
-          Closed Internship
-        </button>
-        <button
-          type="button"
-          onClick={() => setClosedApplicationView("Global Program")}
-          className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
-            closedApplicationView === "Global Program"
-              ? "bg-[#0B4AA6] text-white"
-              : "bg-white text-slate-700 border border-[#DCE5FA]"
-          }`}
-        >
-          Closed Global Program
-        </button>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setClosedApplicationView("Internship");
+              setSelectedIds([]);
+            }}
+            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+              closedApplicationView === "Internship"
+                ? "bg-[#0B4AA6] text-white"
+                : "bg-white text-slate-700 border border-[#DCE5FA]"
+            }`}
+          >
+            Closed Internship
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setClosedApplicationView("Global Program");
+              setSelectedIds([]);
+            }}
+            className={`rounded-lg px-3 py-2 text-sm font-semibold transition ${
+              closedApplicationView === "Global Program"
+                ? "bg-[#0B4AA6] text-white"
+                : "bg-white text-slate-700 border border-[#DCE5FA]"
+            }`}
+          >
+            Closed Global Program
+          </button>
+        </div>
+        {selectedIds.length > 0 && (
+          <button
+            type="button"
+            onClick={handleBulkDelete}
+            className="px-3 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 flex items-center gap-2 shadow-sm"
+          >
+            <FiTrash2 size={14} />
+            Delete Selected ({selectedIds.length})
+          </button>
+        )}
       </div>
 
-      <div className="rounded-xl border border-[#E2EAFC] bg-[#F8FBFF] p-4">
-        <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="rounded-xl border border-[#E2EAFC] bg-white">
+        <div className="p-4 border-b border-[#E2EAFC] flex items-center justify-between">
           <h3 className="text-lg font-semibold text-slate-800">
             {closedApplicationTitle}
           </h3>
@@ -865,32 +1042,86 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
         </div>
 
         {closedApplicationItems.length === 0 ? (
-          <p className="text-sm text-slate-500">
+          <div className="p-8 text-center text-slate-500">
             No closed {closedApplicationView.toLowerCase()} found.
-          </p>
+          </div>
         ) : (
-          <div className="space-y-3 max-h-[42vh] overflow-y-auto pr-1">
-            {closedApplicationItems.map((item) => (
-              <div
-                key={item.id}
-                className="border border-[#E2EAFC] rounded-lg p-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
-              >
-                <div className="min-w-0">
-                  <h4 className="font-semibold text-[17px] text-slate-800">
-                    {item.title}
-                  </h4>
-                  <p className="text-sm text-slate-600">
-                    {item.company} • {item.location}
-                  </p>
-                  <p className="text-sm text-slate-500 mt-1">
-                    {item.duration} • {item.stipend}
-                  </p>
-                </div>
-                <p className="text-xs font-semibold uppercase text-red-500">
-                  Closed
-                </p>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left border-b border-[#E3EAFA] text-slate-500 bg-slate-50/50">
+                  <th className="py-3 px-4 w-10 text-center">
+                    <input
+                      type="checkbox"
+                      className="rounded border-slate-300"
+                      checked={
+                        closedApplicationItems.length > 0 &&
+                        selectedIds.length === closedApplicationItems.length
+                      }
+                      onChange={() => handleSelectAll(closedApplicationItems)}
+                    />
+                  </th>
+                  <th className="py-3 px-4 font-semibold">Name</th>
+                  <th className="py-3 px-4 font-semibold">Company</th>
+                  <th className="py-3 px-4 font-semibold">Location</th>
+                  <th className="py-3 px-4 font-semibold">Date</th>
+                  <th className="py-3 px-4 font-semibold">Status</th>
+                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#EDF2FD]">
+                {closedApplicationItems.map((item) => (
+                  <tr
+                    key={item.id}
+                    className="hover:bg-slate-50/50 transition-colors"
+                  >
+                    <td className="py-3 px-4 text-center">
+                      <input
+                        type="checkbox"
+                        className="rounded border-slate-300"
+                        checked={selectedIds.includes(item.id)}
+                        onChange={() => handleSelectItem(item.id)}
+                      />
+                    </td>
+                    <td className="py-3 px-4 font-medium text-slate-800">
+                      {item.title}
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">{item.company}</td>
+                    <td className="py-3 px-4 text-slate-600">
+                      {item.location}
+                    </td>
+                    <td className="py-3 px-4 text-slate-600">
+                      {item.deadline
+                        ? new Date(item.deadline).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase bg-red-100 text-red-700">
+                        Closed
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-3">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-blue-500 hover:text-blue-700 transition-colors"
+                          title="Edit"
+                        >
+                          <FiEdit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="text-rose-500 hover:text-rose-700 transition-colors"
+                          title="Delete"
+                        >
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -927,9 +1158,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   return (
     <>
       <div className="min-h-screen bg-[#EEF3FF]">
-        <div className="mx-auto w-full max-w-350 px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[250px_minmax(0,1fr)] xl:gap-5">
-            <aside className="bg-[#E4EBFB] border border-[#D8E2F7] rounded-2xl p-4 xl:sticky xl:top-6 h-fit">
+        <div className="w-full px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:gap-5">
+            <aside className="bg-[#E4EBFB] border border-[#D8E2F7] rounded-2xl p-4 xl:sticky xl:top-6 h-[calc(100vh-3rem)] flex flex-col overflow-hidden">
               <div className="mb-7">
                 <p className="text-slate-900 text-xl font-semibold">
                   Admin Control
@@ -937,7 +1168,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 <p className="text-[11px] tracking-[0.16em] text-slate-500 mt-1 font-semibold"></p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 mb-7 sm:grid-cols-3 xl:grid-cols-1 xl:space-y-2 xl:gap-0">
+              <div className="grid grid-cols-2 gap-2 mb-7 sm:grid-cols-3 xl:grid-cols-1 xl:space-y-2 xl:gap-0 overflow-y-auto custom-scrollbar pr-1">
                 {menuItems.map((item) => (
                   <button
                     key={item.key}
@@ -968,26 +1199,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 ))}
               </div>
 
-              {/* <button
-                type="button"
-                onClick={() => handleExport("xlsx")}
-                className="w-full py-2.5 rounded-lg bg-slate-900 text-white text-sm font-semibold shadow-[0_6px_18px_rgba(15,23,42,0.35)] hover:bg-slate-800 transition"
-              >
-                Export Reports
-              </button> */}
-
-              <div className="mt-7 pt-4 border-t border-[#D0DCF5] space-y-2">
-                {/* {isSuperDashboard && isSuperAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => navigate("/admin-dashboard")}
-                    className="w-full text-left px-3 py-2 text-sm text-slate-700 rounded-lg border border-slate-300 hover:bg-white/80 flex items-center gap-2"
-                  >
-                    <FiGrid size={15} />
-                    Open Admin Dashboard
-                  </button>
-                )} */}
-
+              <div className="mt-auto pt-4 border-t border-[#D0DCF5] space-y-2">
                 <button
                   type="button"
                   onClick={handleLogout}
@@ -1015,35 +1227,46 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 </div>
               )}
 
-              <div className="bg-white border border-[#DCE5FA] rounded-2xl px-4 py-4 sm:px-5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h1 className="text-2xl sm:text-3xl font-semibold text-slate-800">
-                    {isSuperDashboard
-                      ? "Super Admin Control Center"
-                      : "Admin Control Center"}
-                  </h1>
-                  <p className="text-xs tracking-[0.14em] text-slate-500 font-semibold mt-1">
-                    OPERATIONAL OVERVIEW
-                  </p>
-                </div>
-                <div className="w-full sm:w-auto flex items-center gap-3 rounded-xl bg-[#F5F8FF] border border-[#DEE8FF] px-3 py-2">
-                  <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-900 font-semibold flex items-center justify-center">
-                    {(user?.fullName || "A").charAt(0).toUpperCase()}
-                  </div>
+              {/* PREMIUM HEADER */}
+              <div className="bg-white border border-[#DCE5FA] rounded-2xl px-6 py-4 flex items-center justify-between shadow-sm mb-5">
+                <div className="flex items-center gap-8">
+                  {/* LOGO */}
+                 
+                  
+                  
+                  
                   <div>
-                    <p className="text-sm font-semibold text-slate-800 leading-tight">
-                      {user?.fullName || "Admin"}
-                    </p>
-                    <p className="text-[11px] text-slate-500 uppercase tracking-wide">
+                    <h1 className="text-xl font-bold text-slate-800">
                       {isSuperDashboard
-                        ? "Super Administrator"
-                        : "Administrator"}
+                        ? "Super Admin Control"
+                        : "Admin Dashboard"}
+                    </h1>
+                    <p className="text-[10px] tracking-[0.1em] text-slate-400 font-bold uppercase">
+                      Operational Excellence
                     </p>
                   </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 rounded-xl bg-[#F5F8FF] border border-[#DEE8FF] px-3 py-1.5">
+                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                      {(user?.fullName || "A").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="hidden sm:block">
+                      <p className="text-xs font-bold text-slate-800 leading-tight">
+                        {user?.fullName || "Admin"}
+                      </p>
+                      <p className="text-[10px] text-slate-500 uppercase font-semibold">
+                        {isSuperDashboard ? "Super Admin" : "Admin"}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  
                 </div>
               </div>
 
-              {isSuperStatsSection ? (
+              {!showOpportunityForm && isSuperStatsSection ? (
                 <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
                   <div className="rounded-lg border border-[#E2EAFC] p-4 bg-white">
                     <p className="text-xs text-slate-500 tracking-widest font-semibold">
@@ -1080,7 +1303,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 </div>
               ) : null}
 
-              {isSuperPostSection ? (
+              {!showOpportunityForm && isSuperPostSection ? (
                 <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5 space-y-4">
                   <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -1142,7 +1365,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 </p>
               )}
 
-              {isAnySuperDirectorySection ? (
+              {!showOpportunityForm && isAnySuperDirectorySection ? (
                 <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5">
                   <div className="flex flex-col items-start gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -1312,7 +1535,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
                                 <th className="py-2 px-3">Name</th>
                                 <th className="py-2 px-3">Email</th>
-
+                                <th className="py-2 px-3">Phone</th>
+                                <th className="py-2 px-3">Organization</th>
+                                <th className="py-2 px-3">Password</th>
                                 <th className="py-2 px-3">Status</th>
                                 <th className="py-2 px-3 ">Action</th>
                               </tr>
@@ -1336,6 +1561,53 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                     {item.email}
                                   </td>
 
+                                  <td className="py-2 px-3 text-slate-600 break-all">
+                                    {item.whatsappNumber || <span className="text-slate-400">N/A</span>}
+                                  </td>
+                                  <td className="py-2 px-3 text-slate-600">
+                                    {item.organizationName || <span className="text-slate-400">N/A</span>}
+                                    
+                                  </td>
+                                  <td className="py-2 px-3 text-slate-600">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-mono">
+                                        {visiblePasswords[item.id] === true
+                                          ? "••••••••"
+                                          : visiblePasswords[item.id] === "loading"
+                                          ? "Loading..."
+                                          : visiblePasswords[item.id] === "error"
+                                          ? "Error"
+                                          : visiblePasswords[item.id] === "N/A"
+                                          ? "N/A"
+                                          : visiblePasswords[item.id] || "••••••••"}
+                                      </span>
+                                      {isSuperAdmin ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (!visiblePasswords[item.id] || visiblePasswords[item.id] === true || visiblePasswords[item.id] === "error" || visiblePasswords[item.id] === "N/A") {
+                                              fetchDecryptedPassword(item.id);
+                                            } else {
+                                              setVisiblePasswords((prev) => ({ ...prev, [item.id]: true }));
+                                            }
+                                          }}
+                                          className="text-slate-400 hover:text-slate-600 transition-colors"
+                                        >
+                                          {visiblePasswords[item.id] && 
+                                           visiblePasswords[item.id] !== true && 
+                                           visiblePasswords[item.id] !== "loading" && 
+                                           visiblePasswords[item.id] !== "error" && 
+                                           visiblePasswords[item.id] !== "N/A" ? (
+                                            <FiEyeOff size={14} />
+                                          ) : (
+                                            <FiEye size={14} />
+                                          )}
+                                        </button>
+                                      ) : (
+                                        <FiEyeOff size={14} className="text-slate-300" />
+                                      )}
+                                    </div>
+                                  </td>
                                   <td className="py-2 px-3 text-slate-600">
                                     <span
                                       className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
@@ -1350,72 +1622,90 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                     </span>
                                   </td>
                                   <td className="py-2 px-3">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      {item.adminApprovalStatus ===
-                                        "pending" && (
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleApproveAdminAccess(item.id)
-                                          }
-                                          disabled={
-                                            approvingAdminId === item.id ||
-                                            !item.isEmailVerified ||
-                                            !item.isPhoneVerified
-                                          }
-                                          className="px-2.5 py-1 rounded-md bg-emerald-600 text-white text-xs font-semibold disabled:opacity-60"
-                                        >
-                                          {approvingAdminId === item.id
-                                            ? "Approving..."
-                                            : !item.isEmailVerified ||
-                                                !item.isPhoneVerified
+                                    <div className="flex items-center gap-3">
+                                      {item.adminApprovalStatus === "pending" && (
+                                        <div className="relative group">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleApproveAdminAccess(item.id)}
+                                            disabled={
+                                              approvingAdminId === item.id ||
+                                              !item.isEmailVerified ||
+                                              !item.isPhoneVerified
+                                            }
+                                            className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white transition-all disabled:opacity-50"
+                                          >
+                                            {approvingAdminId === item.id ? (
+                                              <div className="w-4 h-4 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+                                            ) : (
+                                              <FiCheck size={16} />
+                                            )}
+                                          </button>
+                                          <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
+                                            {!item.isEmailVerified || !item.isPhoneVerified
                                               ? "Verify Email & Phone First"
                                               : "Approve Access"}
-                                        </button>
+                                          </span>
+                                        </div>
                                       )}
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          handleOpenAdminDashboard(item.id)
-                                        }
-                                        disabled={
-                                          item.adminApprovalStatus ===
-                                            "pending" ||
-                                          openingAdminId === item.id ||
-                                          deletingUserId === item.id
-                                        }
-                                        className="px-2.5 py-1 rounded-md bg-slate-900 text-white text-xs font-semibold disabled:opacity-60"
-                                      >
-                                        {openingAdminId === item.id
-                                          ? "Opening..."
-                                          : "Open Dashboard"}
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          handleStartPasswordEditor(item.id)
-                                        }
-                                        disabled={
-                                          openingAdminId === item.id ||
-                                          deletingUserId === item.id ||
-                                          changingPasswordAdminId === item.id
-                                        }
-                                        className="px-2.5 py-1 rounded-md bg-blue-600 text-white text-xs font-semibold disabled:opacity-60"
-                                      >
-                                        Change Password
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          handleDeleteAccount(item)
-                                        }
-                                        disabled={deletingUserId === item.id}
-                                        className="px-2.5 py-1 rounded-md bg-red-600 text-white text-xs font-semibold disabled:opacity-60"
-                                      >
-                                        {deletingUserId === item.id
-                                          ? "Deleting..."
-                                          : "Delete"}
-                                      </button>
+
+                                      <div className="relative group">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleOpenAdminDashboard(item.id)}
+                                          disabled={
+                                            item.adminApprovalStatus === "pending" ||
+                                            openingAdminId === item.id ||
+                                            deletingUserId === item.id
+                                          }
+                                          className="p-2 rounded-lg bg-slate-50 text-slate-600 hover:bg-slate-900 hover:text-white transition-all disabled:opacity-50"
+                                        >
+                                          {openingAdminId === item.id ? (
+                                            <div className="w-4 h-4 border-2 border-slate-600 border-t-transparent rounded-full animate-spin" />
+                                          ) : (
+                                            <FiExternalLink size={16} />
+                                          )}
+                                        </button>
+                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
+                                          {openingAdminId === item.id ? "Opening..." : "Open Dashboard"}
+                                        </span>
+                                      </div>
+
+                                      <div className="relative group">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStartPasswordEditor(item.id)}
+                                          disabled={
+                                            openingAdminId === item.id ||
+                                            deletingUserId === item.id ||
+                                            changingPasswordAdminId === item.id
+                                          }
+                                          className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50"
+                                        >
+                                          <FiKey size={16} />
+                                        </button>
+                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
+                                          Change Password
+                                        </span>
+                                      </div>
+
+                                      <div className="relative group">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteAccount(item)}
+                                          disabled={deletingUserId === item.id}
+                                          className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
+                                        >
+                                          {deletingUserId === item.id ? (
+                                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                          ) : (
+                                            <FiTrash2 size={16} />
+                                          )}
+                                        </button>
+                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
+                                          Delete Account
+                                        </span>
+                                      </div>
                                     </div>
 
                                     {passwordEditorAdminId === item.id && (
@@ -1573,7 +1863,6 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                 <th className="py-2 px-3">Email</th>
                                 <th className="py-2 px-3">Phone</th>
                                 <th className="py-2 px-3">Qualification</th>
-
                                 <th className="py-2 px-3">Resume</th>
                                 <th className="py-2 px-3">Action</th>
                               </tr>
@@ -1616,7 +1905,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B4AA6] text-white text-xs font-semibold hover:bg-[#083D8B] transition shadow-sm"
                                       >
                                         <FiFileText size={14} />
-                                        View Resume
+                                        View 
                                       </a>
                                     ) : (
                                       <span className="text-slate-400">
@@ -1625,16 +1914,23 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                     )}
                                   </td>
                                   <td className="py-2 px-3">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleDeleteAccount(item)}
-                                      disabled={deletingUserId === item.id}
-                                      className="px-2.5 py-1 rounded-md bg-red-600 text-white text-xs font-semibold disabled:opacity-60"
-                                    >
-                                      {deletingUserId === item.id
-                                        ? "Deleting..."
-                                        : "Delete"}
-                                    </button>
+                                    <div className="relative group">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteAccount(item)}
+                                          disabled={deletingUserId === item.id}
+                                          className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
+                                        >
+                                          {deletingUserId === item.id ? (
+                                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                          ) : (
+                                            <FiTrash2 size={16} />
+                                          )}
+                                        </button>
+                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
+                                          Delete Account
+                                        </span>
+                                      </div>
                                   </td>
                                 </tr>
                               ))}
@@ -1777,6 +2073,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 </div>
               ) : (
                 <>
+                  {!showOpportunityForm && (
                   <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5">
                     <div className="flex flex-col items-start gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                       <h2 className="text-2xl font-semibold text-slate-800">
@@ -1800,6 +2097,16 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                 ? "Create Internship"
                                 : "Create Global Program"}
                             </button>
+                            {selectedIds.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={handleBulkDelete}
+                                className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700 flex items-center justify-center gap-2"
+                              >
+                                <FiTrash2 size={14} />
+                                Delete Selected ({selectedIds.length})
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => handleExport("csv")}
@@ -1826,580 +2133,644 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                         No opportunities added yet.
                       </p>
                     ) : (
-                      <div className="space-y-3 max-h-[42vh] overflow-y-auto pr-1">
-                        {filteredOpportunities.map((item) => (
-                          <div
-                            key={item.id}
-                            className="border border-[#E2EAFC] rounded-lg p-4 flex flex-col items-start gap-3 sm:flex-row sm:items-start sm:justify-between"
-                          >
-                            <div className="min-w-0">
-                              <h3 className="font-semibold text-[17px] text-slate-800">
-                                {item.title}
-                              </h3>
-                              <p className="text-sm text-slate-600">
-                                {item.company} • {item.type}
-                              </p>
-                              <p className="text-sm text-slate-500 mt-1">
-                                {item.location} • {item.duration} •{" "}
-                                {item.stipend}
-                              </p>
-                              {isSuperDashboard && (
-                                <p className="text-xs text-slate-500 mt-1">
-                                  Posted by: {resolveOwnerName(item)}
-                                </p>
-                              )}
-                            </div>
+                      <div className="overflow-x-auto border border-[#E2EAFC] rounded-xl bg-white">
+                        <table className="min-w-full text-sm">
+                          <thead>
+                            <tr className="text-left border-b border-[#E3EAFA] text-slate-500 bg-slate-50/50">
+                              <th className="py-3 px-4 w-10 text-center">
+                                <input
+                                  type="checkbox"
+                                  className="rounded border-slate-300"
+                                  checked={
+                                    filteredOpportunities.length > 0 &&
+                                    selectedIds.length ===
+                                      filteredOpportunities.length
+                                  }
+                                  onChange={() =>
+                                    handleSelectAll(filteredOpportunities)
+                                  }
+                                />
+                              </th>
+                              <th className="py-3 px-4 font-semibold">Name</th>
+                              <th className="py-3 px-4 font-semibold">Company</th>
+                              <th className="py-3 px-4 font-semibold">Location</th>
+                              <th className="py-3 px-4 font-semibold">Date</th>
+                              <th className="py-3 px-4 font-semibold">Status</th>
+                              <th className="py-3 px-4 font-semibold text-center">Responses</th>
+                              <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#EDF2FD]">
+                            {filteredOpportunities.map((item) => {
+                              const isClosed = isOpportunityClosed(item);
+                              return (
+                                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                                  <td className="py-3 px-4 text-center">
+                                    <input
+                                      type="checkbox"
+                                      className="rounded border-slate-300"
+                                      checked={selectedIds.includes(item.id)}
+                                      onChange={() => handleSelectItem(item.id)}
+                                    />
+                                  </td>
+                                  <td className="py-3 px-4 font-medium text-slate-800">
+                                    {item.title}
+                                  </td>
+                                  <td className="py-3 px-4 text-slate-600">
+                                    {item.company}
+                                  </td>
+                                  <td className="py-3 px-4 text-slate-600">
+                                    {item.location}
+                                  </td>
+                                  <td className="py-3 px-4 text-slate-600">
+                                    {item.deadline ? new Date(item.deadline).toLocaleDateString() : "N/A"}
+                                  </td>
+                                  <td className="py-3 px-4">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase ${
+                                      isClosed 
+                                        ? "bg-rose-100 text-rose-700" 
+                                        : "bg-emerald-100 text-emerald-700"
+                                    }`}>
+                                      {isClosed ? "Inactive" : "Active"}
+                                    </span>
+                                  </td>
 
-                            <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
-                              <button
-                                onClick={() => handleEdit(item)}
-                                className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-100 text-slate-900 text-sm font-semibold"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDelete(item.id)}
-                                className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-red-100 text-red-700 text-sm font-semibold"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                                  {/*Responses button*/}
+                                  <td className="py-3 px-4 text-center">
+  {item.submissionIds && item.submissionIds.length > 0 ? (
+    <button
+      onClick={() => handleViewResponses(item.id)}
+      className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-2 justify-center"
+      title="View Responses"
+    >
+      <span>{item.submissionIds.length}</span>
+      <FiEye size={16} />
+    </button>
+  ) : (
+    <span className="text-slate-300 flex items-center gap-2 justify-center">
+      <span>0</span>
+      <FiEye size={16} />
+    </span>
+  )}
+</td>
+
+                                
+                                  
+
+                                  <td className="py-3 px-4 text-right">
+                                    <div className="flex items-center justify-end gap-3">
+                                      <button
+                                        onClick={() => handleEdit(item)}
+                                        className="text-blue-500 hover:text-blue-700 transition-colors"
+                                        title="Edit"
+                                      >
+                                        <FiEdit2 size={16} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleDelete(item.id)}
+                                        className="text-rose-500 hover:text-rose-700 transition-colors"
+                                        title="Delete"
+                                      >
+                                        <FiTrash2 size={16} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
                       </div>
                     )}
                   </div>
-
-                  <div
-                    className={`grid gap-4 sm:gap-5 items-start ${
-                      showOpportunityForm
-                        ? "grid-cols-1 xl:grid-cols-[1.2fr_1fr]"
-                        : "grid-cols-1"
-                    }`}
-                  >
-                    {!isClosedApplicationPanel && (
-                      <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5 min-w-0">
-                        <div className="flex items-center justify-between mb-3">
-                          <div>
-                            <h2 className="text-2xl font-semibold text-slate-800">
-                              Recent Applications
-                            </h2>
-                            <p className="text-sm text-slate-500">
-                              Latest candidate submissions.
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => handleSectionChange("Applications")}
-                            className="text-sm px-3 py-1.5 rounded-md bg-slate-900 text-white font-semibold"
-                          >
-                            View All
-                          </button>
-                        </div>
-                        {recentApplications.length === 0 ? (
-                          <p className="text-slate-500">
-                            No applications submitted yet.
-                          </p>
-                        ) : (
-                          <div className="overflow-x-auto">
-                            <table className="min-w-155 w-full text-sm">
-                              <thead>
-                                <tr className="text-left border-b border-[#E3EAFA] text-slate-500">
-                                  <th className="py-2 pr-3">Name</th>
-                                  <th className="py-2 pr-3">Opportunity</th>
-                                  <th className="py-2 pr-3">Type</th>
-                                  <th className="py-2 pr-3">Status</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {recentApplications.map((application) => (
-                                  <tr
-                                    key={application.id}
-                                    className="border-b border-[#EDF2FD]"
-                                  >
-                                    <td className="py-2 pr-3 font-medium text-slate-800">
-                                      {application.name}
-                                    </td>
-                                    <td className="py-2 pr-3 text-slate-700">
-                                      {application.opportunityTitle}
-                                    </td>
-                                    <td className="py-2 pr-3 text-slate-600">
-                                      {application.opportunityType}
-                                    </td>
-                                    <td className="py-2 pr-3">
-                                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-900">
-                                        {application.status || "New"}
-                                      </span>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                )}
 
                     {showOpportunityForm && (
-                      <form
-                        onSubmit={handleSubmit}
-                        className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5 h-fit"
-                      >
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <div>
-                            <h2 className="text-2xl font-semibold text-slate-800">
-                              {title}
-                            </h2>
-                            <p className="text-xs text-slate-500 mt-1">
-                              Fields marked{" "}
-                              <span className="text-rose-600">*</span> are
-                              required.
-                            </p>
+                      <div className="bg-white rounded-3xl border border-[#DCE5FA] overflow-hidden flex flex-col xl:flex-row min-h-[600px] shadow-sm">
+                        {/* LEFT STEPPER SIDEBAR */}
+                        <div className="w-full xl:w-[230px] bg-white border-r border-[#E2EAFC] p-8 flex flex-col">
+                          <h2 className="text-xl font-bold text-slate-800 mb-6">
+                            {editingId ? "Edit" : "Create"} {form.type === "Global Program" ? "Program" : "Internship"}
+                          </h2>
+                          
+                          <div className="w-full bg-[#E2EAFC] h-1.5 rounded-full mb-10 overflow-hidden">
+                            <div 
+                              className="bg-blue-600 h-full transition-all duration-300" 
+                              style={{ width: currentStep === 1 ? "40%" : "100%" }}
+                            ></div>
                           </div>
-                          <button
-                            type="button"
-                            onClick={resetForm}
-                            className="px-3 py-1.5 rounded-md bg-slate-100 text-slate-700 text-sm font-semibold"
-                          >
-                            Close
-                          </button>
-                        </div>
 
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                          <label className="flex flex-col gap-1 text-sm text-slate-700">
-                            <span>
-                              Title <span className="text-rose-600">*</span>
-                            </span>
-                            <input
-                              name="title"
-                              value={form.title}
-                              onChange={handleChange}
-                              placeholder="Enter internship title"
-                              className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              required
-                            />
-                          </label>
+                          <div className="space-y-10 relative">
+                            {/* Connector Line */}
+                            <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-[#E2EAFC]"></div>
 
-                          <label className="flex flex-col gap-1 text-sm text-slate-700">
-                            <span>
-                              Company <span className="text-rose-600">*</span>
-                            </span>
-                            <input
-                              name="company"
-                              value={form.company}
-                              onChange={handleChange}
-                              placeholder="Enter company name"
-                              className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              required
-                            />
-                          </label>
-
-                          <label className="flex flex-col gap-1 text-sm text-slate-700">
-                            <span>
-                              Location <span className="text-rose-600">*</span>
-                            </span>
-                            <input
-                              name="location"
-                              value={form.location}
-                              onChange={handleChange}
-                              placeholder="e.g. Pune / Remote"
-                              className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              required
-                            />
-                          </label>
-
-                          <label className="flex flex-col gap-1 text-sm text-slate-700">
-                            <span>
-                              Duration <span className="text-rose-600">*</span>
-                            </span>
-                            <input
-                              name="duration"
-                              value={form.duration}
-                              onChange={handleChange}
-                              placeholder="e.g. 3 months"
-                              className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              required
-                            />
-                          </label>
-
-                          <label className="flex flex-col gap-1 text-sm text-slate-700">
-                            <span>Stipend Text</span>
-                            <input
-                              name="stipend"
-                              value={form.stipend}
-                              onChange={handleChange}
-                              placeholder="e.g. 10,000 INR / month"
-                              className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                            />
-                          </label>
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>
-                                Work Mode{" "}
-                                <span className="text-rose-600">*</span>
+                            <button 
+                              type="button"
+                              onClick={() => setCurrentStep(1)}
+                              className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
+                              disabled={!editingId && currentStep !== 1}
+                            >
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                                currentStep === 1 
+                                  ? "bg-blue-600 text-white" 
+                                  : "bg-blue-100 text-blue-600 group-hover:bg-blue-200"
+                              }`}>
+                                1
+                              </div>
+                              <span className={`font-semibold text-sm transition-colors ${
+                                currentStep === 1 ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                              }`}>
+                                Program Details
                               </span>
-                              <select
-                                name="workMode"
-                                value={form.workMode}
-                                onChange={handleChange}
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                                required
-                              >
-                                <option value="In Office">In Office</option>
-                                <option value="Remote">Remote</option>
-                                <option value="Hybrid">Hybrid</option>
-                              </select>
-                            </label>
-                          )}
+                            </button>
 
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Card Tags</span>
-                              <input
-                                name="cardTags"
-                                value={form.cardTags}
-                                onChange={handleChange}
-                                placeholder="comma separated tags"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          <div className="grid grid-cols-1 sm:grid-cols-[1fr_180px] gap-4 col-span-2">
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Stipend</span>
-                              <input
-                                name="stipend"
-                                value={form.stipend}
-                                onChange={handleChange}
-                                placeholder="e.g. 15000"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Currency</span>
-                              <select
-                                name="stipendCurrency"
-                                value={form.stipendCurrency}
-                                onChange={handleChange}
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              >
-                                <option value="INR">INR (₹)</option>
-                                <option value="USD">USD ($)</option>
-                              </select>
-                            </label>
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                if (editingId) {
+                                  navigate(`/admin-dashboard/build-form/${editingId}`);
+                                } else {
+                                  // For new opportunities, save first
+                                  alert("Please save the opportunity details first before building the form.");
+                                }
+                              }}
+                              className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
+                              disabled={!editingId}
+                            >
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                                currentStep === 2 
+                                  ? "bg-blue-600 text-white" 
+                                  : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                              }`}>
+                                2
+                              </div>
+                              <span className={`font-semibold text-sm transition-colors ${
+                                currentStep === 2 ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                              }`}>
+                                Application Form
+                              </span>
+                            </button>
                           </div>
 
-                          {form.type === "Internship" && (
-                            <>
-                              <label className="flex flex-col gap-1 text-sm text-slate-700">
-                                <span>
-                                  Work Mode{" "}
-                                  <span className="text-rose-600">*</span>
-                                </span>
-                                <select
-                                  name="workMode"
-                                  value={form.workMode}
-                                  onChange={handleChange}
-                                  className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                                  required
-                                >
-                                  <option value="In Office">In Office</option>
-                                  <option value="Remote">Remote</option>
-                                  <option value="Hybrid">Hybrid</option>
-                                </select>
-                              </label>
-
-                              <label className="flex flex-col gap-1 text-sm text-slate-700">
-                                <span>Card Tags</span>
-                                <input
-                                  name="cardTags"
-                                  value={form.cardTags}
-                                  onChange={handleChange}
-                                  placeholder="comma separated tags"
-                                  className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                                />
-                              </label>
-                            </>
-                          )}
-
-                          <label className="flex flex-col gap-1 text-sm text-slate-700 col-span-2">
-                            <span>
-                              Description{" "}
-                              <span className="text-rose-600">*</span>
-                            </span>
-                            <textarea
-                              name="description"
-                              value={form.description}
-                              onChange={handleChange}
-                              placeholder="Write internship description"
-                              className="border border-[#D6E2FC] rounded-lg px-3 py-2 min-h-24"
-                              required
-                            />
-                          </label>
-
-                          {form.type === "Internship" && (
-                            <div className="col-span-2 rounded-xl border border-[#D6E2FC] p-4 bg-[#FAFCFF]">
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <span className="block text-sm font-medium text-slate-700">
-                                    Required Skills{" "}
-                                    <span className="text-rose-600">*</span>
-                                  </span>
-                                  <p className="text-xs text-slate-500 mt-1">
-                                    Add at least 3 required skills. Use Add
-                                    Skill for more.
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={addRequiredSkillInput}
-                                  className="px-3 py-1.5 rounded-md bg-[#0B4AA6] text-white text-sm font-semibold"
-                                >
-                                  Add Skill
-                                </button>
-                              </div>
-
-                              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {requiredSkillInputs.map((skill, index) => (
-                                  <label
-                                    key={`dashboard-required-skill-${index}`}
-                                    className="flex flex-col gap-1 text-sm text-slate-700"
-                                  >
-                                    <span>
-                                      Skill {index + 1}{" "}
-                                      {index < 3 ? (
-                                        <span className="text-rose-600">*</span>
-                                      ) : null}
-                                    </span>
-                                    <input
-                                      type="text"
-                                      value={skill}
-                                      onChange={(event) =>
-                                        handleRequiredSkillChange(
-                                          index,
-                                          event.target.value,
-                                        )
-                                      }
-                                      placeholder={`Skill ${index + 1}`}
-                                      className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                                      required={index < 3}
-                                    />
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700 col-span-2">
-                              <span>Who Can Apply</span>
-                              <textarea
-                                name="whoCanApply"
-                                value={form.whoCanApply}
-                                onChange={handleChange}
-                                placeholder="Eligibility points"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2 min-h-20"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <div className="col-span-2 rounded-xl border border-[#D6E2FC] p-4 bg-[#FAFCFF]">
-                              <div className="flex items-start justify-between gap-3">
-                                <div>
-                                  <span className="block text-sm font-medium text-slate-700">
-                                    Benefits{" "}
-                                    <span className="text-rose-600">*</span>
-                                  </span>
-                                  <p className="text-xs text-slate-500 mt-1">
-                                    Add at least 4 benefits. Use Add Benefit for
-                                    more.
-                                  </p>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={addBenefitInput}
-                                  className="px-3 py-1.5 rounded-md bg-[#0B4AA6] text-white text-sm font-semibold"
-                                >
-                                  Add Benefit
-                                </button>
-                              </div>
-
-                              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                {benefitInputs.map((benefit, index) => (
-                                  <label
-                                    key={`dashboard-benefit-${index}`}
-                                    className="flex flex-col gap-1 text-sm text-slate-700"
-                                  >
-                                    <span>
-                                      Benefit {index + 1}{" "}
-                                      {index < 4 ? (
-                                        <span className="text-rose-600">*</span>
-                                      ) : null}
-                                    </span>
-                                    <input
-                                      type="text"
-                                      value={benefit}
-                                      onChange={(event) =>
-                                        handleBenefitChange(
-                                          index,
-                                          event.target.value,
-                                        )
-                                      }
-                                      placeholder={`Benefit ${index + 1}`}
-                                      className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                                      required={index < 4}
-                                    />
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Department</span>
-                              <input
-                                name="department"
-                                value={form.department}
-                                onChange={handleChange}
-                                placeholder="e.g. Engineering"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Functional Role</span>
-                              <input
-                                name="functionalRole"
-                                value={form.functionalRole}
-                                onChange={handleChange}
-                                placeholder="e.g. Frontend Development"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Company Type</span>
-                              <input
-                                name="companyType"
-                                value={form.companyType}
-                                onChange={handleChange}
-                                placeholder="e.g. Startup"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Company Size</span>
-                              <input
-                                name="companySize"
-                                value={form.companySize}
-                                onChange={handleChange}
-                                placeholder="e.g. 50-200"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Founded Year</span>
-                              <input
-                                name="foundedYear"
-                                value={form.foundedYear}
-                                onChange={handleChange}
-                                placeholder="e.g. 2018"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Industry</span>
-                              <input
-                                name="industry"
-                                value={form.industry}
-                                onChange={handleChange}
-                                placeholder="e.g. EdTech"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Internship" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700 col-span-2">
-                              <span>Website URL</span>
-                              <input
-                                name="website"
-                                value={form.website}
-                                onChange={handleChange}
-                                placeholder="https://company.com"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Global Program" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Program Category</span>
-                              <input
-                                name="programType"
-                                value={form.programType}
-                                onChange={handleChange}
-                                placeholder="optional"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
-
-                          {form.type === "Global Program" && (
-                            <label className="flex flex-col gap-1 text-sm text-slate-700">
-                              <span>Eligibility</span>
-                              <input
-                                name="eligibility"
-                                value={form.eligibility}
-                                onChange={handleChange}
-                                placeholder="optional"
-                                className="border border-[#D6E2FC] rounded-lg px-3 py-2"
-                              />
-                            </label>
-                          )}
+                          <div className="mt-auto pt-10">
+                            <button
+                              onClick={resetForm}
+                              className="w-full py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
+                            >
+                              Discard
+                            </button>
+                          </div>
                         </div>
 
-                        <div className="flex gap-2 mt-4">
-                          <button
-                            type="submit"
-                            disabled={busy}
-                            className="px-4 py-2 rounded-lg bg-slate-900 text-white font-semibold"
-                          >
-                            {busy
-                              ? "Saving..."
-                              : editingId
-                                ? "Update"
-                                : "Create"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={resetForm}
-                            className="px-4 py-2 rounded-lg bg-slate-100 text-slate-900 font-semibold"
-                          >
-                            Cancel
-                          </button>
+                        {/* RIGHT FORM CONTENT */}
+                        <div className="flex-1 p-8 bg-[#F8FBFF]/50 overflow-y-auto custom-scrollbar max-h-[calc(100vh-10rem)]">
+                          {/* <div className="flex items-center justify-between mb-8">
+                            <h3 className="text-2xl font-bold text-slate-800">
+                              {currentStep === 1 ? "Program Details" : "Application Form Setup"}
+                            </h3>
+                            <button
+                              type="submit"
+                              form="opportunity-form"
+                              disabled={busy}
+                              className={`px-8 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 ${currentStep === 1 ? 'hidden' : ''}`}
+                            >
+                              {busy ? "Saving..." : editingId ? "Update Listing" : "Publish Now"}
+                            </button>
+                          </div> */}
+
+                          <form id="opportunity-form" onSubmit={handleSubmit} className="space-y-8">
+                            <div className="space-y-8">
+                                {/* Type Selection */}
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Internship Type <span className="text-rose-600">*</span></span>
+                                    <select
+                                      name="internshipType"
+                                      value={form.internshipType}
+                                      onChange={handleChange}
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                      required
+                                    >
+                                      <option value="">Select</option>
+                                      <option value="Internship">Internship</option>
+                                      <option value="Global Program">Global Program</option>
+                                      <option value="Summer (Courses)">Summer Internship</option>
+                                      <option value="Winter (Courses)">Winter Internship</option>
+                                      <option value="NGO / Social Work">NGO / Social Work</option>
+                                      <option value="Campus Ambassador">Campus Ambassador</option>
+                                      <option value="Apprenticeships">Apprenticeships</option>
+                                      <option value="Externships">Externships</option>
+                                      <option value="Government Internship">Government Internship</option>
+                                      <option value="Research Internships">Research Internships</option>
+                                      <option value="Assessment Internships">Assessment Internships</option>
+                                    </select>
+                                  </label>
+                                </div>
+
+                                {/* Basic Info */}
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                                  <h4 className="text-md font-bold text-slate-800 mb-6">Basic Info</h4>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Title <span className="text-rose-600">*</span></span>
+                                      <input
+                                        name="title"
+                                        value={form.title}
+                                        onChange={handleChange}
+                                        placeholder="e.g. Software Engineer"
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        required
+                                      />
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Company <span className="text-rose-600">*</span></span>
+                                      <input
+                                        name="company"
+                                        value={form.company}
+                                        onChange={handleChange}
+                                        placeholder="Company Name"
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        required
+                                      />
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Location <span className="text-rose-600">*</span></span>
+                                      <input
+                                        name="location"
+                                        value={form.location}
+                                        onChange={handleChange}
+                                        placeholder="City / Remote"
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        required
+                                      />
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Website URL</span>
+                                      <input
+                                        name="website"
+                                        value={form.website}
+                                        onChange={handleChange}
+                                        placeholder="https://company.com"
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                      />
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Start Date <span className="text-rose-600">*</span></span>
+                                      <input
+                                        type="date"
+                                        name="startDate"
+                                        value={form.startDate}
+                                        onChange={handleChange}
+                                        min={new Date().toISOString().split("T")[0]}
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        required
+                                      />
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Deadline <span className="text-rose-600">*</span></span>
+                                      <input
+                                        type="date"
+                                        name="deadline"
+                                        value={form.deadline}
+                                        onChange={handleChange}
+                                        min={new Date().toISOString().split("T")[0]}
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        required
+                                      />
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Duration <span className="text-rose-600">*</span></span>
+                                      <div className="flex gap-2">
+                                        <input
+                                          name="duration"
+                                          type="number"
+                                          value={form.duration}
+                                          onChange={handleChange}
+                                          placeholder="e.g. 3"
+                                          className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                          required
+                                        />
+                                        <select
+                                          name="durationUnit"
+                                          value={form.durationUnit}
+                                          onChange={handleChange}
+                                          className="w-[120px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        >
+                                          <option value="Weeks">Weeks</option>
+                                          <option value="Months">Months</option>
+                                          <option value="Years">Years</option>
+                                        </select>
+                                      </div>
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Work Mode <span className="text-rose-600">*</span></span>
+                                      <select
+                                        name="workMode"
+                                        value={form.workMode}
+                                        onChange={handleChange}
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                        required
+                                      >
+                                        <option value="In Office">In Office</option>
+                                        <option value="Remote">Remote</option>
+                                        <option value="Hybrid">Hybrid</option>
+                                      </select>
+                                    </label>
+                                  </div>
+                                </div>
+                                
+                                {/* Logo Upload Section - Added after Basic Details */}
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                                  <h4 className="text-md font-bold text-slate-800 mb-6">Company Logo</h4>
+                                  <div className="flex flex-col sm:flex-row items-center gap-8">
+                                    <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-dashed border-[#D6E2FC] flex items-center justify-center overflow-hidden flex-shrink-0">
+                                      {form.logo ? (
+                                        <img src={form.logo} alt="Preview" className="w-full h-full object-contain" />
+                                      ) : (
+                                        <FiGlobe className="text-slate-300" size={32} />
+                                      )}
+                                    </div>
+                                    <div className="flex-1 space-y-3">
+                                      <p className="text-sm text-slate-500">
+                                        Upload your company logo. PNG, JPG or SVG (Max 2MB).
+                                      </p>
+                                      <label className="inline-flex items-center px-6 py-2.5 rounded-xl bg-blue-50 text-blue-600 font-bold text-sm cursor-pointer hover:bg-blue-100 transition-all border border-blue-100">
+                                        <span>Choose Logo File</span>
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={handleLogoChange}
+                                          className="hidden"
+                                        />
+                                      </label>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Compensation */}
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                                  <div className="flex items-center justify-between mb-6">
+                                    <h4 className="text-md font-bold text-slate-800">Stipend Details</h4>
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                      <div className="relative flex items-center">
+                                        <input
+                                          type="checkbox"
+                                          name="isUnpaid"
+                                          checked={form.isUnpaid}
+                                          onChange={handleChange}
+                                          className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 bg-white transition-all checked:border-blue-600 checked:bg-blue-600 focus:outline-none"
+                                        />
+                                        <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" size={14} />
+                                      </div>
+                                      <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">Unpaid Internship</span>
+                                    </label>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <label className={`flex flex-col gap-2 text-sm font-semibold transition-opacity ${form.isUnpaid ? 'opacity-50 pointer-events-none' : 'text-slate-700'}`}>
+                                      <span>Stipend Amount</span>
+                                      <input
+                                        name="stipend"
+                                        value={form.isUnpaid ? "0" : form.stipend}
+                                        onChange={handleChange}
+                                        placeholder="e.g. 10000"
+                                        disabled={form.isUnpaid}
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                      />
+                                    </label>
+                                    <label className={`flex flex-col gap-2 text-sm font-semibold transition-opacity ${form.isUnpaid ? 'opacity-50 pointer-events-none' : 'text-slate-700'}`}>
+                                      <span>Currency</span>
+                                      <select
+                                        name="stipendCurrency"
+                                        value={form.stipendCurrency}
+                                        onChange={handleChange}
+                                        disabled={form.isUnpaid}
+                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                      >
+                                        <option value="INR">INR (₹)</option>
+                                        <option value="USD">USD ($)</option>
+                                      </select>
+                                    </label>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
+                                  <h4 className="text-md font-bold text-slate-800 mb-0">Role Description</h4>
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Detailed Description <span className="text-rose-600">*</span></span>
+                                    <textarea
+                                      name="description"
+                                      value={form.description}
+                                      onChange={handleChange}
+                                      placeholder="Responsibilities, expectations, etc."
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[150px]"
+                                      required
+                                    />
+                                  </label>
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Who Can Apply (Eligibility)</span>
+                                    <textarea
+                                      name="whoCanApply"
+                                      value={form.whoCanApply}
+                                      onChange={handleChange}
+                                      placeholder="Eligibility criteria"
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[100px]"
+                                    />
+                                  </label>
+                                </div>
+
+                                {/* Skills & Benefits Section */}
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
+                                  <div className="flex items-center justify-between">
+                                    <h4 className="text-md font-bold text-slate-800">Required Skills</h4>
+                                    <button type="button" onClick={addRequiredSkillInput} className="text-sm text-blue-600 font-bold">+ Add Skill</button>
+                                  </div>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {requiredSkillInputs.map((skill, index) => (
+                                      <div key={index} className="relative group">
+                                        <input
+                                          value={skill}
+                                          onChange={(e) => handleRequiredSkillChange(index, e.target.value)}
+                                          placeholder={`Skill ${index + 1}`}
+                                          className="w-full border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all pr-12"
+                                          required={index < 3}
+                                        />
+                                        {requiredSkillInputs.length > 3 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => removeRequiredSkillInput(index)}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500 transition-colors"
+                                            title="Remove Skill"
+                                          >
+                                            <FiTrash2 size={16} />
+                                          </button>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Primary Skills / Tags (Comma separated) <span className="text-rose-600">*</span></span>
+                                    <input
+                                      name="skills"
+                                      value={form.skills}
+                                      onChange={handleChange}
+                                      placeholder="React, JavaScript, CSS"
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                      required
+                                    />
+                                  </label>
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Highlight Tags</span>
+                                    <input
+                                      name="cardTags"
+                                      value={form.cardTags}
+                                      onChange={handleChange}
+                                      placeholder="Immediate Joiner, PPO"
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                    />
+                                  </label>
+                                </div>
+
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
+                                  <h4 className="text-md font-bold text-slate-800">Benefits</h4>
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Perks & Benefits (Use commas or new lines)</span>
+                                    <textarea
+                                      name="benefits"
+                                      value={form.benefits}
+                                      onChange={handleChange}
+                                      placeholder="e.g. Flexible hours, Certificate, PPO, Health insurance..."
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px]"
+                                    />
+                                  </label>
+                                </div>
+
+                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                                  <h4 className="text-md font-bold text-slate-800 mb-6">Company Details</h4>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Department</span>
+                                      <input name="department" value={form.department} onChange={handleChange} placeholder="e.g. Engineering" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Functional Role</span>
+                                      <input name="functionalRole" value={form.functionalRole} onChange={handleChange} placeholder="e.g. Developer" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Company Type</span>
+                                      <input name="companyType" value={form.companyType} onChange={handleChange} placeholder="e.g. Startup" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Company Size</span>
+                                      <input name="companySize" value={form.companySize} onChange={handleChange} placeholder="e.g. 50-200" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Founded Year</span>
+                                      <input name="foundedYear" value={form.foundedYear} onChange={handleChange} placeholder="e.g. 2015" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                    </label>
+                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                      <span>Industry</span>
+                                      <input name="industry" value={form.industry} onChange={handleChange} placeholder="e.g. Tech" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                    </label>
+                                  </div>
+                                </div>
+
+                                {form.type === "Global Program" && (
+                                  <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
+                                    <h4 className="text-md font-bold text-slate-800">Program Specifics</h4>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                        <span>Program Type</span>
+                                        <input name="programType" value={form.programType} onChange={handleChange} placeholder="e.g. Fellowship" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                      </label>
+                                      <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                        <span>Eligibility Criteria</span>
+                                        <input name="eligibility" value={form.eligibility} onChange={handleChange} placeholder="Who can join" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
+                                      </label>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="flex justify-end pt-8 border-t border-[#E2EAFC]">
+                                  <button
+                                    type="submit"
+                                    disabled={busy}
+                                    className="px-12 py-4 rounded-2xl bg-slate-900 text-white font-bold hover:bg-black shadow-xl transition-all active:scale-95 disabled:opacity-50"
+                                  >
+                                    {busy ? "Publishing..." : editingId ? "Update Opportunity" : "Preview & Publish Internship"}
+                                  </button>
+                                </div>
+                              </div>
+                          </form>
                         </div>
-                      </form>
+                      </div>
                     )}
-                  </div>
+
+                  {/* PREVIEW MODAL */}
+                  {showPreviewModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+                      <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
+                        <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                          <h2 className="text-xl font-bold text-slate-800">Confirm Program Details</h2>
+                          <button onClick={() => setShowPreviewModal(false)} className="text-blue-600 font-bold hover:underline text-sm">Edit</button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
+                          {[
+                            { label: "Internship Type", value: form.internshipType },
+                            { label: "Listing Type", value: form.type },
+                            { label: "Work Profile", value: form.title },
+                            { label: "Company Name", value: form.company },
+                            { label: "Location", value: form.location },
+                            { label: "Company Website Url", value: form.website || "-" },
+                            { label: "Detailed Description", value: form.description },
+                            { label: "Eligibility Criteria", value: form.whoCanApply || "-" },
+                            { label: "Stipend", value: `${form.stipendCurrency} ${form.stipend || "Unpaid"}` },
+                            { label: "Work Mode", value: form.workMode },
+                            { label: "Company Founded", value: form.foundedYear || "-" },
+                            { label: "Company Type", value: form.companyType || "-" }
+                          ].map((item, idx) => (
+                            <div key={idx} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                              <span className="text-sm font-medium text-slate-500">{item.label}</span>
+                              <span className="text-sm font-semibold text-slate-800 text-right max-w-[60%] truncate">{item.value}</span>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="p-6 border-t border-slate-100 flex items-center justify-end gap-4 bg-white">
+                          <button 
+                            type="button"
+                            onClick={() => setShowPreviewModal(false)}
+                            className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
+                          >
+                            Edit
+                          </button>
+                          <button 
+                            type="button"
+                            onClick={handleConfirmSubmit}
+                            disabled={busy}
+                            className="px-8 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 min-w-[160px]"
+                          >
+                            {busy ? "Publishing..." : "Confirm & Create"}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SUCCESS MESSAGE */}
+                  {showSuccessMessage && (
+                    <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[110] animate-in slide-in-from-top duration-300">
+                      <div className="bg-emerald-500 text-white px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-emerald-400">
+                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                          <FiCheck className="text-white" size={20} />
+                        </div>
+                        <div>
+                          <p className="font-bold">Successfully Published!</p>
+                          <p className="text-xs text-emerald-100">Your opportunity is now live on the portal.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </main>

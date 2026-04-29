@@ -156,6 +156,11 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    encryptedPassword: {
+      type: String,
+      default: "",
+      select: false,
+    },
   },
   {
     timestamps: true,

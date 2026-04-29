@@ -6,6 +6,7 @@ import {
   getInternshipById,
   getInternships,
   updateInternship,
+  attachForm,
 } from "../controllers/internshipOpportunityController.js";
 import { protect, requireAdmin } from "../middleware/authMiddleware.js";
 import logoUpload from "../middleware/logoUpload.js";
@@ -30,5 +31,6 @@ router.put(
   updateInternship,
 );
 router.delete("/:id", protect, requireAdmin, deleteInternship);
+router.put("/:id/attach-form", protect, requireAdmin, attachForm);
 
 export default router;

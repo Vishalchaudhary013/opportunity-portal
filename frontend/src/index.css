@@ -5,3 +5,113 @@ input[type="password"]::-ms-clear {
 	display: none;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+
+select option:hover,
+select option:focus {
+  background-color: #22BE74 !important; /* green */
+  color: white !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* ===== MARQUEE ANIMATIONS ===== */
+
+@keyframes slideRight {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes slideLeft {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-right {
+  animation: slideRight 25s linear infinite;
+  will-change: transform;
+}
+
+.animate-left {
+  animation: slideLeft 25s linear infinite;
+  will-change: transform;
+}
+
+/* ===============================
+   EDECO – SCHBANG STYLE ROTATOR
+   =============================== */
+
+.edeco-rotator {
+  position: relative;
+  height: 26px;
+  overflow: hidden;
+}
+
+.edeco-rotator-inner {
+  display: flex;
+  flex-direction: column;
+  animation: edecoSlide 10s ease-in-out infinite;
+}
+
+.edeco-rotator-inner > div {
+  height: 26px;
+  line-height: 31px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+}
+
+
+/*
+  KEY IDEA (Schbang logic):
+  - last word pe animation HOLD hoti hai
+  - phir animation reset hoti hai
+  - reset ke moment me thoda "nothing"
+*/
+
+@keyframes edecoSlide {
+  /* Internships */
+  0%   { transform: translateY(0); }
+  15%  { transform: translateY(0); }
+
+  /* Jobs */
+  20%  { transform: translateY(-26px); }
+  35%  { transform: translateY(-26px); }
+
+  /* Eduversity */
+  40%  { transform: translateY(-52px); }
+  55%  { transform: translateY(-52px); }
+
+  /* Global */
+  60%  { transform: translateY(-78px); }
+  72%  { transform: translateY(-78px); }
+
+  /* Innovations */
+  76%  { transform: translateY(-104px); }
+  86%  { transform: translateY(-104px); }
+
+  /* Events (LAST WORD – HOLD) */
+  90%  { transform: translateY(-130px); }
+  100% { transform: translateY(-130px); }
+}
+
+

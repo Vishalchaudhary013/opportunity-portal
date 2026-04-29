@@ -90,6 +90,7 @@ const mapOpportunityFromApi = (item) => ({
           currency: "INR",
           period: "per month",
         },
+  formId: item.formId || null,
 });
 
 const buildOpportunityRequest = (body, originalPayload) => {
@@ -398,6 +399,11 @@ export const OpportunitiesProvider = ({ children }) => {
     return response.data;
   };
 
+  const getDecryptedAdminPassword = async (adminId) => {
+    const response = await authAPI.getDecryptedAdminPassword(adminId);
+    return response.data;
+  };
+
   const logout = () => {
     clearSession();
   };
@@ -613,6 +619,7 @@ export const OpportunitiesProvider = ({ children }) => {
       changeAdminPassword,
       approveAdminAccess,
       getWhatsAppStatus,
+      getDecryptedAdminPassword,
       impersonateAdmin,
       stopImpersonation,
       logout,

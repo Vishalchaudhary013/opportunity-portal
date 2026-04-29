@@ -59,4 +59,13 @@ router.patch("/me", protect, updateMe);
 router.get("/whatsapp-status", protect, getWhatsAppStatus);
 router.get("/directory", protect, requireSuperAdmin, getUserDirectory);
 
+// Route for super admin to view decrypted admin password
+import { getDecryptedAdminPassword } from "../controllers/authController.js";
+router.get(
+  "/admins/:id/decrypted-password",
+  protect,
+  requireSuperAdmin,
+  getDecryptedAdminPassword,
+);
+
 export default router;
