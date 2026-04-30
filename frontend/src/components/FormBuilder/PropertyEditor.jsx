@@ -81,7 +81,8 @@ const PropertyEditor = () => {
           dataUrl: event.target.result,
           fileName: file.name,
           fileType: file.type,
-          alt: `Carousel image ${currentImages.length + index + 1}`
+          alt: `Carousel image ${currentImages.length + index + 1}`,
+          file: file
         };
         
         newImages.push(newImage);
@@ -234,7 +235,13 @@ const PropertyEditor = () => {
                             reader.onload = (e) => {
                               const urlProperty = isBannerField ? 'bannerUrl' : 'pdfUrl';
                               updateFieldProperties(activeField.id, {
-                                [urlProperty]: e.target?.result
+                                [urlProperty]: e.target?.result,
+                                value: {
+                                  file: file,
+                                  fileName: file.name,
+                                  fileType: file.type,
+                                  preview: e.target?.result
+                                }
                               });
                             };
                             reader.readAsDataURL(file);

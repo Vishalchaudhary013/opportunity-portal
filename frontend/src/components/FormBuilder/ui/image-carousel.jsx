@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { resolveAssetUrl } from '../../../services/apiClient';
 
 const ImageCarousel = ({ 
   images = [], 
@@ -62,7 +63,7 @@ const ImageCarousel = ({
   }
 
   return (
-    <div className={`relative w-full h-full overflow-hidden ${className}`}>
+    <div className={`relative w-full h-full overflow-hidden rounded-2xl ${className}`}>
       {/* Main Image Display */}
       <div className="relative w-full h-full">
         {limitedImages.map((image, index) => (
@@ -73,7 +74,7 @@ const ImageCarousel = ({
             }`}
           >
             <img
-              src={image.src || image.preview || image.dataUrl}
+              src={resolveAssetUrl(image.src || image.preview || image.dataUrl)}
               alt={image.alt || `Carousel image ${index + 1}`}
               className="w-full h-full object-cover cursor-pointer"
               onClick={() => onImageClick && onImageClick(image, index)}
@@ -95,11 +96,11 @@ const ImageCarousel = ({
                 e.stopPropagation();
                 goToPrevious();
               }}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200 z-10"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 z-50 border border-white/30 group shadow-lg"
               aria-label="Previous image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg className="w-6 h-6 transform group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button
@@ -109,11 +110,11 @@ const ImageCarousel = ({
                 e.stopPropagation();
                 goToNext();
               }}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 text-white p-2 rounded-full transition-all duration-200 z-10"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-3 rounded-full transition-all duration-300 z-50 border border-white/30 group shadow-lg"
               aria-label="Next image"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg className="w-6 h-6 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </>
@@ -121,7 +122,7 @@ const ImageCarousel = ({
 
         {/* Image Counter */}
         {limitedImages.length > 1 && (
-          <div className="absolute top-4 right-4 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm z-10">
+          <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-[10px] font-bold z-50 uppercase tracking-wider border border-white/20 shadow-lg">
             {currentIndex + 1} / {limitedImages.length}
           </div>
         )}
@@ -131,7 +132,7 @@ const ImageCarousel = ({
 
       {/* Pagination Dots */}
       {showDots && limitedImages.length > 1 && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2 z-50 px-3 py-1.5 bg-black/20 backdrop-blur-md rounded-full border border-white/10">
           {limitedImages.map((_, index) => (
             <button
               key={index}
@@ -141,10 +142,10 @@ const ImageCarousel = ({
                 e.stopPropagation();
                 goToSlide(index);
               }}
-              className={`w-3 h-3 rounded-full transition-all duration-200 ${
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 index === currentIndex
-                  ? 'bg-white shadow-lg'
-                  : 'bg-white bg-opacity-50 hover:bg-opacity-70'
+                  ? 'bg-white w-4'
+                  : 'bg-white/40 hover:bg-white/70'
               }`}
               aria-label={`Go to image ${index + 1}`}
             />
@@ -154,9 +155,9 @@ const ImageCarousel = ({
 
       {/* Progress Bar */}
       {limitedImages.length > 1 && isAutoPlaying && (
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-black bg-opacity-30 z-10">
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-white/10 z-50">
           <div 
-            className="h-full bg-white transition-all duration-100 ease-linear"
+            className="h-full bg-blue-500 transition-all duration-100 ease-linear shadow-[0_0_10px_rgba(59,130,246,0.5)]"
             style={{
               width: `${((Date.now() % autoAdvanceTime) / autoAdvanceTime) * 100}%`
             }}

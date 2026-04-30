@@ -32,6 +32,7 @@ export const FormBuilderProvider = ({ children, programId, internshipId: propInt
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [sidebarTab, setSidebarTab] = useState("builder"); // "builder" or "properties"
+  const [pendingSpecialField, setPendingSpecialField] = useState(null);
 
   // Registry for handlers that need local component context
   const [handlers, setHandlers] = useState({
@@ -53,6 +54,21 @@ export const FormBuilderProvider = ({ children, programId, internshipId: propInt
   }, [programId]);
 
   const addField = useCallback((type) => {
+    // 🔥 Check if adding a "Special Component" (Banner, PDF, Carousel)
+    const specialTypes = ['bannerUpload', 'pdfUpload', 'carouselUpload'];
+    if (specialTypes.includes(type)) {
+      const existingSpecial = formState.fields.find(f => specialTypes.includes(f.type));
+      if (existingSpecial) {
+        // Instead of window.confirm, set pending field
+        setPendingSpecialField({
+          newType: type,
+          oldId: existingSpecial.id,
+          oldType: existingSpecial.type
+        });
+        return;
+      }
+    }
+
     const newField = {
       id: `field_${Date.now()}`,
       type,
@@ -68,6 +84,32 @@ export const FormBuilderProvider = ({ children, programId, internshipId: propInt
       fields: [...prev.fields, newField],
     }));
     setActiveFieldId(newField.id);
+  }, [formState.fields]);
+
+  const confirmReplaceSpecial = useCallback(() => {
+    if (!pendingSpecialField) return;
+
+    const { newType, oldId } = pendingSpecialField;
+    const newField = {
+      id: `field_${Date.now()}`,
+      type: newType,
+      label: `Untitled ${newType}`,
+      placeholder: "",
+      required: false,
+      width: "full",
+      options: newType === "select" || newType === "radio" ? [{ label: "Option 1", value: "option1" }] : [],
+    };
+
+    setFormState((prev) => ({
+      ...prev,
+      fields: [...prev.fields.filter(f => f.id !== oldId), newField],
+    }));
+    setActiveFieldId(newField.id);
+    setPendingSpecialField(null);
+  }, [pendingSpecialField]);
+
+  const cancelReplaceSpecial = useCallback(() => {
+    setPendingSpecialField(null);
   }, []);
 
   const deleteField = useCallback((id) => {
@@ -146,6 +188,9 @@ export const FormBuilderProvider = ({ children, programId, internshipId: propInt
     registerHandlers,
     sidebarTab,
     setSidebarTab,
+    pendingSpecialField,
+    confirmReplaceSpecial,
+    cancelReplaceSpecial,
   };
 
   return (

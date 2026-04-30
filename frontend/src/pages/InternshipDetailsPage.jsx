@@ -281,7 +281,7 @@ const InternshipDetailsPage = () => {
 
               <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Job Description</h2>
-                <p
+                <div
                   className="text-slate-700 mt-3 text-[15px] whitespace-pre-wrap"
                   style={
                     shouldShowDescriptionToggle && !isDescriptionExpanded
@@ -293,9 +293,11 @@ const InternshipDetailsPage = () => {
                         }
                       : undefined
                   }
-                >
-                  {descriptionText}
-                </p>
+                  dangerouslySetInnerHTML={{ 
+                    __html: descriptionText
+                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Support **bold**
+                  }}
+                />
                 {shouldShowDescriptionToggle && (
                   <button
                     type="button"

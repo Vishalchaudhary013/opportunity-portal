@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOpportunities } from "../../context/OpportunitiesContext";
 import FormComponents from "../FormBuilder/FormComponents";
-import apiClient, { API_BASE_URL } from "../../services/apiClient";
+import apiClient, { API_BASE_URL, resolveAssetUrl } from "../../services/apiClient";
 import Icons from "../FormBuilder/ui/ui-icons";
 import ImageCarousel from "../FormBuilder/ui/image-carousel";
 
@@ -12,12 +12,12 @@ const ApplicationFormModal = ({
   opportunity = null,
 }) => {
   const { submitApplication, getApiErrorMessage } = useOpportunities();
-  
+
   // Dynamic Form State
   const [dynamicForm, setDynamicForm] = useState(null);
   const [formValues, setFormValues] = useState({});
   const [isLoadingForm, setIsLoadingForm] = useState(false);
-  
+
   // Legacy Form State (Fallback)
   const [legacyForm, setLegacyForm] = useState({
     name: "",
@@ -70,12 +70,12 @@ const ApplicationFormModal = ({
           const fetchedForm = response.data;
           console.log("📥 FETCHED DYNAMIC FORM:", fetchedForm);
           setDynamicForm(fetchedForm);
-          
+
           // Initialize values with default values from fields
           const initialValues = {};
           const fields = fetchedForm.formSchema?.fields || fetchedForm.fields || [];
           console.log("📋 FORM FIELDS FOUND:", fields);
-          
+
           fields.forEach(field => {
             if (field.defaultValue !== undefined) {
               initialValues[field.id] = field.defaultValue;
@@ -179,7 +179,7 @@ const ApplicationFormModal = ({
           if (value instanceof File || (value && value.file instanceof File)) {
             formData.append(fieldId, value.file || value);
           } else if (typeof value === 'object' && value !== null) {
-             formData.append(fieldId, JSON.stringify(value));
+            formData.append(fieldId, JSON.stringify(value));
           } else {
             formData.append(fieldId, value || "");
           }
@@ -223,49 +223,48 @@ const ApplicationFormModal = ({
     <div className="fixed inset-0 z-50 bg-[#F8FAFC] flex flex-col overflow-hidden animate-in fade-in duration-300">
       {/* FULL PAGE SCROLLABLE CONTENT */}
       <div className="flex-1 overflow-y-auto custom-scrollbar flex  flex-col">
-        
-       
-        
+
+
+
 
         {/* MODAL CONTENT LAYOUT */}
         {(() => {
           const fields = dynamicForm?.formSchema?.fields || dynamicForm?.fields || [];
-          
+
           // A component is considered 'left' if position is explicitly 'left' OR if it's undefined (defaulting to left)
-          const hasLeftComponent = fields.some(f => 
-            ['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(f.type) && 
+          const hasLeftComponent = fields.some(f =>
+            ['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(f.type) &&
             (f.position === 'left' || !f.position)
           );
-          
+
           const hasSpecialComponent = fields.some(f => ['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(f.type));
 
           return (
             <div className={`flex-1 flex flex-col ${hasLeftComponent ? 'md:flex-row' : 'flex-col'}`}>
-              
+
               {/* SPECIAL COMPONENT SECTION (Banner/PDF/Carousel) */}
               {hasSpecialComponent && (
-                <div className={`${
-                  hasLeftComponent
-                    ? 'w-full md:w-1/2 h-[300px] md:h-screen p-3  sticky top-0'
+                <div className={`${hasLeftComponent
+                    ? 'w-full md:w-1/2 h-[300px] md:h-screen p-4.5  sticky top-0'
                     : 'w-full h-[300px] sm:h-[450px] lg:h-[500px]'
-                }  overflow-hidden`}>
+                  }  overflow-hidden rounded-xl`}>
                   {fields.map(field => {
                     if (!['bannerUpload', 'pdfUpload', 'carouselUpload'].includes(field.type)) return null;
-                    
+
                     if (field.type === 'bannerUpload') {
                       const bannerSrc = resolveAssetUrl(field.bannerUrl || field.value?.preview);
                       if (!bannerSrc) return null;
                       return (
-                        <img 
+                        <img
                           key={field.id}
-                          src={bannerSrc} 
-                          alt="Form Banner" 
+                          src={bannerSrc}
+                          alt="Form Banner"
                           className="w-full p-0.5 rounded-xl h-full object-cover"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                       );
                     }
-                    
+
                     if (field.type === 'pdfUpload') {
                       return (
                         <div key={field.id} className="w-full h-full flex items-center justify-center bg-blue-50">
@@ -285,8 +284,9 @@ const ApplicationFormModal = ({
                         ...img,
                         src: resolveAssetUrl(img.src || img.preview || img.dataUrl)
                       }));
+                      console.log("CAROUSEL IMAGES IN MODAL:", carouselImages);
                       return (
-                        <ImageCarousel 
+                        <ImageCarousel
                           key={field.id}
                           images={carouselImages}
                           autoAdvanceTime={field.autoAdvanceTime || 20000}
@@ -303,9 +303,9 @@ const ApplicationFormModal = ({
               )}
 
               {/* FORM FIELDS SECTION */}
-              <div className="flex-1 flex flex-col items-center py-6 px-4 overflow-y-auto">
+              <div className="flex-1 flex flex-col items-center py-4.5 px-4 overflow-y-auto">
                 <div className="w-full max-w-[800px] border border-black/10 rounded-xl p-5 bg-white shadow-sm animate-in slide-in-from-bottom-8 duration-500 mx-auto">
-                  
+
                   <div className="text-center mb-12">
                     <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
                       {dynamicForm ? dynamicForm.name : "Application Form"}
@@ -358,7 +358,7 @@ const ApplicationFormModal = ({
                             ))}
                         </div>
                       )}
-                      
+
                       {/* Status Messages */}
                       {error && (
                         <div className="p-6 rounded-3xl bg-rose-50 border border-rose-100 text-rose-600 font-bold flex items-center gap-4 animate-in shake duration-500">
@@ -378,19 +378,18 @@ const ApplicationFormModal = ({
                       )}
 
                       {/* Submit Action */}
-                      <div className="pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-8">
-                        
+                      <div className="pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-8">
                         <button
                           type="submit"
                           disabled={submitting}
-                          className="w-full sm:flex-1 px-12 py-3 rounded-xl bg-[#0B4AA6] text-white font-semibold  text-xl shadow-2xl shadow-blue-200 hover:bg-[#083D8B] hover:-translate-y-1.5 transition-all active:scale-95 disabled:opacity-50 disabled:translate-y-0"
+                          className="px-12 py-2 rounded-xl bg-[#0B4AA6] text-white font-semibold text-lg shadow-2xl shadow-blue-200 hover:bg-[#083D8B] hover:-translate-y-1.5 transition-all active:scale-95 disabled:opacity-50 disabled:translate-y-0"
                         >
                           {submitting ? (
                             <div className="flex items-center justify-center gap-4">
                               <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                               <span className="tracking-widest uppercase text-sm">Processing...</span>
                             </div>
-                          ) : "SUBMIT APPLICATION"}
+                          ) : "Submit"}
                         </button>
                       </div>
                     </form>

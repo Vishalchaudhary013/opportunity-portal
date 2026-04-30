@@ -2853,9 +2853,13 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                           ].map((item, idx) => (
                             <div key={idx} className="flex flex-col gap-1 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
                               <span className="text-sm font-medium text-slate-500">{item.label}</span>
-                              <div className={`text-sm font-semibold text-slate-800 ${item.label.toLowerCase().includes('description') || item.label.toLowerCase().includes('criteria') ? 'whitespace-pre-wrap' : 'truncate'}`}>
-                                {item.value}
-                              </div>
+                              <div 
+                                className={`text-sm font-semibold text-slate-800 ${item.label.toLowerCase().includes('description') || item.label.toLowerCase().includes('criteria') ? 'whitespace-pre-wrap' : 'truncate'}`}
+                                dangerouslySetInnerHTML={{ 
+                                  __html: String(item.value || "")
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                }}
+                              />
                             </div>
                           ))}
                         </div>

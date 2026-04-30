@@ -52,9 +52,24 @@ export const createForm = async (req, res) => {
         }
 
         if (field.type === "carouselUpload") {
+          const carouselFiles = files.filter(f =>
+            f.fieldname === `files[${field.id}]` ||
+            f.fieldname.includes(field.id)
+          );
+
+          // Get existing images (that already have server paths)
+          const existingImages = (field.images || []).filter(img => 
+            img.src && !img.src.startsWith('data:') && !img.src.startsWith('blob:')
+          );
+
+          // Map new files to image objects
+          const newImages = carouselFiles.map(f => ({ 
+            src: f.path 
+          }));
+
           return {
             ...field,
-            images: [{ src: file.path }]
+            images: [...existingImages, ...newImages]
           };
         }
 
@@ -125,9 +140,24 @@ export const updateForm = async (req, res) => {
         }
 
         if (field.type === "carouselUpload") {
+          const carouselFiles = files.filter(f =>
+            f.fieldname === `files[${field.id}]` ||
+            f.fieldname.includes(field.id)
+          );
+
+          // Get existing images (that already have server paths)
+          const existingImages = (field.images || []).filter(img => 
+            img.src && !img.src.startsWith('data:') && !img.src.startsWith('blob:')
+          );
+
+          // Map new files to image objects
+          const newImages = carouselFiles.map(f => ({ 
+            src: f.path 
+          }));
+
           return {
             ...field,
-            images: [{ src: file.path }]
+            images: [...existingImages, ...newImages]
           };
         }
 

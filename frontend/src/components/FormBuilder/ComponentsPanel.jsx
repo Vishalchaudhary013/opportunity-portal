@@ -2,9 +2,11 @@ import React from 'react';
 import { Icons } from './ui/ui-icons';
 import { useFormBuilder } from '../../context/FormBuilderContext';
 import PropertyEditor from './PropertyEditor';
+import { useToast } from './hooks/use-toast';
 
 const ComponentsPanel = () => {
   const { addField, sidebarTab, setSidebarTab } = useFormBuilder();
+  const { toast } = useToast();
   
   const adminControls = [
     { type: 'bannerUpload', label: 'Banner Upload', icon: <Icons.BannerUpload /> },
@@ -39,6 +41,15 @@ const ComponentsPanel = () => {
   
   const handleComponentClick = (component) => {
     addField(component.type);
+    
+    // Only show toast for regular fields (not the special ones that trigger a modal)
+    const specialTypes = ['bannerUpload', 'pdfUpload', 'carouselUpload'];
+    if (!specialTypes.includes(component.type)) {
+      toast({
+        description: `${component.label} added`,
+        duration: 2000,
+      });
+    }
   };
 
   return (

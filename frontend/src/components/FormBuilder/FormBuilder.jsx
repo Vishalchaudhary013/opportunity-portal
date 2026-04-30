@@ -6,6 +6,7 @@ import FormCanvas from './FormCanvas';
 import PropertyEditor from './PropertyEditor';
 import PreviewModal from './modals/PreviewModal';
 import PublishModal from './modals/PublishModal';
+import ConfirmReplaceModal from './modals/ConfirmReplaceModal';
 import { useToast } from './hooks/use-toast';
 import apiClient, { API_BASE_URL } from "../../services/apiClient";
 import { useNavigate } from 'react-router-dom';
@@ -24,7 +25,10 @@ const {
   setShowPublishModal,
   resetFormBuilder,
   registerHandlers,
-  setIsPublishing
+  setIsPublishing,
+  pendingSpecialField,
+  confirmReplaceSpecial,
+  cancelReplaceSpecial
 } = useFormBuilder();
 
 const internshipId = propInternshipId || urlInternshipId || formState.internshipId;
@@ -501,6 +505,14 @@ const handlePublish = useCallback(async () => {
           formState={formState}
         />
       )}
+
+      <ConfirmReplaceModal 
+        isOpen={!!pendingSpecialField}
+        onConfirm={confirmReplaceSpecial}
+        onCancel={cancelReplaceSpecial}
+        oldType={pendingSpecialField?.oldType}
+        newType={pendingSpecialField?.newType}
+      />
     </div>
   );
 };

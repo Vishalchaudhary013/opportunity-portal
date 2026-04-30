@@ -26,4 +26,11 @@ export const getErrorMessage = (error, fallback = "Something went wrong.") => {
   return error?.response?.data?.message || fallback;
 };
 
+export const resolveAssetUrl = (path) => {
+  if (!path) return "";
+  if (path.startsWith("http") || path.startsWith("data:") || path.startsWith("blob:")) return path;
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${API_BASE_URL}${normalized}`;
+};
+
 export default apiClient;
