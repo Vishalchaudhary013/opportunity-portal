@@ -5,6 +5,8 @@ import User from "../models/userModel.js";
 import {
   sendAdminApplicationAlertEmail,
   sendApplicationConfirmationEmail,
+  sendApplicationSelectionEmail,
+  sendApplicationRejectionEmail,
 } from "../utils/mailer.js";
 import { sendApplicationWhatsAppNotifications } from "../utils/whatsapp.js";
 import xlsx from "xlsx";
@@ -213,7 +215,7 @@ export const getApplications = async (req, res, next) => {
 export const updateApplicationStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
-    const allowedStatuses = ["New", "Shortlisted", "Rejected"];
+    const allowedStatuses = ["New", "Shortlisted", "Rejected", "Approved", "Not Approved"];
 
     if (!allowedStatuses.includes(status)) {
       res.status(400).json({ message: "Invalid application status." });
@@ -233,6 +235,13 @@ export const updateApplicationStatus = async (req, res, next) => {
     if (!application) {
       res.status(404).json({ message: "Application not found." });
       return;
+    }
+
+    // Send notification emails based on status
+    if (status === "Approved") {
+      await sendApplicationSelectionEmail(application);
+    } else if (status === "Not Approved") {
+      await sendApplicationRejectionEmail(application);
     }
 
     res.status(200).json(application);

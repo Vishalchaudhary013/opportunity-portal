@@ -17,6 +17,8 @@ import {
   FiTrash2,
   FiCheck,
   FiEdit2,
+  FiX,
+  FiXCircle,
 } from "react-icons/fi";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import NavBar from "../components/NavBar";
@@ -186,6 +188,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const [filterOpportunityId, setFilterOpportunityId] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
 
+  const [statusChangingId, setStatusChangingId] = useState("");
+  const [statusChangeMessage, setStatusChangeMessage] = useState("");
+
   // visiblePasswords: { [adminId]: true | "loading" | "error" | decryptedPassword }
   const [visiblePasswords, setVisiblePasswords] = useState({});
 
@@ -208,33 +213,48 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   // Handle navigation state (e.g. from Form Builder back to Program Details)
   useEffect(() => {
     if (location.state?.editId && opportunities.length > 0) {
-      const item = opportunities.find(o => (o.id || o._id) === location.state.editId);
+      const item = opportunities.find(
+        (o) => (o.id || o._id) === location.state.editId,
+      );
       if (item) {
         handleEdit(item);
       }
       // Clear the state so it doesn't reopen on every render
-      navigate(location.pathname, { replace: true, state: { ...location.state, editId: null } });
+      navigate(location.pathname, {
+        replace: true,
+        state: { ...location.state, editId: null },
+      });
     }
     if (location.state?.activeSection) {
       setActiveSection(location.state.activeSection);
       // Clear the state
-      navigate(location.pathname, { replace: true, state: { ...location.state, activeSection: null } });
+      navigate(location.pathname, {
+        replace: true,
+        state: { ...location.state, activeSection: null },
+      });
     }
   }, [location.state, opportunities, navigate, location.pathname]);
 
-  const title = editingId
-    ? `Edit ${form.type === "Global Program" ? "Global Program" : "Internship"}`
-    : `Create ${form.type === "Global Program" ? "Global Program" : "Internship"}`;
+  const title = editingId ? `Edit ${form.type}` : `Create ${form.type}`;
 
-  // Only show internships created by this super admin in super admin panel
+  // Only show opportunities created by this super admin in super admin panel
   // AFTER
   const sorted = useMemo(() => {
     const userId = String(user?.id || user?._id || "");
+    const opportunityTypes = [
+      "Internship",
+      "Global Program",
+      "Jobs",
+      "Bootcamps",
+      "Masterclasses",
+      "Degree Programs",
+      "PG Programs",
+    ];
     return [...opportunities]
       .filter(
         (item) =>
           resolveOwnerId(item) === userId &&
-          (item.type === "Internship" || item.type === "Global Program"),
+          opportunityTypes.includes(item.type),
       )
       .sort(
         (a, b) =>
@@ -244,15 +264,19 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   }, [opportunities, user?.id]);
 
   const filteredOpportunities = useMemo(() => {
-    if (activeSection === "Internship") {
-      return sorted.filter(
-        (item) => item.type === "Internship" && !isOpportunityClosed(item),
-      );
-    }
+    const opportunityTypes = [
+      "Internship",
+      "Global Program",
+      "Jobs",
+      "Bootcamps",
+      "Masterclasses",
+      "Degree Programs",
+      "PG Programs",
+    ];
 
-    if (activeSection === "Global Program") {
+    if (opportunityTypes.includes(activeSection)) {
       return sorted.filter(
-        (item) => item.type === "Global Program" && !isOpportunityClosed(item),
+        (item) => item.type === activeSection && !isOpportunityClosed(item),
       );
     }
 
@@ -265,6 +289,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const isInternshipPanel = activeSection === "Internship";
   const isGlobalProgramPanel = activeSection === "Global Program";
+  const isJobsPanel = activeSection === "Jobs";
+  const isBootcampsPanel = activeSection === "Bootcamps";
+  const isMasterclassesPanel = activeSection === "Masterclasses";
+  const isDegreeProgramsPanel = activeSection === "Degree Programs";
+  const isPGProgramsPanel = activeSection === "PG Programs";
   const isClosedApplicationPanel = activeSection === "Closed Application";
   const isSuperStatsSection = isSuperDashboard && activeSection === "Overview";
   const isSuperPostSection =
@@ -320,10 +349,13 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
             "",
         ).trim();
 
-        const matchesOwnership = directOpportunityId && ownedOpportunityIds.has(directOpportunityId);
-        
+        const matchesOwnership =
+          directOpportunityId && ownedOpportunityIds.has(directOpportunityId);
+
         if (filterOpportunityId) {
-          return matchesOwnership && directOpportunityId === filterOpportunityId;
+          return (
+            matchesOwnership && directOpportunityId === filterOpportunityId
+          );
         }
 
         return matchesOwnership;
@@ -338,7 +370,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     return scopedApplications.slice(startIndex, startIndex + itemsPerPage);
   }, [scopedApplications, currentPage, itemsPerPage]);
 
-  const totalClosedPages = Math.ceil(closedApplicationItems.length / itemsPerPage);
+  const totalClosedPages = Math.ceil(
+    closedApplicationItems.length / itemsPerPage,
+  );
   const paginatedClosedItems = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return closedApplicationItems.slice(startIndex, startIndex + itemsPerPage);
@@ -536,7 +570,10 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target;
-    setForm((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleLogoChange = (event) => {
@@ -587,8 +624,15 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   };
 
   const handleOpenCreateForm = () => {
-    const nextType =
-      activeSection === "Global Program" ? "Global Program" : "Internship";
+    const typeMap = {
+      "Global Program": "Global Program",
+      Jobs: "Jobs",
+      Bootcamps: "Bootcamps",
+      Masterclasses: "Masterclasses",
+      "Degree Programs": "Degree Programs",
+      "PG Programs": "PG Programs",
+    };
+    const nextType = typeMap[activeSection] || "Internship";
 
     setForm({
       ...initialForm,
@@ -663,7 +707,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
         setShowSuccessMessage(true);
         setTimeout(() => {
           setShowSuccessMessage(false);
-          const path = isSuperDashboard ? `/super-admin-dashboard/build-form/${editingId}` : `/admin-dashboard/build-form/${editingId}`;
+          const path = isSuperDashboard
+            ? `/super-admin-dashboard/build-form/${editingId}`
+            : `/admin-dashboard/build-form/${editingId}`;
           navigate(path);
         }, 3000);
         return;
@@ -675,7 +721,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       setTimeout(() => {
         setShowSuccessMessage(false);
         const createdId = res.id || res._id;
-        const path = isSuperDashboard ? `/super-admin-dashboard/build-form/${createdId}` : `/admin-dashboard/build-form/${createdId}`;
+        const path = isSuperDashboard
+          ? `/super-admin-dashboard/build-form/${createdId}`
+          : `/admin-dashboard/build-form/${createdId}`;
         navigate(path);
       }, 3000);
     } catch (apiError) {
@@ -692,26 +740,45 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       ...initialForm,
       ...item,
       // Handle date formatting for input fields (YYYY-MM-DD)
-      deadline: item.deadline ? new Date(item.deadline).toISOString().split('T')[0] : "",
-      startDate: item.startDate ? new Date(item.startDate).toISOString().split('T')[0] : "",
+      deadline: item.deadline
+        ? new Date(item.deadline).toISOString().split("T")[0]
+        : "",
+      startDate: item.startDate
+        ? new Date(item.startDate).toISOString().split("T")[0]
+        : "",
       // Stipend handling: strip currency symbols if they were prepended
-      stipend: String(item.stipend || "").replace(/[₹$]/g, "").trim(),
+      stipend: String(item.stipend || "")
+        .replace(/[₹$]/g, "")
+        .trim(),
       stipendCurrency: String(item.stipend || "").includes("$") ? "USD" : "INR",
-      isUnpaid: String(item.stipend || "").toLowerCase().includes("unpaid") || item.stipend === "0" || !item.stipend,
+      isUnpaid:
+        String(item.stipend || "")
+          .toLowerCase()
+          .includes("unpaid") ||
+        item.stipend === "0" ||
+        !item.stipend,
     };
 
     // 2. Set arrays for dynamic inputs
-    const skillsArray = Array.isArray(item.requiredSkills) 
-      ? item.requiredSkills 
-      : String(item.requiredSkills || "").split(/,|\n/).map(s => s.trim()).filter(Boolean);
-    
+    const skillsArray = Array.isArray(item.requiredSkills)
+      ? item.requiredSkills
+      : String(item.requiredSkills || "")
+          .split(/,|\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+
     setRequiredSkillInputs(skillsArray.length > 0 ? skillsArray : ["", "", ""]);
 
-    const benefitsArray = Array.isArray(item.benefits) 
-      ? item.benefits 
-      : String(item.benefits || "").split(/,|\n/).map(b => b.trim()).filter(Boolean);
-    
-    setBenefitInputs(benefitsArray.length > 0 ? benefitsArray : ["", "", "", ""]);
+    const benefitsArray = Array.isArray(item.benefits)
+      ? item.benefits
+      : String(item.benefits || "")
+          .split(/,|\n/)
+          .map((b) => b.trim())
+          .filter(Boolean);
+
+    setBenefitInputs(
+      benefitsArray.length > 0 ? benefitsArray : ["", "", "", ""],
+    );
 
     // 3. Update state to show form
     setForm({
@@ -730,17 +797,19 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     }
 
     // 4. Scroll to top/form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleViewResponses = (id) => {
     setFilterOpportunityId(id);
     setActiveSection("Applications");
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleDelete = async (id) => {
-    const confirmed = window.confirm("Are you sure you want to delete this opportunity?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this opportunity?",
+    );
     if (!confirmed) return;
     try {
       setError("");
@@ -752,17 +821,21 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const handleBulkDelete = async () => {
     if (selectedIds.length === 0) return;
-    const confirmed = window.confirm(`Are you sure you want to delete ${selectedIds.length} selected opportunities?`);
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${selectedIds.length} selected opportunities?`,
+    );
     if (!confirmed) return;
 
     setBusy(true);
     try {
       setError("");
       // Using Promise.all for bulk deletion
-      await Promise.all(selectedIds.map(id => deleteOpportunity(id)));
+      await Promise.all(selectedIds.map((id) => deleteOpportunity(id)));
       setSelectedIds([]);
     } catch (apiError) {
-      setError(getApiErrorMessage(apiError, "Failed to delete some opportunities."));
+      setError(
+        getApiErrorMessage(apiError, "Failed to delete some opportunities."),
+      );
     } finally {
       setBusy(false);
     }
@@ -778,7 +851,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
 
   const handleSelectItem = (id) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id],
+      prev.includes(id)
+        ? prev.filter((itemId) => itemId !== id)
+        : [...prev, id],
     );
   };
 
@@ -801,7 +876,16 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
     setShowOpportunityForm(false);
     setRequiredSkillInputs(["", "", ""]);
     setBenefitInputs(["", "", "", ""]);
-    if (section === "Internship" || section === "Global Program") {
+    const opportunityTypes = [
+      "Internship",
+      "Global Program",
+      "Jobs",
+      "Bootcamps",
+      "Masterclasses",
+      "Degree Programs",
+      "PG Programs",
+    ];
+    if (opportunityTypes.includes(section)) {
       setForm((prev) => ({ ...prev, type: section }));
     }
     // Clear filter when changing section manually
@@ -993,9 +1077,15 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const handleStatusChange = async (id, status) => {
     try {
       setError("");
+      setStatusChangeMessage("");
+      setStatusChangingId(id);
       await updateApplicationStatus(id, status);
+      setStatusChangeMessage(`Status updated to ${status}`);
     } catch (apiError) {
       setError(getApiErrorMessage(apiError, "Failed to update status."));
+    } finally {
+      setStatusChangingId("");
+      setTimeout(() => setStatusChangeMessage(""), 3000);
     }
   };
 
@@ -1017,8 +1107,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
   const menuItems = [
     { key: "Internship", label: "Internships" },
     { key: "Global Program", label: "Global Programs" },
-
-   
+    { key: "Jobs", label: "Jobs" },
+    { key: "Bootcamps", label: "Bootcamps" },
+    { key: "Masterclasses", label: "Masterclasses" },
+    { key: "Degree Programs", label: "Degree Programs" },
+    { key: "PG Programs", label: "PG Programs" },
     { key: "Closed Application", label: "Closed Application" },
   ];
 
@@ -1102,7 +1195,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                   <th className="py-3 px-4 font-semibold">Location</th>
                   <th className="py-3 px-4 font-semibold">Date</th>
                   <th className="py-3 px-4 font-semibold">Status</th>
-                  <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  <th className="py-3 px-4 font-semibold text-right">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EDF2FD]">
@@ -1164,10 +1259,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
         {/* Pagination Controls for Closed Applications */}
         {totalClosedPages > 1 && (
           <div className="mt-6 flex items-center  justify-center border-t border-[#EDF2FD] p-4 bg-white rounded-b-xl">
-            
             <div className="flex gap-2">
               <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
@@ -1179,7 +1273,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 </span>
               </div>
               <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalClosedPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalClosedPages))
+                }
                 disabled={currentPage === totalClosedPages}
                 className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
@@ -1203,7 +1299,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
       { key: "Users", label: "Users" },
       { key: "Internship", label: "Internships" },
       { key: "Global Program", label: "Global Programs" },
-      
+      { key: "Jobs", label: "Jobs" },
+      { key: "Bootcamps", label: "Bootcamps" },
+      { key: "Masterclasses", label: "Masterclasses" },
+      { key: "Degree Programs", label: "Degree Programs" },
+      { key: "PG Programs", label: "PG Programs" },
       { key: "Closed Application", label: "Closed Application" },
     );
   }
@@ -1247,6 +1347,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                   >
                     {item.key === "Internship" && <FiGrid size={16} />}
                     {item.key === "Global Program" && <FiPieChart size={16} />}
+                    {item.key === "Jobs" && <FiBriefcase size={16} />}
+                    {item.key === "Bootcamps" && <FiCheckCircle size={16} />}
+                    {item.key === "Masterclasses" && <FiFileText size={16} />}
+                    {item.key === "Degree Programs" && <FiGrid size={16} />}
+                    {item.key === "PG Programs" && <FiPieChart size={16} />}
                     {item.key === "Closed Application" && (
                       <FiEyeOff size={16} />
                     )}
@@ -1297,10 +1402,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                 <div className="bg-white border border-[#DCE5FA] rounded-2xl px-6 py-4 flex items-center justify-between shadow-sm mb-5">
                   <div className="flex items-center gap-8">
                     {/* LOGO */}
-                   
-                    
-                    
-                    
+
                     <div>
                       <h1 className="text-xl font-bold text-slate-800">
                         {isSuperDashboard
@@ -1327,8 +1429,6 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                         </p>
                       </div>
                     </div>
-                    
-                    
                   </div>
                 </div>
               )}
@@ -1629,49 +1729,77 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                   </td>
 
                                   <td className="py-2 px-3 text-slate-600 break-all">
-                                    {item.whatsappNumber || <span className="text-slate-400">N/A</span>}
+                                    {item.whatsappNumber || (
+                                      <span className="text-slate-400">
+                                        N/A
+                                      </span>
+                                    )}
                                   </td>
                                   <td className="py-2 px-3 text-slate-600">
-                                    {item.organizationName || <span className="text-slate-400">N/A</span>}
-                                    
+                                    {item.organizationName || (
+                                      <span className="text-slate-400">
+                                        N/A
+                                      </span>
+                                    )}
                                   </td>
                                   <td className="py-2 px-3 text-slate-600">
                                     <div className="flex items-center gap-2">
                                       <span className="font-mono">
                                         {visiblePasswords[item.id] === true
                                           ? "••••••••"
-                                          : visiblePasswords[item.id] === "loading"
-                                          ? "Loading..."
-                                          : visiblePasswords[item.id] === "error"
-                                          ? "Error"
-                                          : visiblePasswords[item.id] === "N/A"
-                                          ? "N/A"
-                                          : visiblePasswords[item.id] || "••••••••"}
+                                          : visiblePasswords[item.id] ===
+                                              "loading"
+                                            ? "Loading..."
+                                            : visiblePasswords[item.id] ===
+                                                "error"
+                                              ? "Error"
+                                              : visiblePasswords[item.id] ===
+                                                  "N/A"
+                                                ? "N/A"
+                                                : visiblePasswords[item.id] ||
+                                                  "••••••••"}
                                       </span>
                                       {isSuperAdmin ? (
                                         <button
                                           type="button"
                                           onClick={() => {
-                                            if (!visiblePasswords[item.id] || visiblePasswords[item.id] === true || visiblePasswords[item.id] === "error" || visiblePasswords[item.id] === "N/A") {
+                                            if (
+                                              !visiblePasswords[item.id] ||
+                                              visiblePasswords[item.id] ===
+                                                true ||
+                                              visiblePasswords[item.id] ===
+                                                "error" ||
+                                              visiblePasswords[item.id] ===
+                                                "N/A"
+                                            ) {
                                               fetchDecryptedPassword(item.id);
                                             } else {
-                                              setVisiblePasswords((prev) => ({ ...prev, [item.id]: true }));
+                                              setVisiblePasswords((prev) => ({
+                                                ...prev,
+                                                [item.id]: true,
+                                              }));
                                             }
                                           }}
                                           className="text-slate-400 hover:text-slate-600 transition-colors"
                                         >
-                                          {visiblePasswords[item.id] && 
-                                           visiblePasswords[item.id] !== true && 
-                                           visiblePasswords[item.id] !== "loading" && 
-                                           visiblePasswords[item.id] !== "error" && 
-                                           visiblePasswords[item.id] !== "N/A" ? (
+                                          {visiblePasswords[item.id] &&
+                                          visiblePasswords[item.id] !== true &&
+                                          visiblePasswords[item.id] !==
+                                            "loading" &&
+                                          visiblePasswords[item.id] !==
+                                            "error" &&
+                                          visiblePasswords[item.id] !==
+                                            "N/A" ? (
                                             <FiEyeOff size={14} />
                                           ) : (
                                             <FiEye size={14} />
                                           )}
                                         </button>
                                       ) : (
-                                        <FiEyeOff size={14} className="text-slate-300" />
+                                        <FiEyeOff
+                                          size={14}
+                                          className="text-slate-300"
+                                        />
                                       )}
                                     </div>
                                   </td>
@@ -1690,11 +1818,14 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                   </td>
                                   <td className="py-2 px-3">
                                     <div className="flex items-center gap-3">
-                                      {item.adminApprovalStatus === "pending" && (
+                                      {item.adminApprovalStatus ===
+                                        "pending" && (
                                         <div className="relative group">
                                           <button
                                             type="button"
-                                            onClick={() => handleApproveAdminAccess(item.id)}
+                                            onClick={() =>
+                                              handleApproveAdminAccess(item.id)
+                                            }
                                             disabled={
                                               approvingAdminId === item.id ||
                                               !item.isEmailVerified ||
@@ -1709,7 +1840,8 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                             )}
                                           </button>
                                           <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
-                                            {!item.isEmailVerified || !item.isPhoneVerified
+                                            {!item.isEmailVerified ||
+                                            !item.isPhoneVerified
                                               ? "Verify Email & Phone First"
                                               : "Approve Access"}
                                           </span>
@@ -1719,9 +1851,12 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                       <div className="relative group">
                                         <button
                                           type="button"
-                                          onClick={() => handleOpenAdminDashboard(item.id)}
+                                          onClick={() =>
+                                            handleOpenAdminDashboard(item.id)
+                                          }
                                           disabled={
-                                            item.adminApprovalStatus === "pending" ||
+                                            item.adminApprovalStatus ===
+                                              "pending" ||
                                             openingAdminId === item.id ||
                                             deletingUserId === item.id
                                           }
@@ -1734,14 +1869,18 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                           )}
                                         </button>
                                         <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
-                                          {openingAdminId === item.id ? "Opening..." : "Open Dashboard"}
+                                          {openingAdminId === item.id
+                                            ? "Opening..."
+                                            : "Open Dashboard"}
                                         </span>
                                       </div>
 
                                       <div className="relative group">
                                         <button
                                           type="button"
-                                          onClick={() => handleStartPasswordEditor(item.id)}
+                                          onClick={() =>
+                                            handleStartPasswordEditor(item.id)
+                                          }
                                           disabled={
                                             openingAdminId === item.id ||
                                             deletingUserId === item.id ||
@@ -1759,7 +1898,9 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                       <div className="relative group">
                                         <button
                                           type="button"
-                                          onClick={() => handleDeleteAccount(item)}
+                                          onClick={() =>
+                                            handleDeleteAccount(item)
+                                          }
                                           disabled={deletingUserId === item.id}
                                           className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
                                         >
@@ -1954,7 +2095,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                       </span>
                                     )}
                                   </td>
-                                  
+
                                   <td className="py-2 px-3 text-slate-600">
                                     {item.latestQualification || (
                                       <span className="text-slate-400">
@@ -1972,7 +2113,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0B4AA6] text-white text-xs font-semibold hover:bg-[#083D8B] transition shadow-sm"
                                       >
                                         <FiFileText size={14} />
-                                        View 
+                                        View
                                       </a>
                                     ) : (
                                       <span className="text-slate-400">
@@ -1982,22 +2123,24 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                   </td>
                                   <td className="py-2 px-3">
                                     <div className="relative group">
-                                        <button
-                                          type="button"
-                                          onClick={() => handleDeleteAccount(item)}
-                                          disabled={deletingUserId === item.id}
-                                          className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
-                                        >
-                                          {deletingUserId === item.id ? (
-                                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                                          ) : (
-                                            <FiTrash2 size={16} />
-                                          )}
-                                        </button>
-                                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
-                                          Delete Account
-                                        </span>
-                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          handleDeleteAccount(item)
+                                        }
+                                        disabled={deletingUserId === item.id}
+                                        className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
+                                      >
+                                        {deletingUserId === item.id ? (
+                                          <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                                        ) : (
+                                          <FiTrash2 size={16} />
+                                        )}
+                                      </button>
+                                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-[10px] text-white bg-slate-800 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-sm z-10">
+                                        Delete Account
+                                      </span>
+                                    </div>
                                   </td>
                                 </tr>
                               ))}
@@ -2027,8 +2170,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                         Application Forms
                         {filterOpportunityId && (
                           <span className="ml-3 text-sm font-normal text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-                            Filtered for: {filteredOpportunities.find(o => (o.id || o._id) === filterOpportunityId)?.title || "Selected Opportunity"}
-                            <button 
+                            Filtered for:{" "}
+                            {filteredOpportunities.find(
+                              (o) => (o.id || o._id) === filterOpportunityId,
+                            )?.title || "Selected Opportunity"}
+                            <button
                               onClick={() => setFilterOpportunityId(null)}
                               className="ml-2 text-blue-800 hover:text-blue-900 font-bold"
                             >
@@ -2065,6 +2211,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                     </p>
                   ) : (
                     <>
+                      {statusChangeMessage && (
+                        <div className="mb-4 px-4 py-2 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
+                          {statusChangeMessage}
+                        </div>
+                      )}
                       <div className="overflow-x-auto">
                         <table className="min-w-245 w-full text-sm">
                           <thead>
@@ -2076,8 +2227,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               <th className="py-2 pr-3">Type</th>
                               <th className="py-2 pr-3">Resume</th>
                               <th className="py-2 pr-3">Status</th>
-                              <th className="py-2 pr-3">Applied At</th>
-                              
+                              <th className="py-2 pr-3">Action</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2121,30 +2271,56 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                     </span>
                                   )}
                                 </td>
-                                <td className="py-2 pr-3">
-                                  <select
-                                    value={application.status || "New"}
-                                    onChange={(event) =>
-                                      handleStatusChange(
-                                        application.id,
-                                        event.target.value,
-                                      )
-                                    }
-                                    className="rounded-lg border border-[#DCE5FA] bg-[#F8FAFF] px-2 py-1 text-xs font-medium text-slate-700 outline-none focus:border-blue-400"
-                                  >
-                                    <option value="New">New</option>
-                                    <option value="Shortlisted">
-                                      Shortlisted
-                                    </option>
-                                    <option value="Rejected">Rejected</option>
-                                  </select>
-                                </td>
-                                <td className="py-2 pr-3 text-slate-600">
-                                  {new Date(
-                                    application.appliedAt,
-                                  ).toLocaleString()}
-                                </td>
-                                
+                                {/* STATUS COLUMN */}
+{/* STATUS COLUMN */}
+<td className="py-2 pr-3">
+  <span
+    className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold tracking-wide ${
+      application.status === "Accepted" || application.status === "Approved"
+        ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+        : application.status === "Rejected" || application.status === "Not Approved"
+        ? "bg-rose-100 text-rose-700 border border-rose-200"
+        : "bg-blue-100 text-blue-700 border border-blue-200"
+    }`}
+  >
+    {/* Normalize display text */}
+    {application.status === "Approved" ? "Accepted"
+      : application.status === "Not Approved" ? "Rejected"
+      : application.status || "New"}
+  </span>
+</td>
+
+{/* ACTION COLUMN — hide buttons if already actioned */}
+<td className="py-2 pr-3">
+  {(!application.status || application.status === "New") ? (
+    <div className="flex items-center gap-2">
+      <button
+        onClick={() => handleStatusChange(application.id || application._id, "Accepted")}
+        disabled={statusChangingId === (application.id || application._id)}
+        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+          statusChangingId === (application.id || application._id)
+            ? "bg-emerald-200 text-emerald-800 cursor-wait"
+            : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200"
+        }`}
+      >
+        {statusChangingId === (application.id || application._id) ? "..." : "Accept"}
+      </button>
+      <button
+        onClick={() => handleStatusChange(application.id || application._id, "Rejected")}
+        disabled={statusChangingId === (application.id || application._id)}
+        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+          statusChangingId === (application.id || application._id)
+            ? "bg-rose-200 text-rose-800 cursor-wait"
+            : "bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200"
+        }`}
+      >
+        {statusChangingId === (application.id || application._id) ? "..." : "Reject"}
+      </button>
+    </div>
+  ) : (
+    <span className="text-slate-300 text-xs">—</span>
+  )}
+</td>
                               </tr>
                             ))}
                           </tbody>
@@ -2155,11 +2331,28 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                       {totalPages > 1 && (
                         <div className="mt-6 flex items-center justify-between border-t border-[#EDF2FD] pt-4">
                           <p className="text-sm text-slate-500">
-                            Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="font-medium">{Math.min(currentPage * itemsPerPage, scopedApplications.length)}</span> of <span className="font-medium">{scopedApplications.length}</span> results
+                            Showing{" "}
+                            <span className="font-medium">
+                              {(currentPage - 1) * itemsPerPage + 1}
+                            </span>{" "}
+                            to{" "}
+                            <span className="font-medium">
+                              {Math.min(
+                                currentPage * itemsPerPage,
+                                scopedApplications.length,
+                              )}
+                            </span>{" "}
+                            of{" "}
+                            <span className="font-medium">
+                              {scopedApplications.length}
+                            </span>{" "}
+                            results
                           </p>
                           <div className="flex gap-2">
                             <button
-                              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                              onClick={() =>
+                                setCurrentPage((prev) => Math.max(prev - 1, 1))
+                              }
                               disabled={currentPage === 1}
                               className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
@@ -2171,7 +2364,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                               </span>
                             </div>
                             <button
-                              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                              onClick={() =>
+                                setCurrentPage((prev) =>
+                                  Math.min(prev + 1, totalPages),
+                                )
+                              }
                               disabled={currentPage === totalPages}
                               className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
@@ -2186,265 +2383,345 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
               ) : (
                 <>
                   {!showOpportunityForm && (
-                  <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5">
-                    <div className="flex flex-col items-start gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
-                      <h2 className="text-2xl font-semibold text-slate-800">
-                        {activeSection === "Internship"
-                          ? "Internship Opportunities"
-                          : activeSection === "Global Program"
-                            ? "Global Program Opportunities"
-                            : activeSection === "Closed Application"
-                              ? "Closed Application"
-                              : "Application Forms"}
-                      </h2>
-                      <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
-                        {!isClosedApplicationPanel && (
-                          <>
-                            <button
-                              type="button"
-                              onClick={handleOpenCreateForm}
-                              className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-[#0B4AA6] text-white text-sm font-semibold hover:bg-[#083B85]"
-                            >
-                              {activeSection === "Internship"
-                                ? "Create Internship"
-                                : "Create Global Program"}
-                            </button>
-                            {selectedIds.length > 0 && (
+                    <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5">
+                      <div className="flex flex-col items-start gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
+                        <h2 className="text-2xl font-semibold text-slate-800">
+                          {activeSection === "Internship"
+                            ? "Internship Opportunities"
+                            : activeSection === "Global Program"
+                              ? "Global Program Opportunities"
+                              : activeSection === "Jobs"
+                                ? "Job Opportunities"
+                                : activeSection === "Bootcamps"
+                                  ? "Bootcamp Opportunities"
+                                  : activeSection === "Masterclasses"
+                                    ? "Masterclass Opportunities"
+                                    : activeSection === "Degree Programs"
+                                      ? "Degree Program Opportunities"
+                                      : activeSection === "PG Programs"
+                                        ? "PG Program Opportunities"
+                                        : activeSection === "Closed Application"
+                                          ? "Closed Application"
+                                          : "Application Forms"}
+                        </h2>
+                        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
+                          {!isClosedApplicationPanel && (
+                            <>
                               <button
                                 type="button"
-                                onClick={handleBulkDelete}
-                                className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700 flex items-center justify-center gap-2"
+                                onClick={handleOpenCreateForm}
+                                className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-[#0B4AA6] text-white text-sm font-semibold hover:bg-[#083B85]"
                               >
-                                <FiTrash2 size={14} />
-                                Delete Selected ({selectedIds.length})
+                                {activeSection === "Internship"
+                                  ? "Create Internship"
+                                  : activeSection === "Global Program"
+                                    ? "Create Global Program"
+                                    : activeSection === "Jobs"
+                                      ? "Create Job"
+                                      : activeSection === "Bootcamps"
+                                        ? "Create Bootcamp"
+                                        : activeSection === "Masterclasses"
+                                          ? "Create Masterclass"
+                                          : activeSection === "Degree Programs"
+                                            ? "Create Degree Program"
+                                            : activeSection === "PG Programs"
+                                              ? "Create PG Program"
+                                              : "Create Opportunity"}
                               </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => handleExport("csv")}
-                              className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-100 text-slate-900 text-sm font-semibold"
-                            >
-                              Download CSV
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleExport("xlsx")}
-                              className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-900 text-white text-sm font-semibold"
-                            >
-                              Download Excel
-                            </button>
-                          </>
-                        )}
+                              {selectedIds.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={handleBulkDelete}
+                                  className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-700 flex items-center justify-center gap-2"
+                                >
+                                  <FiTrash2 size={14} />
+                                  Delete Selected ({selectedIds.length})
+                                </button>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleExport("csv")}
+                                className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-100 text-slate-900 text-sm font-semibold"
+                              >
+                                Download CSV
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleExport("xlsx")}
+                                className="w-full sm:w-auto px-3 py-1.5 rounded-md bg-slate-900 text-white text-sm font-semibold"
+                              >
+                                Download Excel
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
 
-                    {isClosedApplicationPanel ? (
-                      closedApplicationContent
-                    ) : filteredOpportunities.length === 0 ? (
-                      <p className="text-slate-500">
-                        No opportunities added yet.
-                      </p>
-                    ) : (
-                      <div className="overflow-x-auto border border-[#E2EAFC] rounded-xl bg-white">
-                        <table className="min-w-full text-sm">
-                          <thead>
-                            <tr className="text-left border-b border-[#E3EAFA] text-slate-500 bg-slate-50/50">
-                              <th className="py-3 px-4 w-10 text-center">
-                                <input
-                                  type="checkbox"
-                                  className="rounded border-slate-300"
-                                  checked={
-                                    filteredOpportunities.length > 0 &&
-                                    selectedIds.length ===
-                                      filteredOpportunities.length
-                                  }
-                                  onChange={() =>
-                                    handleSelectAll(filteredOpportunities)
-                                  }
-                                />
-                              </th>
-                              <th className="py-3 px-4 font-semibold">Name</th>
-                              <th className="py-3 px-4 font-semibold">Company</th>
-                              <th className="py-3 px-4 font-semibold">Location</th>
-                              <th className="py-3 px-4 font-semibold">Date</th>
-                              <th className="py-3 px-4 font-semibold">Status</th>
-                              <th className="py-3 px-4 font-semibold text-center">Responses</th>
-                              <th className="py-3 px-4 font-semibold text-right">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-[#EDF2FD]">
-                            {filteredOpportunities.map((item) => {
-                              const isClosed = isOpportunityClosed(item);
-                              return (
-                                <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
-                                  <td className="py-3 px-4 text-center">
-                                    <input
-                                      type="checkbox"
-                                      className="rounded border-slate-300"
-                                      checked={selectedIds.includes(item.id)}
-                                      onChange={() => handleSelectItem(item.id)}
-                                    />
-                                  </td>
-                                  <td className="py-3 px-4 font-medium text-slate-800">
-                                    {item.title}
-                                  </td>
-                                  <td className="py-3 px-4 text-slate-600">
-                                    {item.company}
-                                  </td>
-                                  <td className="py-3 px-4 text-slate-600">
-                                    {item.location}
-                                  </td>
-                                  <td className="py-3 px-4 text-slate-600">
-                                    {item.deadline ? new Date(item.deadline).toLocaleDateString() : "N/A"}
-                                  </td>
-                                  <td className="py-3 px-4">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase ${
-                                      isClosed 
-                                        ? "bg-rose-100 text-rose-700" 
-                                        : "bg-emerald-100 text-emerald-700"
-                                    }`}>
-                                      {isClosed ? "Inactive" : "Active"}
-                                    </span>
-                                  </td>
+                      {isClosedApplicationPanel ? (
+                        closedApplicationContent
+                      ) : filteredOpportunities.length === 0 ? (
+                        <p className="text-slate-500">
+                          No opportunities added yet.
+                        </p>
+                      ) : (
+                        <div className="overflow-x-auto border border-[#E2EAFC] rounded-xl bg-white">
+                          <table className="min-w-full text-sm">
+                            <thead>
+                              <tr className="text-left border-b border-[#E3EAFA] text-slate-500 bg-slate-50/50">
+                                <th className="py-3 px-4 w-10 text-center">
+                                  <input
+                                    type="checkbox"
+                                    className="rounded border-slate-300"
+                                    checked={
+                                      filteredOpportunities.length > 0 &&
+                                      selectedIds.length ===
+                                        filteredOpportunities.length
+                                    }
+                                    onChange={() =>
+                                      handleSelectAll(filteredOpportunities)
+                                    }
+                                  />
+                                </th>
+                                <th className="py-3 px-4 font-semibold">
+                                  Name
+                                </th>
+                                <th className="py-3 px-4 font-semibold">
+                                  Company
+                                </th>
+                                <th className="py-3 px-4 font-semibold">
+                                  Location
+                                </th>
+                                <th className="py-3 px-4 font-semibold">
+                                  Date
+                                </th>
+                                <th className="py-3 px-4 font-semibold">
+                                  Status
+                                </th>
+                                <th className="py-3 px-4 font-semibold text-center">
+                                  Responses
+                                </th>
+                                <th className="py-3 px-4 font-semibold text-right">
+                                  Actions
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#EDF2FD]">
+                              {filteredOpportunities.map((item) => {
+                                const isClosed = isOpportunityClosed(item);
+                                return (
+                                  <tr
+                                    key={item.id}
+                                    className="hover:bg-slate-50/50 transition-colors"
+                                  >
+                                    <td className="py-3 px-4 text-center">
+                                      <input
+                                        type="checkbox"
+                                        className="rounded border-slate-300"
+                                        checked={selectedIds.includes(item.id)}
+                                        onChange={() =>
+                                          handleSelectItem(item.id)
+                                        }
+                                      />
+                                    </td>
+                                    <td className="py-3 px-4 font-medium text-slate-800">
+                                      {item.title}
+                                    </td>
+                                    <td className="py-3 px-4 text-slate-600">
+                                      {item.company}
+                                    </td>
+                                    <td className="py-3 px-4 text-slate-600">
+                                      {item.location}
+                                    </td>
+                                    <td className="py-3 px-4 text-slate-600">
+                                      {item.deadline
+                                        ? new Date(
+                                            item.deadline,
+                                          ).toLocaleDateString()
+                                        : "N/A"}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                      <span
+                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wide uppercase ${
+                                          isClosed
+                                            ? "bg-rose-100 text-rose-700"
+                                            : "bg-emerald-100 text-emerald-700"
+                                        }`}
+                                      >
+                                        {isClosed ? "Inactive" : "Active"}
+                                      </span>
+                                    </td>
 
-                                  {/*Responses button*/}
-                                  <td className="py-3 px-4 text-center">
-                                    {(() => {
-                                      const responseCount = applications.filter(app => {
-                                        const oppId = String(app.opportunityId || app.opportunity?._id || app.opportunity || "");
-                                        return oppId === String(item.id || item._id);
-                                      }).length;
+                                    {/*Responses button*/}
+                                    <td className="py-3 px-4 text-center">
+                                      {(() => {
+                                        const responseCount =
+                                          applications.filter((app) => {
+                                            const oppId = String(
+                                              app.opportunityId ||
+                                                app.opportunity?._id ||
+                                                app.opportunity ||
+                                                "",
+                                            );
+                                            return (
+                                              oppId ===
+                                              String(item.id || item._id)
+                                            );
+                                          }).length;
 
-                                      return responseCount > 0 ? (
+                                        return responseCount > 0 ? (
+                                          <button
+                                            onClick={() =>
+                                              handleViewResponses(
+                                                item.id || item._id,
+                                              )
+                                            }
+                                            className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-2 justify-center mx-auto group"
+                                            title="View Responses"
+                                          >
+                                            <span className="font-bold">
+                                              {responseCount}
+                                            </span>
+                                            <FiEye
+                                              size={16}
+                                              className="group-hover:scale-110 transition-transform"
+                                            />
+                                          </button>
+                                        ) : (
+                                          <span className="text-slate-300 flex items-center gap-2 justify-center">
+                                            <span>0</span>
+                                            <FiEye size={16} />
+                                          </span>
+                                        );
+                                      })()}
+                                    </td>
+
+                                    <td className="py-3 px-4 text-right">
+                                      <div className="flex items-center justify-end gap-3">
                                         <button
-                                          onClick={() => handleViewResponses(item.id || item._id)}
-                                          className="text-blue-500 hover:text-blue-700 transition-colors flex items-center gap-2 justify-center mx-auto group"
-                                          title="View Responses"
+                                          onClick={() => handleEdit(item)}
+                                          className="text-blue-500 hover:text-blue-700 transition-colors"
+                                          title="Edit"
                                         >
-                                          <span className="font-bold">{responseCount}</span>
-                                          <FiEye size={16} className="group-hover:scale-110 transition-transform" />
+                                          <FiEdit2 size={16} />
                                         </button>
-                                      ) : (
-                                        <span className="text-slate-300 flex items-center gap-2 justify-center">
-                                          <span>0</span>
-                                          <FiEye size={16} />
-                                        </span>
-                                      );
-                                    })()}
-                                  </td>
+                                        <button
+                                          onClick={() => handleDelete(item.id)}
+                                          className="text-rose-500 hover:text-rose-700 transition-colors"
+                                          title="Delete"
+                                        >
+                                          <FiTrash2 size={16} />
+                                        </button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                                
-                                  
+                  {showOpportunityForm && (
+                    <div className="bg-white rounded-xl border border-[#DCE5FA] overflow-hidden flex flex-col xl:flex-row min-h-[600px] shadow-sm">
+                      {/* LEFT STEPPER SIDEBAR */}
+                      <div className="w-full xl:w-[300px] bg-white border-r border-[#E2EAFC] p-8 flex flex-col">
+                        <h2 className="text-xl font-bold text-slate-800 mb-6">
+                          {editingId ? "Edit" : "Create"} {form.type}
+                        </h2>
 
-                                  <td className="py-3 px-4 text-right">
-                                    <div className="flex items-center justify-end gap-3">
-                                      <button
-                                        onClick={() => handleEdit(item)}
-                                        className="text-blue-500 hover:text-blue-700 transition-colors"
-                                        title="Edit"
-                                      >
-                                        <FiEdit2 size={16} />
-                                      </button>
-                                      <button
-                                        onClick={() => handleDelete(item.id)}
-                                        className="text-rose-500 hover:text-rose-700 transition-colors"
-                                        title="Delete"
-                                      >
-                                        <FiTrash2 size={16} />
-                                      </button>
-                                    </div>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                    {showOpportunityForm && (
-                      <div className="bg-white rounded-xl border border-[#DCE5FA] overflow-hidden flex flex-col xl:flex-row min-h-[600px] shadow-sm">
-                        {/* LEFT STEPPER SIDEBAR */}
-                        <div className="w-full xl:w-[230px] bg-white border-r border-[#E2EAFC] p-8 flex flex-col">
-                          <h2 className="text-xl font-bold text-slate-800 mb-6">
-                            {editingId ? "Edit" : "Create"} {form.type === "Global Program" ? "Program" : "Internship"}
-                          </h2>
-                          
-                          <div className="w-full bg-[#E2EAFC] h-1.5 rounded-full mb-10 overflow-hidden">
-                            <div 
-                              className="bg-blue-600 h-full transition-all duration-300" 
-                              style={{ width: currentStep === 1 ? "40%" : "100%" }}
-                            ></div>
-                          </div>
-
-                          <div className="space-y-10 relative">
-                            {/* Connector Line */}
-                            <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-[#E2EAFC]"></div>
-
-                            <button 
-                              type="button"
-                              onClick={() => setCurrentStep(1)}
-                              className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
-                              disabled={!editingId && currentStep !== 1}
-                            >
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                                currentStep === 1 
-                                  ? "bg-blue-600 text-white" 
-                                  : "bg-blue-100 text-blue-600 group-hover:bg-blue-200"
-                              }`}>
-                                1
-                              </div>
-                              <span className={`font-semibold text-sm transition-colors ${
-                                currentStep === 1 ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
-                              }`}>
-                                Program Details
-                              </span>
-                            </button>
-
-                            <button 
-                              type="button"
-                              onClick={() => {
-                                if (editingId) {
-                                  const path = isSuperDashboard ? `/super-admin-dashboard/build-form/${editingId}` : `/admin-dashboard/build-form/${editingId}`;
-                                  navigate(path);
-                                } else {
-                                  // For new opportunities, save first
-                                  alert("Please save the opportunity details first before building the form.");
-                                }
-                              }}
-                              className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
-                              disabled={!editingId}
-                            >
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
-                                currentStep === 2 
-                                  ? "bg-blue-600 text-white" 
-                                  : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
-                              }`}>
-                                2
-                              </div>
-                              <span className={`font-semibold text-sm transition-colors ${
-                                currentStep === 2 ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
-                              }`}>
-                                Application Form
-                              </span>
-                            </button>
-                          </div>
-
-                          <div className="mt-auto pt-10">
-                            <button
-                              onClick={resetForm}
-                              className="w-full py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
-                            >
-                              Discard
-                            </button>
-                          </div>
+                        <div className="w-full bg-[#E2EAFC] h-1.5 rounded-full mb-10 overflow-hidden">
+                          <div
+                            className="bg-blue-600 h-full transition-all duration-300"
+                            style={{
+                              width: currentStep === 1 ? "40%" : "100%",
+                            }}
+                          ></div>
                         </div>
 
-                        {/* RIGHT FORM CONTENT */}
-                        <div className="flex-1 p-8 pb-6 bg-[#F8FBFF]/50 overflow-y-auto custom-scrollbar max-h-[94vh]">
-                          {/* <div className="flex items-center justify-between mb-8">
+                        <div className="space-y-10 relative">
+                          {/* Connector Line */}
+                          <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-[#E2EAFC]"></div>
+
+                          <button
+                            type="button"
+                            onClick={() => setCurrentStep(1)}
+                            className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
+                            disabled={!editingId && currentStep !== 1}
+                          >
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                                currentStep === 1
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-blue-100 text-blue-600 group-hover:bg-blue-200"
+                              }`}
+                            >
+                              1
+                            </div>
+                            <span
+                              className={`font-semibold text-sm transition-colors ${
+                                currentStep === 1
+                                  ? "text-blue-600"
+                                  : "text-slate-400 group-hover:text-slate-600"
+                              }`}
+                            >
+                              Program Details
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (editingId) {
+                                const path = isSuperDashboard
+                                  ? `/super-admin-dashboard/build-form/${editingId}`
+                                  : `/admin-dashboard/build-form/${editingId}`;
+                                navigate(path);
+                              } else {
+                                // For new opportunities, save first
+                                alert(
+                                  "Please save the opportunity details first before building the form.",
+                                );
+                              }
+                            }}
+                            className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
+                            disabled={!editingId}
+                          >
+                            <div
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${
+                                currentStep === 2
+                                  ? "bg-blue-600 text-white"
+                                  : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"
+                              }`}
+                            >
+                              2
+                            </div>
+                            <span
+                              className={`font-semibold text-sm transition-colors ${
+                                currentStep === 2
+                                  ? "text-blue-600"
+                                  : "text-slate-400 group-hover:text-slate-600"
+                              }`}
+                            >
+                              Application Form
+                            </span>
+                          </button>
+                        </div>
+
+                        <div className="mt-auto pt-10">
+                          <button
+                            onClick={resetForm}
+                            className="w-full py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
+                          >
+                            Discard
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* RIGHT FORM CONTENT */}
+                      <div className="flex-1 p-8 pb-6 bg-[#F8FBFF]/50 overflow-y-auto custom-scrollbar max-h-[94vh]">
+                        {/* <div className="flex items-center justify-between mb-8">
                             <h3 className="text-2xl font-bold text-slate-800">
                               {currentStep === 1 ? "Program Details" : "Application Form Setup"}
                             </h3>
@@ -2458,406 +2735,595 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                             </button>
                           </div> */}
 
-                          <form id="opportunity-form" onSubmit={handleSubmit} className="space-y-8">
-                            <div className="space-y-8">
-                                {/* Type Selection */}
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
-                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                    <span>Internship Type <span className="text-rose-600">*</span></span>
+                        <form
+                          id="opportunity-form"
+                          onSubmit={handleSubmit}
+                          className="space-y-8"
+                        >
+                          <div className="space-y-8">
+                            {/* Type Selection */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                              <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                <span>
+                                  Internship Type{" "}
+                                  <span className="text-rose-600">*</span>
+                                </span>
+                                <select
+                                  name="internshipType"
+                                  value={form.internshipType}
+                                  onChange={handleChange}
+                                  className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                  required
+                                >
+                                  <option value="">Select</option>
+                                  <option value="Internship">Internship</option>
+                                  <option value="Global Program">
+                                    Global Program
+                                  </option>
+                                  <option value="Summer (Courses)">
+                                    Summer Internship
+                                  </option>
+                                  <option value="Winter (Courses)">
+                                    Winter Internship
+                                  </option>
+                                  <option value="NGO / Social Work">
+                                    NGO / Social Work
+                                  </option>
+                                  <option value="Campus Ambassador">
+                                    Campus Ambassador
+                                  </option>
+                                  <option value="Apprenticeships">
+                                    Apprenticeships
+                                  </option>
+                                  <option value="Externships">
+                                    Externships
+                                  </option>
+                                  <option value="Government Internship">
+                                    Government Internship
+                                  </option>
+                                  <option value="Research Internships">
+                                    Research Internships
+                                  </option>
+                                  <option value="Assessment Internships">
+                                    Assessment Internships
+                                  </option>
+                                </select>
+                              </label>
+                            </div>
+
+                            {/* Basic Info */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                              <h4 className="text-md font-bold text-slate-800 mb-6">
+                                Basic Info
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>
+                                    Title{" "}
+                                    <span className="text-rose-600">*</span>
+                                  </span>
+                                  <input
+                                    name="title"
+                                    value={form.title}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Software Engineer"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                    required
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>
+                                    Company{" "}
+                                    <span className="text-rose-600">*</span>
+                                  </span>
+                                  <input
+                                    name="company"
+                                    value={form.company}
+                                    onChange={handleChange}
+                                    placeholder="Company Name"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                    required
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>
+                                    Location{" "}
+                                    <span className="text-rose-600">*</span>
+                                  </span>
+                                  <input
+                                    name="location"
+                                    value={form.location}
+                                    onChange={handleChange}
+                                    placeholder="City / Remote"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                    required
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>Website URL</span>
+                                  <input
+                                    name="website"
+                                    value={form.website}
+                                    onChange={handleChange}
+                                    placeholder="https://company.com"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                  />
+                                </label>
+
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>
+                                    Deadline{" "}
+                                    <span className="text-rose-600">*</span>
+                                  </span>
+                                  <input
+                                    type="date"
+                                    name="deadline"
+                                    value={form.deadline}
+                                    onChange={handleChange}
+                                    min={new Date().toISOString().split("T")[0]}
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                    required
+                                  />
+                                </label>
+
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>
+                                    Start Date{" "}
+                                    <span className="text-rose-600">*</span>
+                                  </span>
+                                  <input
+                                    type="date"
+                                    name="startDate"
+                                    value={form.startDate}
+                                    onChange={handleChange}
+                                    min={new Date().toISOString().split("T")[0]}
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                    required
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>
+                                    Duration{" "}
+                                    <span className="text-rose-600">*</span>
+                                  </span>
+                                  <div className="flex gap-2">
+                                    <input
+                                      name="duration"
+                                      type="number"
+                                      value={form.duration}
+                                      onChange={handleChange}
+                                      placeholder="e.g. 3"
+                                      className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                      required
+                                    />
                                     <select
-                                      name="internshipType"
-                                      value={form.internshipType}
+                                      name="durationUnit"
+                                      value={form.durationUnit}
                                       onChange={handleChange}
-                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                      required
+                                      className="w-[120px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
                                     >
-                                      <option value="">Select</option>
-                                      <option value="Internship">Internship</option>
-                                      <option value="Global Program">Global Program</option>
-                                      <option value="Summer (Courses)">Summer Internship</option>
-                                      <option value="Winter (Courses)">Winter Internship</option>
-                                      <option value="NGO / Social Work">NGO / Social Work</option>
-                                      <option value="Campus Ambassador">Campus Ambassador</option>
-                                      <option value="Apprenticeships">Apprenticeships</option>
-                                      <option value="Externships">Externships</option>
-                                      <option value="Government Internship">Government Internship</option>
-                                      <option value="Research Internships">Research Internships</option>
-                                      <option value="Assessment Internships">Assessment Internships</option>
+                                      <option value="Weeks">Weeks</option>
+                                      <option value="Months">Months</option>
+                                      <option value="Years">Years</option>
                                     </select>
-                                  </label>
-                                </div>
-
-                                {/* Basic Info */}
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
-                                  <h4 className="text-md font-bold text-slate-800 mb-6">Basic Info</h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Title <span className="text-rose-600">*</span></span>
-                                      <input
-                                        name="title"
-                                        value={form.title}
-                                        onChange={handleChange}
-                                        placeholder="e.g. Software Engineer"
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        required
-                                      />
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Company <span className="text-rose-600">*</span></span>
-                                      <input
-                                        name="company"
-                                        value={form.company}
-                                        onChange={handleChange}
-                                        placeholder="Company Name"
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        required
-                                      />
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Location <span className="text-rose-600">*</span></span>
-                                      <input
-                                        name="location"
-                                        value={form.location}
-                                        onChange={handleChange}
-                                        placeholder="City / Remote"
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        required
-                                      />
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Website URL</span>
-                                      <input
-                                        name="website"
-                                        value={form.website}
-                                        onChange={handleChange}
-                                        placeholder="https://company.com"
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                      />
-                                    </label>
-                                    
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Deadline <span className="text-rose-600">*</span></span>
-                                      <input
-                                        type="date"
-                                        name="deadline"
-                                        value={form.deadline}
-                                        onChange={handleChange}
-                                        min={new Date().toISOString().split("T")[0]}
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        required
-                                      />
-                                    </label>
-
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Start Date <span className="text-rose-600">*</span></span>
-                                      <input
-                                        type="date"
-                                        name="startDate"
-                                        value={form.startDate}
-                                        onChange={handleChange}
-                                        min={new Date().toISOString().split("T")[0]}
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        required
-                                      />
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Duration <span className="text-rose-600">*</span></span>
-                                      <div className="flex gap-2">
-                                        <input
-                                          name="duration"
-                                          type="number"
-                                          value={form.duration}
-                                          onChange={handleChange}
-                                          placeholder="e.g. 3"
-                                          className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                          required
-                                        />
-                                        <select
-                                          name="durationUnit"
-                                          value={form.durationUnit}
-                                          onChange={handleChange}
-                                          className="w-[120px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        >
-                                          <option value="Weeks">Weeks</option>
-                                          <option value="Months">Months</option>
-                                          <option value="Years">Years</option>
-                                        </select>
-                                      </div>
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Work Mode <span className="text-rose-600">*</span></span>
-                                      <select
-                                        name="workMode"
-                                        value={form.workMode}
-                                        onChange={handleChange}
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                        required
-                                      >
-                                        <option value="In Office">In Office</option>
-                                        <option value="Remote">Remote</option>
-                                        <option value="Hybrid">Hybrid</option>
-                                      </select>
-                                    </label>
                                   </div>
-                                </div>
-                                
-                                {/* Logo Upload Section - Added after Basic Details */}
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
-                                  <h4 className="text-md font-bold text-slate-800 mb-6">Company Logo</h4>
-                                  <div className="flex flex-col sm:flex-row items-center gap-8">
-                                    <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-dashed border-[#D6E2FC] flex items-center justify-center overflow-hidden flex-shrink-0">
-                                      {form.logo ? (
-                                        <img src={form.logo} alt="Preview" className="w-full h-full object-contain" />
-                                      ) : (
-                                        <FiGlobe className="text-slate-300" size={32} />
-                                      )}
-                                    </div>
-                                    <div className="flex-1 space-y-3">
-                                      <p className="text-sm text-slate-500">
-                                        Upload your company logo. PNG, JPG or SVG (Max 2MB).
-                                      </p>
-                                      <label className="inline-flex items-center px-6 py-2.5 rounded-xl bg-blue-50 text-blue-600 font-bold text-sm cursor-pointer hover:bg-blue-100 transition-all border border-blue-100">
-                                        <span>Choose Logo File</span>
-                                        <input
-                                          type="file"
-                                          accept="image/*"
-                                          onChange={handleLogoChange}
-                                          className="hidden"
-                                        />
-                                      </label>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Compensation */}
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
-                                  <div className="flex items-center justify-between mb-6">
-                                    <h4 className="text-md font-bold text-slate-800">Stipend Details</h4>
-                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                      <div className="relative flex items-center">
-                                        <input
-                                          type="checkbox"
-                                          name="isUnpaid"
-                                          checked={form.isUnpaid}
-                                          onChange={handleChange}
-                                          className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 bg-white transition-all checked:border-blue-600 checked:bg-blue-600 focus:outline-none"
-                                        />
-                                        <FiCheck className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" size={14} />
-                                      </div>
-                                      <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">Unpaid Internship</span>
-                                    </label>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label className={`flex flex-col gap-2 text-sm font-semibold transition-opacity ${form.isUnpaid ? 'opacity-50 pointer-events-none' : 'text-slate-700'}`}>
-                                      <span>Stipend Amount</span>
-                                      <input
-                                        name="stipend"
-                                        value={form.isUnpaid ? "0" : form.stipend}
-                                        onChange={handleChange}
-                                        placeholder="e.g. 10000"
-                                        disabled={form.isUnpaid}
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                      />
-                                    </label>
-                                    <label className={`flex flex-col gap-2 text-sm font-semibold transition-opacity ${form.isUnpaid ? 'opacity-50 pointer-events-none' : 'text-slate-700'}`}>
-                                      <span>Currency</span>
-                                      <select
-                                        name="stipendCurrency"
-                                        value={form.stipendCurrency}
-                                        onChange={handleChange}
-                                        disabled={form.isUnpaid}
-                                        className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
-                                      >
-                                        <option value="INR">INR (₹)</option>
-                                        <option value="USD">USD ($)</option>
-                                      </select>
-                                    </label>
-                                  </div>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
-                                  <h4 className="text-md font-bold text-slate-800 mb-0">Role Description</h4>
-                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                    <span>Detailed Description <span className="text-rose-600">*</span></span>
-                                    <textarea
-                                      name="description"
-                                      value={form.description}
-                                      onChange={handleChange}
-                                      placeholder="Responsibilities, expectations, etc."
-                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[150px]"
-                                      required
-                                    />
-                                  </label>
-                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                    <span>Who Can Apply (Eligibility)</span>
-                                    <textarea
-                                      name="whoCanApply"
-                                      value={form.whoCanApply}
-                                      onChange={handleChange}
-                                      placeholder="Eligibility criteria"
-                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[100px]"
-                                    />
-                                  </label>
-                                </div>
-
-                                {/* Skills & Benefits Section */}
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
-                                  <div className="flex items-center justify-between">
-                                    <h4 className="text-md font-bold text-slate-800">Required Skills</h4>
-                                    <button type="button" onClick={addRequiredSkillInput} className="text-sm text-blue-600 font-bold">+ Add Skill</button>
-                                  </div>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {requiredSkillInputs.map((skill, index) => (
-                                      <div key={index} className="relative group">
-                                        <input
-                                          value={skill}
-                                          onChange={(e) => handleRequiredSkillChange(index, e.target.value)}
-                                          placeholder={`Skill ${index + 1}`}
-                                          className="w-full border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all pr-12"
-                                          required={index < 3}
-                                        />
-                                        {requiredSkillInputs.length > 3 && (
-                                          <button
-                                            type="button"
-                                            onClick={() => removeRequiredSkillInput(index)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500 transition-colors"
-                                            title="Remove Skill"
-                                          >
-                                            <FiTrash2 size={16} />
-                                          </button>
-                                        )}
-                                      </div>
-                                    ))}
-                                  </div>
-                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                    <span>Primary Skills / Tags (Comma separated) <span className="text-rose-600">*</span></span>
-                                    <input
-                                      name="skills"
-                                      value={form.skills}
-                                      onChange={handleChange}
-                                      placeholder="React, JavaScript, CSS"
-                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
-                                      required
-                                    />
-                                  </label>
-                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                    <span>Highlight Tags</span>
-                                    <input
-                                      name="cardTags"
-                                      value={form.cardTags}
-                                      onChange={handleChange}
-                                      placeholder="Immediate Joiner, PPO"
-                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
-                                    />
-                                  </label>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-3">
-                                  <h4 className="text-md font-bold text-slate-800">Perks & Benefits <span className="text-sm font-medium">(Use commas or new lines)</span></h4>
-                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                    
-                                    <textarea
-                                      name="benefits"
-                                      value={form.benefits}
-                                      onChange={handleChange}
-                                      placeholder="e.g. Flexible hours, Certificate, PPO, Health insurance..."
-                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px]"
-                                    />
-                                  </label>
-                                </div>
-
-                                <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
-                                  <h4 className="text-md font-bold text-slate-800 mb-6">Company Details</h4>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Department</span>
-                                      <input name="department" value={form.department} onChange={handleChange} placeholder="e.g. Engineering" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Functional Role</span>
-                                      <input name="functionalRole" value={form.functionalRole} onChange={handleChange} placeholder="e.g. Developer" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Company Type</span>
-                                      <input name="companyType" value={form.companyType} onChange={handleChange} placeholder="e.g. Startup" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Company Size</span>
-                                      <input name="companySize" value={form.companySize} onChange={handleChange} placeholder="e.g. 50-200" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Founded Year</span>
-                                      <input name="foundedYear" value={form.foundedYear} onChange={handleChange} placeholder="e.g. 2015" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                    </label>
-                                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                      <span>Industry</span>
-                                      <input name="industry" value={form.industry} onChange={handleChange} placeholder="e.g. Tech" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                    </label>
-                                  </div>
-                                </div>
-
-                                {form.type === "Global Program" && (
-                                  <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
-                                    <h4 className="text-md font-bold text-slate-800">Program Specifics</h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                      <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                        <span>Program Type</span>
-                                        <input name="programType" value={form.programType} onChange={handleChange} placeholder="e.g. Fellowship" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                      </label>
-                                      <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                                        <span>Eligibility Criteria</span>
-                                        <input name="eligibility" value={form.eligibility} onChange={handleChange} placeholder="Who can join" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"/>
-                                      </label>
-                                    </div>
-                                  </div>
-                                )}
-
-                                <div className="flex justify-end pt-8 border-t border-[#E2EAFC]">
-                                  <button
-                                    type="submit"
-                                    disabled={busy}
-                                    className="px-12 py-4 rounded-2xl bg-slate-900 text-white font-bold hover:bg-black shadow-xl transition-all active:scale-95 disabled:opacity-50"
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>
+                                    Work Mode{" "}
+                                    <span className="text-rose-600">*</span>
+                                  </span>
+                                  <select
+                                    name="workMode"
+                                    value={form.workMode}
+                                    onChange={handleChange}
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                    required
                                   >
-                                    {busy ? "Publishing..." : editingId ? "Update Opportunity" : "Preview & Publish Internship"}
-                                  </button>
+                                    <option value="In Office">In Office</option>
+                                    <option value="Remote">Remote</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                  </select>
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Logo Upload Section - Added after Basic Details */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                              <h4 className="text-md font-bold text-slate-800 mb-6">
+                                Company Logo
+                              </h4>
+                              <div className="flex flex-col sm:flex-row items-center gap-8">
+                                <div className="w-24 h-24 rounded-2xl bg-slate-50 border-2 border-dashed border-[#D6E2FC] flex items-center justify-center overflow-hidden flex-shrink-0">
+                                  {form.logo ? (
+                                    <img
+                                      src={form.logo}
+                                      alt="Preview"
+                                      className="w-full h-full object-contain"
+                                    />
+                                  ) : (
+                                    <FiGlobe
+                                      className="text-slate-300"
+                                      size={32}
+                                    />
+                                  )}
+                                </div>
+                                <div className="flex-1 space-y-3">
+                                  <p className="text-sm text-slate-500">
+                                    Upload your company logo. PNG, JPG or SVG
+                                    (Max 2MB).
+                                  </p>
+                                  <label className="inline-flex items-center px-6 py-2.5 rounded-xl bg-blue-50 text-blue-600 font-bold text-sm cursor-pointer hover:bg-blue-100 transition-all border border-blue-100">
+                                    <span>Choose Logo File</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={handleLogoChange}
+                                      className="hidden"
+                                    />
+                                  </label>
                                 </div>
                               </div>
-                          </form>
-                        </div>
+                            </div>
+
+                            {/* Compensation */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                              <div className="flex items-center justify-between mb-6">
+                                <h4 className="text-md font-bold text-slate-800">
+                                  Stipend Details
+                                </h4>
+                                <label className="flex items-center gap-2 cursor-pointer group">
+                                  <div className="relative flex items-center">
+                                    <input
+                                      type="checkbox"
+                                      name="isUnpaid"
+                                      checked={form.isUnpaid}
+                                      onChange={handleChange}
+                                      className="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 bg-white transition-all checked:border-blue-600 checked:bg-blue-600 focus:outline-none"
+                                    />
+                                    <FiCheck
+                                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none"
+                                      size={14}
+                                    />
+                                  </div>
+                                  <span className="text-sm font-semibold text-slate-600 group-hover:text-slate-800 transition-colors">
+                                    Unpaid Internship
+                                  </span>
+                                </label>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <label
+                                  className={`flex flex-col gap-2 text-sm font-semibold transition-opacity ${form.isUnpaid ? "opacity-50 pointer-events-none" : "text-slate-700"}`}
+                                >
+                                  <span>Stipend Amount</span>
+                                  <input
+                                    name="stipend"
+                                    value={form.isUnpaid ? "0" : form.stipend}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 10000"
+                                    disabled={form.isUnpaid}
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                  />
+                                </label>
+                                <label
+                                  className={`flex flex-col gap-2 text-sm font-semibold transition-opacity ${form.isUnpaid ? "opacity-50 pointer-events-none" : "text-slate-700"}`}
+                                >
+                                  <span>Currency</span>
+                                  <select
+                                    name="stipendCurrency"
+                                    value={form.stipendCurrency}
+                                    onChange={handleChange}
+                                    disabled={form.isUnpaid}
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none"
+                                  >
+                                    <option value="INR">INR (₹)</option>
+                                    <option value="USD">USD ($)</option>
+                                  </select>
+                                </label>
+                              </div>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
+                              <h4 className="text-md font-bold text-slate-800 mb-0">
+                                Role Description
+                              </h4>
+                              <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                <span>
+                                  Detailed Description{" "}
+                                  <span className="text-rose-600">*</span>
+                                </span>
+                                <textarea
+                                  name="description"
+                                  value={form.description}
+                                  onChange={handleChange}
+                                  placeholder="Responsibilities, expectations, etc."
+                                  className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[150px]"
+                                  required
+                                />
+                              </label>
+                              <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                <span>Who Can Apply (Eligibility)</span>
+                                <textarea
+                                  name="whoCanApply"
+                                  value={form.whoCanApply}
+                                  onChange={handleChange}
+                                  placeholder="Eligibility criteria"
+                                  className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[100px]"
+                                />
+                              </label>
+                            </div>
+
+                            {/* Skills & Benefits Section */}
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
+                              <div className="flex items-center justify-between">
+                                <h4 className="text-md font-bold text-slate-800">
+                                  Required Skills
+                                </h4>
+                                <button
+                                  type="button"
+                                  onClick={addRequiredSkillInput}
+                                  className="text-sm text-blue-600 font-bold"
+                                >
+                                  + Add Skill
+                                </button>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {requiredSkillInputs.map((skill, index) => (
+                                  <div key={index} className="relative group">
+                                    <input
+                                      value={skill}
+                                      onChange={(e) =>
+                                        handleRequiredSkillChange(
+                                          index,
+                                          e.target.value,
+                                        )
+                                      }
+                                      placeholder={`Skill ${index + 1}`}
+                                      className="w-full border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all pr-12"
+                                      required={index < 3}
+                                    />
+                                    {requiredSkillInputs.length > 3 && (
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          removeRequiredSkillInput(index)
+                                        }
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-rose-500 transition-colors"
+                                        title="Remove Skill"
+                                      >
+                                        <FiTrash2 size={16} />
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                              <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                <span>
+                                  Primary Skills / Tags (Comma separated){" "}
+                                  <span className="text-rose-600">*</span>
+                                </span>
+                                <input
+                                  name="skills"
+                                  value={form.skills}
+                                  onChange={handleChange}
+                                  placeholder="React, JavaScript, CSS"
+                                  className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                  required
+                                />
+                              </label>
+                              <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                <span>Highlight Tags</span>
+                                <input
+                                  name="cardTags"
+                                  value={form.cardTags}
+                                  onChange={handleChange}
+                                  placeholder="Immediate Joiner, PPO"
+                                  className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                />
+                              </label>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-3">
+                              <h4 className="text-md font-bold text-slate-800">
+                                Perks & Benefits{" "}
+                                <span className="text-sm font-medium">
+                                  (Use commas or new lines)
+                                </span>
+                              </h4>
+                              <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                <textarea
+                                  name="benefits"
+                                  value={form.benefits}
+                                  onChange={handleChange}
+                                  placeholder="e.g. Flexible hours, Certificate, PPO, Health insurance..."
+                                  className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[120px]"
+                                />
+                              </label>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+                              <h4 className="text-md font-bold text-slate-800 mb-6">
+                                Company Details
+                              </h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>Department</span>
+                                  <input
+                                    name="department"
+                                    value={form.department}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Engineering"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>Functional Role</span>
+                                  <input
+                                    name="functionalRole"
+                                    value={form.functionalRole}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Developer"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>Company Type</span>
+                                  <input
+                                    name="companyType"
+                                    value={form.companyType}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Startup"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>Company Size</span>
+                                  <input
+                                    name="companySize"
+                                    value={form.companySize}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 50-200"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>Founded Year</span>
+                                  <input
+                                    name="foundedYear"
+                                    value={form.foundedYear}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 2015"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                  />
+                                </label>
+                                <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                  <span>Industry</span>
+                                  <input
+                                    name="industry"
+                                    value={form.industry}
+                                    onChange={handleChange}
+                                    placeholder="e.g. Tech"
+                                    className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                  />
+                                </label>
+                              </div>
+                            </div>
+
+                            {form.type === "Global Program" && (
+                              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm space-y-6">
+                                <h4 className="text-md font-bold text-slate-800">
+                                  Program Specifics
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Program Type</span>
+                                    <input
+                                      name="programType"
+                                      value={form.programType}
+                                      onChange={handleChange}
+                                      placeholder="e.g. Fellowship"
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                    />
+                                  </label>
+                                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                                    <span>Eligibility Criteria</span>
+                                    <input
+                                      name="eligibility"
+                                      value={form.eligibility}
+                                      onChange={handleChange}
+                                      placeholder="Who can join"
+                                      className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 outline-none"
+                                    />
+                                  </label>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="flex justify-end pt-8 border-t border-[#E2EAFC]">
+                              <button
+                                type="submit"
+                                disabled={busy}
+                                className="px-12 py-4 rounded-2xl bg-slate-900 text-white font-bold hover:bg-black shadow-xl transition-all active:scale-95 disabled:opacity-50"
+                              >
+                                {busy
+                                  ? "Publishing..."
+                                  : editingId
+                                    ? "Update Opportunity"
+                                    : "Preview & Publish Internship"}
+                              </button>
+                            </div>
+                          </div>
+                        </form>
                       </div>
-                    )}
+                    </div>
+                  )}
 
                   {/* PREVIEW MODAL */}
                   {showPreviewModal && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
                       <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
                         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                          <h2 className="text-xl font-bold text-slate-800">Confirm Program Details</h2>
-                          <button onClick={() => setShowPreviewModal(false)} className="text-blue-600 font-bold hover:underline text-sm">Edit</button>
+                          <h2 className="text-xl font-bold text-slate-800">
+                            Confirm Program Details
+                          </h2>
+                          <button
+                            onClick={() => setShowPreviewModal(false)}
+                            className="text-blue-600 font-bold hover:underline text-sm"
+                          >
+                            Edit
+                          </button>
                         </div>
-                        
+
                         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
                           {[
-                            { label: "Internship Type", value: form.internshipType },
+                            {
+                              label: "Internship Type",
+                              value: form.internshipType,
+                            },
                             { label: "Listing Type", value: form.type },
                             { label: "Work Profile", value: form.title },
                             { label: "Company Name", value: form.company },
                             { label: "Location", value: form.location },
-                            { label: "Company Website Url", value: form.website || "-" },
-                            { label: "Detailed Description", value: form.description },
-                            { label: "Eligibility Criteria", value: form.whoCanApply || "-" },
-                            { label: "Stipend", value: `${form.stipendCurrency} ${form.stipend || "Unpaid"}` },
+                            {
+                              label: "Company Website Url",
+                              value: form.website || "-",
+                            },
+                            {
+                              label: "Detailed Description",
+                              value: form.description,
+                            },
+                            {
+                              label: "Eligibility Criteria",
+                              value: form.whoCanApply || "-",
+                            },
+                            {
+                              label: "Stipend",
+                              value: `${form.stipendCurrency} ${form.stipend || "Unpaid"}`,
+                            },
                             { label: "Work Mode", value: form.workMode },
-                            { label: "Company Founded", value: form.foundedYear || "-" },
-                            { label: "Company Type", value: form.companyType || "-" }
+                            {
+                              label: "Company Founded",
+                              value: form.foundedYear || "-",
+                            },
+                            {
+                              label: "Company Type",
+                              value: form.companyType || "-",
+                            },
                           ].map((item, idx) => (
-                            <div key={idx} className="flex flex-col gap-1 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
-                              <span className="text-sm font-medium text-slate-500">{item.label}</span>
-                              <div 
-                                className={`text-sm font-semibold text-slate-800 ${item.label.toLowerCase().includes('description') || item.label.toLowerCase().includes('criteria') ? 'whitespace-pre-wrap' : 'truncate'}`}
-                                dangerouslySetInnerHTML={{ 
-                                  __html: String(item.value || "")
-                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            <div
+                              key={idx}
+                              className="flex flex-col gap-1 p-3 bg-white rounded-xl border border-slate-100 shadow-sm"
+                            >
+                              <span className="text-sm font-medium text-slate-500">
+                                {item.label}
+                              </span>
+                              <div
+                                className={`text-sm font-semibold text-slate-800 ${item.label.toLowerCase().includes("description") || item.label.toLowerCase().includes("criteria") ? "whitespace-pre-wrap" : "truncate"}`}
+                                dangerouslySetInnerHTML={{
+                                  __html: String(item.value || "").replace(
+                                    /\*\*(.*?)\*\*/g,
+                                    "<strong>$1</strong>",
+                                  ),
                                 }}
                               />
                             </div>
@@ -2865,14 +3331,14 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                         </div>
 
                         <div className="p-6 border-t border-slate-100 flex items-center justify-end gap-4 bg-white">
-                          <button 
+                          <button
                             type="button"
                             onClick={() => setShowPreviewModal(false)}
                             className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all"
                           >
                             Edit
                           </button>
-                          <button 
+                          <button
                             type="button"
                             onClick={handleConfirmSubmit}
                             disabled={busy}
@@ -2889,10 +3355,11 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                   {showSuccessMessage && (
                     <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[110] animate-in slide-in-from-top duration-300">
                       <div className="bg-green-100 text-green-500 px-8 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-emerald-400">
-                       
                         <div>
                           <p className="font-bold">Successfully Published!</p>
-                          <p className="text-xs text-green-500">Your opportunity is now live on the portal.</p>
+                          <p className="text-xs text-green-500">
+                            Your opportunity is now live on the portal.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -2901,104 +3368,150 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
               )}
             </main>
           </div>
-      {/* SUBMISSION DETAILS MODAL */}
-      {selectedApplication && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
-          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-[#F8FBFF]">
-              <div>
-                <h3 className="text-lg font-bold text-slate-800">Form Submission Details</h3>
-                <p className="text-xs text-slate-500 mt-1">Submitted by {selectedApplication.name}</p>
-              </div>
-              <button 
-                onClick={() => setSelectedApplication(null)}
-                className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
-              <div className="space-y-6">
-                {/* Standard Fields Section */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100">
-                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Applicant Name</p>
-                    <p className="text-slate-800 font-bold">{selectedApplication.name}</p>
+          {/* SUBMISSION DETAILS MODAL */}
+          {selectedApplication && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-all duration-300">
+              <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+                <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-[#F8FBFF]">
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-800">
+                      Form Submission Details
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Submitted by {selectedApplication.name}
+                    </p>
                   </div>
-                  <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100">
-                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">Applied At</p>
-                    <p className="text-slate-800 font-bold">{new Date(selectedApplication.appliedAt).toLocaleDateString()}</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Email Address</p>
-                    <p className="text-slate-700 font-medium break-all">{selectedApplication.email}</p>
-                  </div>
-                  <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Phone Number</p>
-                    <p className="text-slate-700 font-medium">{selectedApplication.phone}</p>
-                  </div>
+                  <button
+                    onClick={() => setSelectedApplication(null)}
+                    className="w-10 h-10 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-all"
+                  >
+                    ×
+                  </button>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Opportunity</p>
-                  <p className="text-slate-800 font-bold">{selectedApplication.opportunityTitle} ({selectedApplication.opportunityType})</p>
-                </div>
-
-                {selectedApplication.resumeFileName && (
-                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">Resume / CV</p>
-                      <p className="text-emerald-900 font-bold text-sm truncate max-w-[200px]">{selectedApplication.resumeFileName}</p>
-                    </div>
-                    <button
-                      onClick={() => handleViewResume(selectedApplication)}
-                      className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-sm transition-all flex items-center gap-2"
-                    >
-                      <FiFileText size={14} />
-                      View Document
-                    </button>
-                  </div>
-                )}
-
-                <div className="h-px bg-slate-100 my-2"></div>
-
-                {/* Dynamic Form Responses */}
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                  <div className="w-1.5 h-4 bg-blue-600 rounded-full"></div>
-                  Form Responses
-                </h4>
-
-                <div className="space-y-3">
-                  {selectedApplication.formData && Object.entries(selectedApplication.formData).length > 0 ? (
-                    Object.entries(selectedApplication.formData).map(([label, value]) => (
-                      <div key={label} className="p-4 rounded-2xl bg-white border border-slate-100 hover:border-blue-200 transition-colors shadow-sm">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-                        <p className="text-slate-700 font-medium break-words whitespace-pre-wrap">
-                          {typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value || 'N/A')}
+                <div className="p-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                  <div className="space-y-6">
+                    {/* Standard Fields Section */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100">
+                        <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">
+                          Applicant Name
+                        </p>
+                        <p className="text-slate-800 font-bold">
+                          {selectedApplication.name}
                         </p>
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                      <p className="text-slate-400 text-xs italic">No additional form data submitted.</p>
+                      <div className="p-3 rounded-xl bg-blue-50/50 border border-blue-100">
+                        <p className="text-[10px] font-bold text-blue-400 uppercase tracking-wider mb-1">
+                          Applied At
+                        </p>
+                        <p className="text-slate-800 font-bold">
+                          {new Date(
+                            selectedApplication.appliedAt,
+                          ).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                          Email Address
+                        </p>
+                        <p className="text-slate-700 font-medium break-all">
+                          {selectedApplication.email}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                          Phone Number
+                        </p>
+                        <p className="text-slate-700 font-medium">
+                          {selectedApplication.phone}
+                        </p>
+                      </div>
                     </div>
-                  )}
+
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        Opportunity
+                      </p>
+                      <p className="text-slate-800 font-bold">
+                        {selectedApplication.opportunityTitle} (
+                        {selectedApplication.opportunityType})
+                      </p>
+                    </div>
+
+                    {selectedApplication.resumeFileName && (
+                      <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-between">
+                        <div>
+                          <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider mb-1">
+                            Resume / CV
+                          </p>
+                          <p className="text-emerald-900 font-bold text-sm truncate max-w-[200px]">
+                            {selectedApplication.resumeFileName}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleViewResume(selectedApplication)}
+                          className="px-4 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 shadow-sm transition-all flex items-center gap-2"
+                        >
+                          <FiFileText size={14} />
+                          View Document
+                        </button>
+                      </div>
+                    )}
+
+                    <div className="h-px bg-slate-100 my-2"></div>
+
+                    {/* Dynamic Form Responses */}
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                      <div className="w-1.5 h-4 bg-blue-600 rounded-full"></div>
+                      Form Responses
+                    </h4>
+
+                    <div className="space-y-3">
+                      {selectedApplication.formData &&
+                      Object.entries(selectedApplication.formData).length >
+                        0 ? (
+                        Object.entries(selectedApplication.formData).map(
+                          ([label, value]) => (
+                            <div
+                              key={label}
+                              className="p-4 rounded-2xl bg-white border border-slate-100 hover:border-blue-200 transition-colors shadow-sm"
+                            >
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                                {label}
+                              </p>
+                              <p className="text-slate-700 font-medium break-words whitespace-pre-wrap">
+                                {typeof value === "boolean"
+                                  ? value
+                                    ? "Yes"
+                                    : "No"
+                                  : String(value || "N/A")}
+                              </p>
+                            </div>
+                          ),
+                        )
+                      ) : (
+                        <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          <p className="text-slate-400 text-xs italic">
+                            No additional form data submitted.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+                  <button
+                    onClick={() => setSelectedApplication(null)}
+                    className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all"
+                  >
+                    Close Details
+                  </button>
                 </div>
               </div>
             </div>
-            
-            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-              <button
-                onClick={() => setSelectedApplication(null)}
-                className="px-6 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 transition-all"
-              >
-                Close Details
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          )}
         </div>
       </div>
     </>

@@ -134,17 +134,17 @@ const PreviewModal = ({ onClose, formFields, formName }) => {
           <form onSubmit={handleSubmit} className="h-full flex flex-col">
             {hasBannerComponent || hasPdfComponent || hasCarouselComponent ? (
               <div className={`${(bannerField?.position === 'top' ||
-  pdfField?.position === 'top' ||
-  carouselField?.position === 'top')
-  ? 'flex flex-col overflow-y-auto flex-1 p-1 bg-gray-50/20'
-  : 'flex-1 flex overflow-hidden flex-col md:flex-row'
-  }`}>
+                pdfField?.position === 'top' ||
+                carouselField?.position === 'top')
+                ? 'flex flex-col overflow-y-auto flex-1 p-1 bg-gray-50/20'
+                : 'flex-1 flex overflow-hidden flex-col md:flex-row'
+                }`}>
                 {/* Special Component Display Area (Banner or PDF) */}
                 <div
-  className={`${(bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top') ? 'h-[400px] w-full flex-shrink-0' : 'h-full md:w-1/2'
-    } relative overflow-hidden p-2 `}
->
-  
+                  className={`${(bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top') ? 'h-[400px] w-full flex-shrink-0' : 'h-full md:w-1/2'
+                    } relative overflow-hidden p-4.5 `}
+                >
+
                   {/* Banner Component Display */}
                   {bannerField && (bannerField?.bannerUrl || formValues?.[bannerId]?.preview) ? (
                     <div className="w-full rounded-xl h-full">
@@ -420,91 +420,91 @@ const PreviewModal = ({ onClose, formFields, formName }) => {
                 </div>
 
                 <div className={`${(bannerField?.position === 'top' ||
-  pdfField?.position === 'top' ||
-  carouselField?.position === 'top')
-  ? 'flex flex-col'
-  : 'h-full overflow-hidden flex flex-col md:w-1/2'
-  }`}>
+                  pdfField?.position === 'top' ||
+                  carouselField?.position === 'top')
+                  ? 'flex flex-col'
+                  : 'h-full overflow-hidden flex flex-col md:w-1/2'
+                  }`}>
 
-  {/* 🔹 SCROLLABLE AREA */}
-  <div className={`${(bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top') ? 'p-5 bg-gray-50/30' : 'flex-1 overflow-y-auto p-5 bg-gray-50/30'}`}>
+                  {/* 🔹 SCROLLABLE AREA */}
+                  <div className={`${(bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top') ? 'p-5 bg-gray-50/30' : 'flex-1 overflow-y-auto p-5 bg-gray-50/30'}`}>
                     <div className="max-w-4xl rounded-xl mx-auto grid grid-cols-12 gap-8 px-10 bg-gray-100 w-full">
 
-                    <div className="col-span-12">
-  <Card className="mb-4 border-none shadow-none">
-    <CardHeader>
-      <CardTitle className="text-center">
-        {formName}
-      </CardTitle>
-      {formState.description && (
-        <CardDescription className="text-center">
-         {formState.description}
-        </CardDescription>
-      )}
-    </CardHeader>
-  </Card>
-</div>
+                      <div className="col-span-12">
+                        <Card className="mb-4 border-none shadow-none">
+                          <CardHeader>
+                            <CardTitle className="text-center">
+                              {formName}
+                            </CardTitle>
+                            {formState.description && (
+                              <CardDescription className="text-center">
+                                {formState.description}
+                              </CardDescription>
+                            )}
+                          </CardHeader>
+                        </Card>
+                      </div>
 
-                    {regularFields.map((field, index) => {
-                      const fieldId = field.id || index;
+                      {regularFields.map((field, index) => {
+                        const fieldId = field.id || index;
 
-                      return (
-                        <div
-                          key={fieldId}
-                          className={`${field.width === 'half'
-                            ? 'col-span-12 md:col-span-6'
-                            : 'col-span-12'
-                            }`}
+                        return (
+                          <div
+                            key={fieldId}
+                            className={`${field.width === 'half'
+                              ? 'col-span-12 md:col-span-6'
+                              : 'col-span-12'
+                              }`}
+                          >
+                            {!field.hideLabel && (
+                              <>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  {field.label || `Untitled ${field.type}`}
+                                </label>
+
+                                {field.helperText && (
+                                  <p className="text-xs text-gray-500 mb-1">
+                                    {field.helperText}
+                                  </p>
+                                )}
+                              </>
+                            )}
+
+                            <FormComponents
+                              field={{
+                                ...field,
+                                options: field.options?.map(opt =>
+                                  typeof opt === "string"
+                                    ? { label: opt, value: opt }
+                                    : opt
+                                ),
+                                value:
+                                  formValues[fieldId] !== undefined
+                                    ? formValues[fieldId]
+                                    : field.defaultValue
+                              }}
+                              isPreview={true}
+                              onChange={handleFormValueChange}
+                            />
+                          </div>
+
+                        );
+                      })}
+
+                      {/* Form submit button inside scrollable area */}
+                      <div className="col-span-12 mt-8 flex justify-end pb-10">
+                        <button
+                          type="submit"
+                          className="w-full md:w-auto px-10 py-3 text-white rounded-md bg-blue-800 hover:bg-blue-900 transition shadow-lg font-bold"
                         >
-                          {!field.hideLabel && (
-                            <>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">
-                                {field.label || `Untitled ${field.type}`}
-                              </label>
+                          Submit Form
+                        </button>
+                      </div>
 
-                              {field.helperText && (
-                                <p className="text-xs text-gray-500 mb-1">
-                                  {field.helperText}
-                                </p>
-                              )}
-                            </>
-                          )}
-
-                          <FormComponents
-                            field={{
-                              ...field,
-                              options: field.options?.map(opt =>
-                                typeof opt === "string"
-                                  ? { label: opt, value: opt }
-                                  : opt
-                              ),
-                              value:
-                                formValues[fieldId] !== undefined
-                                  ? formValues[fieldId]
-                                  : field.defaultValue
-                            }}
-                            isPreview={true}
-                            onChange={handleFormValueChange}
-                          />
-                        </div>
-
-                      );
-                    })}
-
-                    {/* Form submit button inside scrollable area */}
-                    <div className="col-span-12 mt-8 flex justify-end pb-10">
-                      <button
-                        type="submit"
-                        className="w-full md:w-auto px-10 py-3 text-white rounded-md bg-blue-800 hover:bg-blue-900 transition shadow-lg font-bold"
-                      >
-                        Submit Form
-                      </button>
                     </div>
-
                   </div>
                 </div>
               </div>
-            </div>
             )
 
               : (

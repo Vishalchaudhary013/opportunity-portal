@@ -321,3 +321,120 @@ export const sendAdminApplicationAlertEmail = async ({
     to: targetEmail,
   };
 };
+
+const buildApplicationSelectionEmail = (application) => {
+  const companyName = application.company || "our team";
+  const subject = `Congratulations! You are selected for ${application.opportunityTitle}`;
+
+  const text = [
+    `Hi ${application.name},`,
+    "",
+    `We are pleased to inform you that you have been selected for the ${application.opportunityTitle} (${application.opportunityType}) at ${companyName}.`,
+    "",
+    "Our team will contact you soon with the next steps.",
+    "",
+    "Best regards,",
+    `${companyName}`,
+  ].join("\n");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+      <p>Hi ${escapeHtml(application.name)},</p>
+      <p>
+        We are pleased to inform you that you have been selected for the <strong>${escapeHtml(
+          application.opportunityTitle,
+        )}</strong> (${escapeHtml(application.opportunityType)}) at ${escapeHtml(
+          companyName,
+        )}.
+      </p>
+      <p>
+        Our team will contact you soon with the next steps.
+      </p>
+      <p>Best regards,<br>${escapeHtml(companyName)}</p>
+    </div>
+  `;
+
+  return { subject, text, html };
+};
+
+export const sendApplicationSelectionEmail = async (application) => {
+  const mailConfig = getTransportConfig();
+  if (!mailConfig) return { sent: false, message: "SMTP settings not configured." };
+
+  const { subject, text, html } = buildApplicationSelectionEmail(application);
+
+  try {
+    await mailConfig.transport.sendMail({
+      from: mailConfig.from,
+      to: application.email,
+      subject,
+      text,
+      html,
+    });
+    return { sent: true, message: "Selection email sent." };
+  } catch (error) {
+    console.error("Failed to send selection email:", error);
+    return { sent: false, message: "Failed to send selection email." };
+  }
+};
+
+const buildApplicationRejectionEmail = (application) => {
+  const companyName = application.company || "our team";
+  const subject = `Update regarding your application for ${application.opportunityTitle}`;
+
+  const text = [
+    `Hi ${application.name},`,
+    "",
+    `Thank you for your interest in the ${application.opportunityTitle} (${application.opportunityType}) at ${companyName}.`,
+    "",
+    "After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.",
+    "",
+    "We wish you the best in your future endeavors.",
+    "",
+    "Best regards,",
+    `${companyName}`,
+  ].join("\n");
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #111827; line-height: 1.6;">
+      <p>Hi ${escapeHtml(application.name)},</p>
+      <p>
+        Thank you for your interest in the <strong>${escapeHtml(
+          application.opportunityTitle,
+        )}</strong> (${escapeHtml(application.opportunityType)}) at ${escapeHtml(
+          companyName,
+        )}.
+      </p>
+      <p>
+        After careful consideration, we regret to inform you that we will not be moving forward with your application at this time.
+      </p>
+      <p>
+        We wish you the best in your future endeavors.
+      </p>
+      <p>Best regards,<br>${escapeHtml(companyName)}</p>
+    </div>
+  `;
+
+  return { subject, text, html };
+};
+
+export const sendApplicationRejectionEmail = async (application) => {
+  const mailConfig = getTransportConfig();
+  if (!mailConfig) return { sent: false, message: "SMTP settings not configured." };
+
+  const { subject, text, html } = buildApplicationRejectionEmail(application);
+
+  try {
+    await mailConfig.transport.sendMail({
+      from: mailConfig.from,
+      to: application.email,
+      subject,
+      text,
+      html,
+    });
+    return { sent: true, message: "Rejection email sent." };
+  } catch (error) {
+    console.error("Failed to send rejection email:", error);
+    return { sent: false, message: "Failed to send rejection email." };
+  }
+};

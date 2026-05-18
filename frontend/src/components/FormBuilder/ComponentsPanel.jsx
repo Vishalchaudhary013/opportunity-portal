@@ -53,7 +53,7 @@ const ComponentsPanel = () => {
   };
 
   return (
-    <div className="w-80 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm z-10">
+    <div className="w-60 bg-white border-r border-gray-200 flex flex-col h-full shadow-sm z-10">
       {/* Tabs */}
       <div className="flex border-b border-gray-200">
         <button

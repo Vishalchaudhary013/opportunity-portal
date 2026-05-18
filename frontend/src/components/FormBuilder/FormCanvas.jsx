@@ -125,11 +125,11 @@ const FormCanvas = () => {
   };
 
   return (
-    <div className="flex-1  bg-[#F8FAFC] relative flex flex-col">
-      <div className="p-3 max-w-6xl mx-auto flex-1 w-full flex flex-col">
+    <div className="flex-1  bg-[#F8FAFC] relative flex flex-col ">
+      <div className="p-3 max-w-7xl mx-auto flex-1 w-full flex flex-col ">
         {hasBannerComponent || hasPdfComponent || hasCarouselComponent ? (
           // Special component-enabled form layout (banner or PDF)
-          <div className=" rounded-xl  mb-6 flex-1 flex flex-col">
+          <div className=" rounded-xl  mb-6 flex-1  flex flex-col">
             {/* ... banner layout code unchanged ... */}
             <div className={`${(bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top')
                 ? 'flex flex-col'
@@ -139,7 +139,7 @@ const FormCanvas = () => {
               <div
                 className={`${(bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top')
                     ? 'h-[300px] w-full relative'
-                    : "flex-1 h-[77vh] border-bottom sticky top-0 left-0 border-md-0 border-md-end border-secondary position-relative"
+                    : "flex-1 h-[77.5vh] border-bottom sticky top-0 left-0 border-md-0 border-md-end border-secondary position-relative"
                   } relative`}
                 onClick={() => {
                   if (bannerField) setActiveField(bannerField.id);
@@ -365,7 +365,7 @@ const FormCanvas = () => {
               <div className={`${(bannerField?.position === 'top' || pdfField?.position === 'top' || carouselField?.position === 'top')
                   ? 'h-[300px] w-full relative'
                   : 'flex-1 h-[77vh] overflow-auto position-relative' // make this flexible as well
-                } p-4`}>
+                } px-4 `}>
                 <div
                   id="formCanvas"
                   ref={formCanvasRef}

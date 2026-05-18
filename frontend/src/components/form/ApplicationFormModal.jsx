@@ -303,7 +303,7 @@ const ApplicationFormModal = ({
               )}
 
               {/* FORM FIELDS SECTION */}
-              <div className="flex-1 flex flex-col items-center py-4.5 px-4 overflow-y-auto">
+              <div className="flex-1 flex flex-col items-center py-5 px-4 overflow-y-auto">
                 <div className="w-full max-w-[800px] border border-black/10 rounded-xl p-5 bg-white shadow-sm animate-in slide-in-from-bottom-8 duration-500 mx-auto">
 
                   <div className="text-center mb-12">

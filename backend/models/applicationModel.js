@@ -103,7 +103,7 @@ const applicationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["New", "Shortlisted", "Rejected"],
+      enum: ["New", "Shortlisted", "Rejected", "Approved", "Not Approved"],
       default: "New",
     },
     formResponse: {
