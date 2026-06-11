@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { resolveAssetUrl } from '../../../services/apiClient';
+import { resolveAssetUrl } from '../../../api/apiClient';
 
 const ImageCarousel = ({ 
   images = [], 

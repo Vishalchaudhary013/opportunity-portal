@@ -8,7 +8,7 @@ import PreviewModal from './modals/PreviewModal';
 import PublishModal from './modals/PublishModal';
 import ConfirmReplaceModal from './modals/ConfirmReplaceModal';
 import { useToast } from './hooks/use-toast';
-import apiClient, { API_BASE_URL } from "../../services/apiClient";
+import apiClient, { API_BASE_URL } from "../../api/apiClient";
 import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from "react-router-dom";
 import { useOpportunities } from '../../context/OpportunitiesContext';

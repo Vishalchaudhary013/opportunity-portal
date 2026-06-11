@@ -22,7 +22,7 @@ import {
 } from "react-icons/fi";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import NavBar from "../components/NavBar";
-import { API_BASE_URL } from "../services/apiClient";
+import { API_BASE_URL } from "../api/apiClient";
 
 const initialForm = {
   title: "",
@@ -1715,8 +1715,7 @@ const AdminDashboard = ({ dashboardType = "admin" }) => {
                                     (item) =>
                                       item.adminApprovalStatus === "approved",
                                   )
-                                : directory.admins
-                              ).map((item) => (
+                                : directory.admins).map((item) => (
                                 <tr
                                   key={item.id}
                                   className="border-b border-[#EDF2FD]"

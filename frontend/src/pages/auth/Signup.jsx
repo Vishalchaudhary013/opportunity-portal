@@ -283,9 +283,9 @@ const Signup = () => {
         <div className="bg-[#e0ebf8]">
           <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-5">
             <header>
-              <Link to="/" className="text-3xl font-medium">
-                edeco
-              </Link>
+               <Link to="/" className="text-[30px] text-[#0f2a4d] font-bold cursor-pointer select-none hover:opacity-90">
+                            edeco<span className="text-[#0f2a4d]">®</span>
+                          </Link>
             </header>
           </div>
         </div>
@@ -455,7 +455,8 @@ const Signup = () => {
                         name="firstName"
                         value={studentForm.firstName}
                         onChange={handleStudentChange}
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        placeholder="Enter First Name"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -468,7 +469,8 @@ const Signup = () => {
                         name="lastName"
                         value={studentForm.lastName}
                         onChange={handleStudentChange}
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        placeholder="Enter Last Name"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                       />
                     </div>
                   </div>
@@ -525,7 +527,7 @@ const Signup = () => {
                         value={studentForm.collegeName}
                         onChange={handleStudentChange}
                         placeholder="Enter institute name"
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -539,7 +541,7 @@ const Signup = () => {
                         value={studentForm.location}
                         onChange={handleStudentChange}
                         placeholder="city,state"
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -556,7 +558,7 @@ const Signup = () => {
                         value={studentForm.mobileNumber}
                         onChange={handleStudentChange}
                         placeholder="10-digit number"
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -569,7 +571,8 @@ const Signup = () => {
                         name="email"
                         value={studentForm.email}
                         onChange={handleStudentChange}
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        placeholder="Enter Mail"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -588,7 +591,8 @@ const Signup = () => {
                           name="password"
                           value={studentForm.password}
                           onChange={handleStudentChange}
-                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full"
+                          placeholder="Enter Password"
+                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full placeholder:text-[15px] font-medium"
                           required
                         />
                         <button
@@ -625,7 +629,8 @@ const Signup = () => {
                           name="confirmPassword"
                           value={studentForm.confirmPassword}
                           onChange={handleStudentChange}
-                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full"
+                          placeholder="Re-enter Password"
+                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full placeholder:text-[15px] font-medium"
                           required
                         />
                         <button
@@ -686,7 +691,7 @@ const Signup = () => {
 
                   <label
                     htmlFor="student-resume-upload"
-                    className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-600 flex items-center gap-3 cursor-pointer hover:border-blue-400 hover:text-blue-600 transition"
+                    className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-600 flex items-center gap-3 cursor-pointer hover:border-blue-400 hover:text-blue-600 transition font-medium"
                   >
                     <FiUpload className="text-lg" />
                     <span className="text-base">Upload resume (PDF Only)</span>
@@ -708,7 +713,7 @@ const Signup = () => {
 
                   <p className="text-sm text-center">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600">
+                    <Link to="/login" className="text-blue-500">
                       Log in
                     </Link>
                   </p>
@@ -735,7 +740,8 @@ const Signup = () => {
                         name="firstName"
                         value={employerForm.firstName}
                         onChange={handleEmployerChange}
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        placeholder="Enter First name"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -748,7 +754,8 @@ const Signup = () => {
                         name="lastName"
                         value={employerForm.lastName}
                         onChange={handleEmployerChange}
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        placeholder="Enter Last name"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -765,7 +772,7 @@ const Signup = () => {
                         value={employerForm.email}
                         onChange={handleEmployerChange}
                         placeholder="name@company.com"
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -779,7 +786,7 @@ const Signup = () => {
                         value={employerForm.phoneNumber}
                         onChange={handleEmployerChange}
                         placeholder="10 digit number"
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -796,7 +803,7 @@ const Signup = () => {
                         value={employerForm.organizationName}
                         onChange={handleEmployerChange}
                         placeholder="Enter organization name"
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full placeholder:text-[15px] font-medium"
                         required
                       />
                     </div>
@@ -808,10 +815,10 @@ const Signup = () => {
                         name="organizationType"
                         value={employerForm.organizationType}
                         onChange={handleEmployerChange}
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full text-[15px] font-medium "
                         required
                       >
-                        <option value="">Select organization type</option>
+                        <option value="" >Select organization type</option>
                         <option value="Startup">Startup</option>
                         <option value="Enterprise">Enterprise</option>
                         <option value="Ed Tech">Ed Tech</option>
@@ -830,7 +837,7 @@ const Signup = () => {
                         value={employerForm.username}
                         onChange={handleEmployerChange}
                         placeholder="Enter username"
-                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full mb-6"
+                        className="outline-none border border-gray-300 rounded-lg py-2 px-3 w-full mb-6 placeholder:text-[15px] font-medium"
                         required
                       />
 
@@ -849,7 +856,8 @@ const Signup = () => {
                           name="password"
                           value={employerForm.password}
                           onChange={handleEmployerChange}
-                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full"
+                          placeholder="Enter Password"
+                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full placeholder:text-[15px] font-medium"
                           required
                         />
                         <button
@@ -886,7 +894,8 @@ const Signup = () => {
                           name="confirmPassword"
                           value={employerForm.confirmPassword}
                           onChange={handleEmployerChange}
-                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full"
+                          placeholder="Re-enter Password"
+                          className="outline-none border border-gray-300 rounded-lg py-2 px-3 pr-10 w-full placeholder:text-[15px] font-medium"
                           required
                         />
                         <button

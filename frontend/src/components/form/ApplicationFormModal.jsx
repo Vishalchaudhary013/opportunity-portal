@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useOpportunities } from "../../context/OpportunitiesContext";
 import FormComponents from "../FormBuilder/FormComponents";
-import apiClient, { API_BASE_URL, resolveAssetUrl } from "../../services/apiClient";
+import apiClient, { API_BASE_URL, resolveAssetUrl } from "../../api/apiClient";
 import Icons from "../FormBuilder/ui/ui-icons";
 import ImageCarousel from "../FormBuilder/ui/image-carousel";
 

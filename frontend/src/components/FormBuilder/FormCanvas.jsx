@@ -14,7 +14,7 @@ import { useFormBuilder } from '../../context/FormBuilderContext';
 import FormComponents from './FormComponents';
 import { Icons } from './ui/ui-icons';
 import ImageCarousel from './ui/image-carousel';
-import { resolveAssetUrl } from "../../services/apiClient";
+import { resolveAssetUrl } from "../../api/apiClient";
 
 const FormCanvas = () => {
   const {

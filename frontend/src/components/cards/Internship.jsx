@@ -30,6 +30,7 @@ import {
   FlaskConical,
   Sigma,
 } from "lucide-react";
+import SectionTitle from "../SectionTitle";
 
 const Internship = ({ limit }) => {
   const [selectedCategory, setSelectedCategory] = React.useState(null);
@@ -75,23 +76,23 @@ const Internship = ({ limit }) => {
 
   return (
     <>
-      <div className="bg-[#F8FAFC]">
+      <div className="">
         <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8 sm:mb-10">
             <ul>
-              <li className="text-2xl font-semibold">Internships</li>
-              <li className="text-xl font-medium">
-                Top Internship Opportunities
-              </li>
+              <SectionTitle
+            title="Internships & Work Experience"
+            subtitle="Gain practical experience through on-job training"
+          />
             </ul>
 
             <ul>
               <li>
                 <Link
                   to="/intership"
-                  className="font-medium flex gap-2 items-center text-slate-900 hover:underline"
+                  className="font-medium flex gap-2 items-center text-slate-900 hover:underline bg-[#002761] text-white py-1 px-4 rounded-md"
                 >
-                  View All Internships
+                  View All 
                   <FaLongArrowAltRight />
                 </Link>
               </li>

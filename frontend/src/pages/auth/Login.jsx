@@ -47,8 +47,8 @@ const Login = () => {
       <div className="bg-[#e0ebf8]">
         <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-5">
           <header>
-            <Link to="/" className="text-3xl font-medium">
-              edeco
+            <Link to="/" className="text-[30px] text-[#0f2a4d] font-bold cursor-pointer select-none hover:opacity-90">
+              edeco<span className="text-[#0f2a4d]">®</span>
             </Link>
           </header>
         </div>
@@ -56,8 +56,22 @@ const Login = () => {
 
       <div className="w-full max-w-350 mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-center min-h-[calc(100dvh-88px)] py-8 sm:py-10">
-          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 w-full max-w-[370px]">
-            <h2 className="text-center text-2xl font-medium mb-6">Sign In</h2>
+          <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 w-full max-w-[410px] shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+            <p className="text-sm text-center mb-4">
+              Don’t have an account?{" "}
+              <Link to="/signup" className="text-blue-500">
+                Sign up
+              </Link>
+            </p>
+
+            <div
+            className="flex items-center gap-2 text-[26px] font-bold text-[#0b3c74] mb-3 cursor-pointer cursor-pointer"
+            onClick={() => navigate("/")}
+          >
+            edeco <span style={{ color: "#60a5fa" }}>employer</span>
+          </div>
+
+          <h2 className=" text-xl font-semibold mb-2">Sign in</h2>
 
             <label
               htmlFor=""
@@ -70,7 +84,8 @@ const Login = () => {
               name="email"
               value={form.email}
               onChange={handleChange}
-              className="outline-none rounded-lg px-3 border border-black/30 w-full py-2 mb-5"
+              placeholder="Enter Email"
+              className="outline-none rounded-lg px-3 border border-black/30 w-full py-2 mb-5 placeholder:text-[15px] placeholder:font-medium"
               required
             />
 
@@ -86,8 +101,9 @@ const Login = () => {
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className="outline-none rounded-lg border border-black/30 w-full py-2 px-3 pr-10"
+                className="outline-none rounded-lg border border-black/30 w-full py-2 px-3 pr-10 placeholder:text-[15px] placeholder:font-medium"
                 required
+                placeholder="Enter Password"
               />
               <button
                 type="button"
@@ -118,12 +134,13 @@ const Login = () => {
               </button>
             </div>
 
-            <p className="text-sm text-center">
-              Don’t have an account?{" "}
-              <Link to="/signup" className="text-blue-600">
-                Sign up
-              </Link>
-            </p>
+            <p className="text-xs text-center mt-4 text-gray-500">
+            By logging in, you agree to edeco’s{" "}
+            <span className="text-[#2563eb] text-[13px] cursor-pointer">User Terms</span> and{" "}
+            <span className="text-[#2563eb] text-[13px] cursor-pointer">Privacy Policy</span>.
+          </p>
+
+            
           </form>
         </div>
       </div>

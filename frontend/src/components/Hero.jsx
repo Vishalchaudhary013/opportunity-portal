@@ -26,8 +26,8 @@ const Hero = () => {
   };
   return (
     <>
-      <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 mb-8 sm:mb-10">
+      <div className="w-full max-w-350 h-screen mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 mb-8 sm:mb-15">
           <div className="w-full lg:w-1/2">
             <div className="relative">
               <img
@@ -68,7 +68,7 @@ const Hero = () => {
           </div>
         </div>
 
-        <div className="bg-[#F5F7FF] py-8 sm:py-10 px-4 rounded-lg">
+        <div className="bg-[#F5F7FF] py-6 sm:py-10 px-4 rounded-lg">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-10 mb-8">
             <div className="flex justify-between items-center p-4 bg-white rounded-lg border border-black/10">
               <h2 className="font-medium text-lg text-gray-800">

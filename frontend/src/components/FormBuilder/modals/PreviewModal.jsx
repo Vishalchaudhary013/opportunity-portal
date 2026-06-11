@@ -4,7 +4,7 @@ import { Icons } from '../ui/ui-icons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 import { useFormBuilder } from '../../../context/FormBuilderContext';
 import ImageCarousel from '../ui/image-carousel';
-import { API_BASE_URL, resolveAssetUrl } from '../../../services/apiClient';
+import { API_BASE_URL, resolveAssetUrl } from '../../../api/apiClient';
 
 const PreviewModal = ({ onClose, formFields, formName }) => {
   const { formState } = useFormBuilder();

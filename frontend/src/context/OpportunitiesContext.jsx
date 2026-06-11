@@ -9,8 +9,8 @@ import apiClient, {
   API_BASE_URL,
   getErrorMessage,
   setAuthToken,
-} from "../services/apiClient";
-import { authAPI } from "../services/authAPI";
+} from "../api/apiClient";
+import { authAPI } from "../api/authAPI";
 
 const AUTH_TOKEN_KEY = "auth_token_v1";
 const IMPERSONATOR_TOKEN_KEY = "impersonator_token_v1";

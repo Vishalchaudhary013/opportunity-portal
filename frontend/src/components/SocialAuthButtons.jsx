@@ -1,8 +1,8 @@
-// frontend/src/components/auth/SocialAuthButtons.jsx
+// frontend/src/pages/auth/SocialAuthButtons.jsx
 // OAuth social login/signup buttons
 
 import React from 'react';
-import { API_BASE_URL } from '../services/apiClient';
+import { API_BASE_URL } from '../api/apiClient';
 
 const socialAuthURL = {
   google: `${API_BASE_URL}/api/auth/google`,
