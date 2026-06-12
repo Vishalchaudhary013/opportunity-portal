@@ -107,7 +107,7 @@ const sanitizeUser = (userDoc) => ({
   adminApprovedAt: userDoc.adminApprovedAt || null,
 });
 
-// ─── OTP Email Content Builder ────────────────────────────────────────────────
+//OTP Email 
 
 const buildOtpEmailContent = ({ fullName, code, reason }) => {
   const isReset = reason === "password_reset";
@@ -156,7 +156,7 @@ const buildOtpEmailContent = ({ fullName, code, reason }) => {
   return { subject, text, html };
 };
 
-// ─── Send Email OTP ───────────────────────────────────────────────────────────
+//Send Email OTP
 
 const sendEmailOtp = async ({ user, code, reason }) => {
   const content = buildOtpEmailContent({
@@ -177,7 +177,7 @@ const sendEmailOtp = async ({ user, code, reason }) => {
   };
 };
 
-// ─── Admin Approved Email Content Builder ─────────────────────────────────────
+//  Admin Approved Email
 
 const buildAdminApprovedEmailContent = ({ adminName, approverName }) => {
   const subject = "Your admin account has been approved";
@@ -203,7 +203,7 @@ const buildAdminApprovedEmailContent = ({ adminName, approverName }) => {
   return { subject, text, html };
 };
 
-// ─── Registration Success Notifications ───────────────────────────────────────
+//  Registration Success Notifications
 
 const sendRegistrationSuccessNotifications = async ({ user, accountLabel }) => {
   const label = accountLabel || "user";
@@ -255,7 +255,7 @@ const sendRegistrationSuccessNotifications = async ({ user, accountLabel }) => {
   return { email, whatsapp };
 };
 
-// ─── Admin Access Request Notifications (to Super Admins) ─────────────────────
+//  Admin Access Request Notifications (to Super Admins)
 
 const sendAdminAccessRequestNotifications = async ({ adminUser }) => {
   const superAdmins = await User.find({ role: "super_admin" }).select(
@@ -336,7 +336,7 @@ const sendAdminAccessRequestNotifications = async ({ adminUser }) => {
   };
 };
 
-// ─── Phone OTP ────────────────────────────────────────────────────────────────
+//  Phone OTP
 
 const sendPhoneOtp = async ({ user, code }) => {
   const body = [
@@ -428,7 +428,7 @@ const sendAdminApprovedNotifications = async ({ adminUser, approverName }) => {
   };
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+//  Helpers 
 
 const buildFullName = ({ fullName, firstName, lastName }) => {
   if (typeof fullName === "string" && fullName.trim()) {
@@ -450,7 +450,7 @@ const buildContactNumber = ({ whatsappNumber, phoneNumber, mobileNumber }) => {
 
 const getNormalizedEnvValue = (value) => String(value || "").trim();
 
-// ─── Super Admin Env Login ────────────────────────────────────────────────────
+//  Super Admin Env Login 
 
 const tryEnvSuperAdminLogin = async ({ email, password }) => {
   const envEmail = getNormalizedEnvValue(
@@ -511,7 +511,7 @@ const tryEnvSuperAdminLogin = async ({ email, password }) => {
   };
 };
 
-// ─── Core Auth Helpers ────────────────────────────────────────────────────────
+//  Core Auth Helpers 
 
 const authenticateUser = async ({ email, password, allowedRoles = null }) => {
   const user = await User.findOne({ email: email.toLowerCase() });
@@ -635,7 +635,7 @@ const registerUser = async ({
   };
 };
 
-// ─── OTP Code Setters ─────────────────────────────────────────────────────────
+//  OTP Code Setters 
 
 const setEmailVerificationCode = async (user) => {
   const code = generateOtpCode();
@@ -721,7 +721,7 @@ const issueInitialVerificationCodes = async (userId) => {
   };
 };
 
-// ─── Route Handlers ───────────────────────────────────────────────────────────
+//  Route Handlers 
 
 export const signup = async (req, res, next) => {
   try {

@@ -19,11 +19,12 @@ const useAuthStore = () => {
     signup: createAccount,
     login: signIn,
     logout,
+    isBootstrapping,
   } = useOpportunities();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingState, setIsLoadingState] = useState(false);
 
   const signup = async ({ fullName, email, password, whatsappNumber }) => {
-    setIsLoading(true);
+    setIsLoadingState(true);
 
     try {
       const result = await createAccount({
@@ -45,12 +46,12 @@ const useAuthStore = () => {
           error?.response?.data?.message || "Signup failed. Please try again.",
       };
     } finally {
-      setIsLoading(false);
+      setIsLoadingState(false);
     }
   };
 
   const login = async ({ email, password }) => {
-    setIsLoading(true);
+    setIsLoadingState(true);
 
     try {
       const result = await signIn({ email, password });
@@ -67,9 +68,11 @@ const useAuthStore = () => {
           error?.response?.data?.message || "Login failed. Please try again.",
       };
     } finally {
-      setIsLoading(false);
+      setIsLoadingState(false);
     }
   };
+
+  const isLoading = isLoadingState || isBootstrapping;
 
   return useMemo(
     () => ({
@@ -80,7 +83,7 @@ const useAuthStore = () => {
       login,
       logout,
     }),
-    [isLoading, login, logout, signup, user],
+    [user, isLoading, signup, login, logout],
   );
 };
 

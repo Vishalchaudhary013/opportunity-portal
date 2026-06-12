@@ -13,7 +13,7 @@ const Home = () => {
 
   return (
     <>
-    <div className="bg-[]">
+    <div className="bg-gray-50">
 <Hero />
 
       <UniversityMarquee />

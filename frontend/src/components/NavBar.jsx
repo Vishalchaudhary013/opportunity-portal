@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import { CiSearch } from "react-icons/ci";
@@ -21,6 +21,28 @@ const NavBar = () => {
       ? "/super-admin-dashboard"
       : "/admin-dashboard";
 
+  useEffect(() => {
+    if (!document.querySelector('script[src*="translate.google.com"]')) {
+      window.googleTranslateElementInit = () => {
+        if (window.google && window.google.translate) {
+          new window.google.translate.TranslateElement(
+            {
+              pageLanguage: "en",
+              includedLanguages: "hi,pa,fr,es,de,zh,ja",
+              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+            },
+            "google_translate_element"
+          );
+        }
+      };
+
+      const script = document.createElement("script");
+      script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
   const handleLogout = () => {
     logout();
     setMobileMenuOpen(false);
@@ -38,14 +60,14 @@ const NavBar = () => {
 
   return (
     <>
-      <header className="top-0 fixed left-0 w-full z-50 bg-white border-b border-gray-200">
+      <header className="top-0 fixed left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
         {showExplore && (
           <div className="fixed left-0 right-0 bottom-0 top-[144px] bg-black/40 z-40 pointer-events-none"></div>
         )}
 
         {/* ===== MAIN NAVBAR ===== */}
         <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center justify-between h-[72px]">
+          <div className="flex items-center justify-between h-[70px]">
 
             {/* LEFT SECTION */}
             <div className="flex items-center gap-[50px]">
@@ -87,7 +109,7 @@ const NavBar = () => {
 
 
               {/* ================= EXPLORE DROPDOWN ================= */}
-              <div className="flex items-center">
+              <div className="flex items-center mt-0.5">
                 <div
                   className="relative"
                   onMouseEnter={() => setShowExplore(true)}
@@ -95,12 +117,12 @@ const NavBar = () => {
                 >
                   {/* EXPLORE BUTTON */}
                   <button
-                    className={`flex items-center gap-[10px] text-sm text-gray-700 border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+                    className={`flex items-center gap-[10px] text-sm text-gray-700 border border-transparent px-[15px] py-6 rounded-[7px] cursor-pointer
                   hover:text-blue-600 hover:bg-blue-50
                   ${showExplore ? "text-blue-600 bg-blue-50" : ""}
                 `}
                   >
-                    Discover
+                    Career Services
                     <i
                       className="bi bi-chevron-down"
                       style={{
@@ -287,6 +309,9 @@ const NavBar = () => {
                 </button>
               </div>
 
+              {/* Google Translate Widget */}
+              {/* <div id="google_translate_element" className="flex items-center bg-[#002761] translate-widget-wrapper"></div> */}
+
               {user ? (
                 <div className="relative group">
                   <button className="h-9 w-9 rounded-full bg-[#002761] text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
@@ -318,8 +343,8 @@ const NavBar = () => {
                 </div>
               ) : (
                 <>
-                  <Link to="/login" className="text-sm text-[#0F2A4D] font-semibold hover:underline">Log In</Link>
-                  <Link to="/signup" className="border-2 border-[#0F2A4D] text-[#0F2A4D] px-[15px] py-[7px] rounded-[7px] text-sm font-bold hover:bg-blue-50 transition-colors">Signup</Link>
+                  <Link to="/login" className="text-[17px] text-[#0F2A4D] font-semibold hover:underline">Log In</Link>
+                  <Link to="/signup" className=" text-white px-[15px] py-[7px] rounded-[7px] text-[17px] font-semibold bg-[#22945c] transition-colors">Sign up</Link>
                 </>
               )}
             </div>

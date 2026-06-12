@@ -228,11 +228,14 @@ export const OpportunitiesProvider = ({ children }) => {
   const bootstrap = async () => {
     try {
       if (authToken) {
+        setAuthToken(authToken);
         const me = await apiClient.get("/api/auth/me");
         setUser(me.data?.user || null);
       }
     } catch (error) {
-      clearSession();
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        clearSession();
+      }
     } finally {
       try {
         await loadOpportunities();

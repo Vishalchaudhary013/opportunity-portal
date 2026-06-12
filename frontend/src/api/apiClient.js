@@ -5,14 +5,21 @@ const isLocalHost =
   isBrowser && ["localhost", "127.0.0.1"].includes(window.location.hostname);
 const fallbackBaseURL = isLocalHost
   ? "http://localhost:3000"
-  : "https://opportunity-portal-2.onrender.com";
+  : "https://opportunity-portal-1.onrender.com";
 
 export const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || fallbackBaseURL;
+  import.meta.env.VITE_API_BASE_URLL || fallbackBaseURL;
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
 });
+
+if (isBrowser) {
+  const token = localStorage.getItem("auth_token_v1");
+  if (token) {
+    apiClient.defaults.headers.common.Authorization = `Bearer ${token}`;
+  }
+}
 
 export const setAuthToken = (token) => {
   if (token) {
