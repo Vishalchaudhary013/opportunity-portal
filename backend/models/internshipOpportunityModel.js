@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const internshipOpportunitySchema = new mongoose.Schema(
   {
-    // === 1. Program Specifics ===
+    //  1. Program Specifics 
     title: { type: String, required: true, trim: true },
     departmentCategory: { type: String, default: "", trim: true },
     openings: { type: Number, default: null },
@@ -13,41 +13,41 @@ const internshipOpportunitySchema = new mongoose.Schema(
     internshipType: { type: String, default: "", trim: true },
     workingHours: { type: String, enum: ["Full-time", "Part-time", ""], default: "", trim: true },
 
-    // === 2. Program Timeline ===
+    //  2. Program Timeline 
     applicationsOpenDate: { type: Date, default: null },
     deadline: { type: Date, required: true }, // Application Deadline
     selectionAnnouncementDate: { type: Date, default: null },
     startDate: { type: Date, default: null },
 
-    // === 3. Financials & Incentives ===
+    //  3. Financials & Incentives 
     stipendType: { type: String, enum: ["Fixed", "Performance-based", "Unpaid", "Paid"], default: "Fixed", trim: true },
     stipend: { type: String, default: "", trim: true }, // Amount
     stipendCurrency: { type: String, default: "INR", trim: true },
     incentivesBonuses: { type: String, default: "", trim: true },
     perks: { type: [String], default: [] }, // Multi-select Checkbox (Benefits)
 
-    // === 4. Candidate Requirements ===
+    //  4. Candidate Requirements 
     targetEducation: { type: [String], default: [] },
     batchEligibility: { type: [String], default: [] },
     minimumCGPA: { type: Number, default: null },
     requiredSkills: { type: [String], default: [] },
     experienceLevel: { type: String, enum: ["Beginner", "Intermediate", ""], default: "", trim: true },
 
-    // === 5. Qualifications ===
+    //  5. Qualifications 
     minimumRequirements: { type: String, default: "", trim: true }, // Bullet points
     preferredQualifications: { type: String, default: "", trim: true }, // Bullet points
 
-    // === 6. Job Description ===
+    //  6. Job Description 
     aboutProgram: { type: String, default: "", trim: true },
     description: { type: String, required: true, trim: true }, // Key Responsibilities
     whatYouWillLearn: { type: String, default: "", trim: true },
 
-    // === 7. Selection Process ===
+    //  7. Selection Process 
     selectionRounds: { type: [String], default: [] },
     assignmentLink: { type: String, default: "", trim: true },
     customScreeningQuestion: { type: String, default: "", trim: true },
 
-    // === 8. About the company ===
+    //  8. About the company 
     company: { type: String, required: true, trim: true },
     website: { type: String, default: "", trim: true },
     industry: { type: String, default: "", trim: true },
@@ -68,9 +68,9 @@ const internshipOpportunitySchema = new mongoose.Schema(
     companyOverview: { type: String, default: "", trim: true },
     specialties: { type: String, default: "", trim: true },
 
-    // === Existing core/metadata fields for backward compatibility ===
+    //  Existing core/metadata fields for backward compatibility 
     location: { type: String, default: "Remote", trim: true }, // Keeping for backwards compatibility, gave default Remote so it validates if omitted
-    type: { type: String, default: "Internship", enum: ["Internship"], required: true },
+    type: { type: String, default: "Internship", enum: ["Internship", "Global Program", "Jobs", "Bootcamps", "Masterclasses", "Degree Programs", "PG Programs"], required: true },
     skills: { type: [String], default: [] }, // Primary Skills/Tags
     cardTags: { type: [String], default: [] },
     department: { type: String, default: "", trim: true }, 

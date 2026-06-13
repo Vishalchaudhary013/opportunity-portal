@@ -104,7 +104,7 @@ const Hero = () => {
             </div>
           </div>
           <div className=" sm:pl-4 lg:flex lg:items-center lg:justify-between">
-            <h2 className="text-xl font-semibold text-gray-800 lg:w-60 lg:shrink-0">
+            <h2 className="text-[19px] font-semibold text-gray-800 lg:w-60 lg:shrink-0">
               What are you looking for?
             </h2>
             <div className="mt-4 flex  flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-nowrap lg:mt-0">

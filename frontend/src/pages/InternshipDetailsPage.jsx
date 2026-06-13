@@ -132,22 +132,20 @@ const InternshipDetailsPage = () => {
 
               <InternshipDetailsSummaryCards internship={internship} />
 
-              <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
-                <h2 className="text-xl font-semibold text-slate-900">Who Can Apply</h2>
-                {whoCanApply.length ? (
+              {whoCanApply.length > 0 && (
+                <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
+                  <h2 className="text-xl font-semibold text-slate-900">Who Can Apply</h2>
                   <ul className="mt-3 space-y-2 text-slate-700 list-disc pl-5">
                     {whoCanApply.map((item, index) => (
                       <li key={`${item}-${index}`}>{item}</li>
                     ))}
                   </ul>
-                ) : (
-                  <p className="mt-3 text-slate-500">No eligibility criteria added yet.</p>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
-                <h2 className="text-xl font-semibold text-slate-900">Required Skills</h2>
-                {requiredSkills.length ? (
+              {requiredSkills.length > 0 && (
+                <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
+                  <h2 className="text-xl font-semibold text-slate-900">Required Skills</h2>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {requiredSkills.map((skill, index) => (
                       <span
@@ -158,14 +156,12 @@ const InternshipDetailsPage = () => {
                       </span>
                     ))}
                   </div>
-                ) : (
-                  <p className="mt-3 text-slate-500">No skills listed.</p>
-                )}
-              </div>
+                </div>
+              )}
 
-              <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
-                <h2 className="text-xl font-semibold text-slate-900">Internship Benefits</h2>
-                {benefits.length ? (
+              {benefits.length > 0 && (
+                <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
+                  <h2 className="text-xl font-semibold text-slate-900">Internship Benefits</h2>
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {benefits.map((benefit, index) => (
                       <div
@@ -182,10 +178,8 @@ const InternshipDetailsPage = () => {
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <p className="mt-3 text-slate-500">No benefits listed.</p>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="bg-white border border-[#E4EAF8] rounded-2xl p-6">
                 <h2 className="text-xl font-semibold text-slate-900">Job Description</h2>

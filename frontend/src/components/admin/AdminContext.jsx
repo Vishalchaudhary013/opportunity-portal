@@ -8,7 +8,7 @@ const AdminContext = createContext(null);
 export const useAdminContext = () => useContext(AdminContext);
 
 const initialForm = {
-  // === 1. Program Specifics ===
+  //  Program Specifics 
   title: "",
   departmentCategory: "",
   openings: "",
@@ -20,13 +20,13 @@ const initialForm = {
   internshipType: "",
   workingHours: "",
 
-  // === 2. Program Timeline ===
+  //  Program Timeline 
   applicationsOpenDate: "",
   deadline: "",
   selectionAnnouncementDate: "",
   startDate: "",
 
-  // === 3. Financials & Incentives ===
+  //  Financials & Incentives 
   stipendType: "Fixed",
   stipend: "",
   isUnpaid: false,
@@ -34,28 +34,28 @@ const initialForm = {
   incentivesBonuses: "",
   perks: [],
 
-  // === 4. Candidate Requirements ===
+  //  Candidate Requirements 
   targetEducation: [],
   batchEligibility: [],
   minimumCGPA: "",
   requiredSkills: "",
   experienceLevel: "",
 
-  // === 5. Qualifications ===
+  //  Qualifications 
   minimumRequirements: "",
   preferredQualifications: "",
 
-  // === 6. Job Description ===
+  //  Job Description 
   aboutProgram: "",
   description: "",
   whatYouWillLearn: "",
 
-  // === 7. Selection Process ===
+  //  Selection Process 
   selectionRounds: [],
   assignmentLink: "",
   customScreeningQuestion: "",
 
-  // === 8. About the company ===
+  //  About the company 
   company: "",
   website: "",
   industry: "",
@@ -495,6 +495,7 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
     const requiredSkillsValue = requiredSkillInputs.map((skill) => String(skill || "").trim()).filter(Boolean).join(", ");
     const payload = {
       ...form,
+      duration: form.duration ? `${form.duration} ${form.durationUnit || 'Months'}` : form.duration,
       skills: form.skills,
       requiredSkills: shouldIncludeInternshipCardFields ? requiredSkillsValue : form.requiredSkills,
       benefits: form.benefits,

@@ -212,7 +212,7 @@ const OpportunityForm = () => {
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                     <span>Duration <span className="text-rose-600">*</span></span>
                       <div className="flex gap-2">
-                    <input type="number" onChange={handleChange} className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
+                    <input type="number" name="duration" value={form.duration} onChange={handleChange} className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
                     
                       {/* <select name="duration" value={form.duration} onChange={handleChange} className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required>
                         <option value="">Select Duration</option>

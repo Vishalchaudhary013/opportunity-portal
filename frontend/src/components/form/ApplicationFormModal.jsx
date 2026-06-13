@@ -191,11 +191,11 @@ const ApplicationFormModal = ({
 
       } else {
         // Submit Legacy Form
-        if (!resumeFile) {
-          setError("Resume upload is mandatory.");
-          setSubmitting(false);
-          return;
-        }
+        // if (!resumeFile) {
+        //   setError("Resume upload is mandatory.");
+        //   setSubmitting(false);
+        //   return;
+        // }
 
         await submitApplication({
           ...legacyForm,

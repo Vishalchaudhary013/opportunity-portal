@@ -93,10 +93,10 @@ const resolveAdminRecipient = async (opportunityDoc) => {
 
 export const submitApplication = async (req, res, next) => {
   try {
-    if (!req.file) {
-      res.status(400).json({ message: "Resume PDF is required." });
-      return;
-    }
+    // if (!req.file) {
+    //   res.status(400).json({ message: "Resume PDF is required." });
+    //   return;
+    // }
 
     const payload = pickApplicationPayload(req.body);
 

@@ -9,6 +9,7 @@ import { ImPower } from "react-icons/im";
 import { HiOutlineShieldCheck } from "react-icons/hi2";
 import ApplicationFormModal from "../form/ApplicationFormModal";
 import { useOpportunities } from "../../context/OpportunitiesContext";
+import SectionTitle from "../SectionTitle";
 
 const GlobalProgram = ({ limit }) => {
   const navigate = useNavigate();
@@ -25,19 +26,22 @@ const GlobalProgram = ({ limit }) => {
         <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8 sm:mb-10">
             <ul>
-              <li className="text-2xl font-semibold">Global Programs</li>
+
+              <SectionTitle title="Global Programs" subtitle="Prestigious Global Programs"/>
+
+              {/* <li className="text-2xl font-semibold">Global Programs</li>
               <li className="text-xl font-medium">
                 Prestigious Global Programs
-              </li>
+              </li> */}
             </ul>
 
             <ul>
               <li>
                 <Link
                   to="/global-program"
-                  className="font-medium flex gap-2 items-center text-slate-900  hover:underline"
+                  className="font-medium flex gap-2 items-center text-slate-900 bg-[#002761] text-white py-1 px-4 rounded-md"
                 >
-                  View All Global Programs
+                  View All
                   <FaLongArrowAltRight />
                 </Link>
               </li>

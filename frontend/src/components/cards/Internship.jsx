@@ -90,7 +90,7 @@ const Internship = ({ limit }) => {
               <li>
                 <Link
                   to="/intership"
-                  className="font-medium flex gap-2 items-center text-slate-900 hover:underline bg-[#002761] text-white py-1 px-4 rounded-md"
+                  className="font-medium flex gap-2 items-center text-slate-900  bg-[#002761] text-white py-1 px-4 rounded-md"
                 >
                   View All 
                   <FaLongArrowAltRight />
