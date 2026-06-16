@@ -18,6 +18,7 @@ const Linkedinn = () => {
             text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
             images: [
                 "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
+                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
                 
             ],
             likes: 29,
@@ -48,6 +49,10 @@ const Linkedinn = () => {
             text2: null,
             images: [
                 "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
+                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
+                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
+
+                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
                 
             ],
             likes: 19,
@@ -60,6 +65,7 @@ const Linkedinn = () => {
             text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
             images: [
                 "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7381760986321473536-images-0.webp?nocache=1761741101247",
+                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
             ],
             likes: 29,
             comments:2,
@@ -81,6 +87,7 @@ const Linkedinn = () => {
             text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
             images: [
                 "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7382135776010035200-images-0.webp?nocache=1761741100345",
+                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
             ],
             likes: 29,
             comments:2,
@@ -223,12 +230,12 @@ const Linkedinn = () => {
                                                 <img
                                                     src={post.images[0]}
                                                     alt=""
-                                                    className="mb-5"
+                                                    className="mb-5 rounded-sm"
                                                 />
                                             ) : (
-                                                <div className="mb-2.5">
+                                                <div className="grid grid-cols-2 gap-3 mb-2.5">
                                                     {post.images.map((imgSrc, idx) => (
-                                                        <img key={idx} src={imgSrc} alt="" className="h-95 w-full"/>
+                                                        <img key={idx} src={imgSrc} alt="" className=" w-full rounded-sm"/>
                                                     ))}
                                                 </div>
                                             )}
