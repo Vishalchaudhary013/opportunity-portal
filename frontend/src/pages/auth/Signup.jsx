@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FiEye, FiEyeOff, FiUpload } from "react-icons/fi";
 import { useOpportunities } from "../../context/OpportunitiesContext";
 
 const Signup = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     signup,
     adminSignup,
@@ -13,7 +14,7 @@ const Signup = () => {
     requestPhoneVerification,
     verifyPhoneCode,
   } = useOpportunities();
-  const [accountType, setAccountType] = useState("student");
+  const [accountType, setAccountType] = useState(searchParams.get("type") || "student");
   const [studentResumeName, setStudentResumeName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -290,66 +291,8 @@ const Signup = () => {
           </div>
         </div>
 
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-6 sm:py-10 flex-1">
-          <div
-            className={`flex ${
-              verificationEmail ? "justify-center" : "flex-col lg:flex-row lg:justify-between gap-6 lg:gap-10"
-            }`}
-          >
-            {!verificationEmail ? (
-              <div className="w-full lg:w-1/2 flex flex-col lg:pr-20 mt-2 lg:mt-28">
-              <h2 className="text-3xl text-white font-medium mb-4">
-                Identify your account type
-              </h2>
-
-              <button
-                type="button"
-                onClick={() => setAccountType("student")}
-                className={`text-left mb-5 p-4 rounded-lg transition ${
-                  accountType === "student"
-                    ? "bg-white text-black/90"
-                    : "bg-[#163a6b] text-white"
-                }`}
-              >
-                <div className="font-medium">Register as Student</div>
-                <div className="text-sm">Apply for internships & programs</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setAccountType("employer")}
-                className={`text-left mb-8 p-4 rounded-lg transition ${
-                  accountType === "employer"
-                    ? "bg-white text-black/90"
-                    : "bg-[#163a6b] text-white"
-                }`}
-              >
-                <div className="font-medium">Signup as Employer</div>
-                <div className="text-sm">Post jobs & hire talent</div>
-              </button>
-
-              <hr className="text-gray-400 mb-5" />
-
-              <p className="text-sm text-white mb-4">
-                <b>edeco</b> is a career enablement platform connecting students,
-                institutions and employers through internships, programs and
-                real-world opportunities.
-              </p>
-
-              <p className="text-sm text-white">
-                Whether you are starting your career or building your team, edeco
-                helps you discover the right opportunities faster.
-              </p>
-              </div>
-            ) : null}
-
-            <div
-              className={`${
-                verificationEmail
-                  ? "w-full flex justify-center items-center min-h-[70dvh]"
-                  : "w-full lg:w-1/2"
-              } rounded-lg`}
-            >
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex-1 flex justify-center items-center min-h-[70dvh]">
+          <div className="w-full rounded-lg">
               {verificationEmail ? (
                 <div className="w-full max-w-xl mx-auto bg-white p-5 sm:p-8 rounded-lg">
                   <h2 className="text-xl text-center font-medium mb-2">
@@ -957,7 +900,6 @@ const Signup = () => {
             </div>
           </div>
         </div>
-      </div>
     </>
   );
 };

@@ -6,7 +6,7 @@ import Footer from "./components/Footer";
 
 const App = () => {
   const location = useLocation();
-  const hideLayout = ["/login", "/signup", "/forget-password"];
+  const hideLayout = ["/login", "/signup", "/forget-password" ,"/choose-signup"];
   const isAdminRoute =
     location.pathname.startsWith("/admin-dashboard") ||
     location.pathname.startsWith("/super-admin-dashboard");

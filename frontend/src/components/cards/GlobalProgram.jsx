@@ -39,7 +39,7 @@ const GlobalProgram = ({ limit }) => {
               <li>
                 <Link
                   to="/global-program"
-                  className="font-medium flex gap-2 items-center text-slate-900 bg-[#002761] text-white py-1 px-4 rounded-md"
+                  className="font-medium flex gap-2 items-center text-slate-900 bg-[#1E40AF] text-white py-1 px-4 rounded-md"
                 >
                   View All
                   <FaLongArrowAltRight />
@@ -124,7 +124,7 @@ const GlobalProgram = ({ limit }) => {
                   </div>
                 </div>
 
-                <div className="mt-auto flex w-full rounded-xl bg-slate-900 font-medium text-base text-white transition hover:bg-slate-800 sm:text-xl">
+                <div className="mt-auto flex w-full rounded-xl bg-[#1E40AF] font-medium text-base text-white transition hover:bg-slate-800 sm:text-xl">
                   <button
                     className="flex w-full items-center justify-center gap-2 px-4 py-3"
                     onClick={() => {

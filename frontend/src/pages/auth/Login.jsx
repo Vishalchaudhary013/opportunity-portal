@@ -59,7 +59,7 @@ const Login = () => {
           <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 w-full max-w-[410px] shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
             <p className="text-sm text-center mb-4">
               Don’t have an account?{" "}
-              <Link to="/signup" className="text-blue-500">
+              <Link to="/choose-signup" className="text-blue-500">
                 Sign up
               </Link>
             </p>

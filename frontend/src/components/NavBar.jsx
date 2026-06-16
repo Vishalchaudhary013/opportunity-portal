@@ -60,14 +60,35 @@ const NavBar = () => {
 
   return (
     <>
-      <header className="top-0 fixed left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm">
+      <header className="top-0 fixed left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm ">
         {showExplore && (
           <div className="fixed left-0 right-0 bottom-0 top-[144px] bg-black/40 z-40 pointer-events-none"></div>
         )}
 
-        {/* ===== MAIN NAVBAR ===== */}
-        <div className="max-w-[1400px] mx-auto px-6">
-          <div className="flex items-center justify-between h-[70px]">
+        {/*MAIN NAVBAR  */}
+        
+          <div className="border-b border-black/10 py-3">
+
+            <div className="max-w-[1400px] mx-auto px-6">
+              <div className="flex justify-between items-center text-[15px]">
+                <ul className="">
+                  <li><Link to='/'>
+                  Home
+                  </Link></li>
+                </ul>
+                <ul className="flex items-center gap-5">
+                  <li className="">EN | HINDI</li>
+                  <li className="">Login</li>
+                </ul>
+
+              </div>
+            </div>
+           
+          </div>
+
+          <div className="max-w-[1400px] mx-auto px-6 ">
+
+            <div className="flex items-center justify-between h-[70px]">
 
             {/* LEFT SECTION */}
             <div className="flex items-center gap-[50px]">
@@ -108,7 +129,7 @@ const NavBar = () => {
 
 
 
-              {/* ================= EXPLORE DROPDOWN ================= */}
+              {/*  EXPLORE DROPDOWN  */}
               <div className="flex items-center mt-0.5">
                 <div
                   className="relative"
@@ -302,7 +323,7 @@ const NavBar = () => {
                   onFocus={() => setIsSearchOpen(true)}
                 />
                 <button
-                  className="relative z-10 h-[36px] w-[36px] rounded-full bg-[#002761] text-white flex items-center justify-center shadow-md hover:bg-blue-700 transition-colors"
+                  className="relative z-10 h-[36px] w-[36px] rounded-full bg-[#1944f1] text-white flex items-center justify-center shadow-md hover:bg-blue-700 transition-colors"
                   onClick={() => { if (!searchValue) setIsSearchOpen(true); }}
                 >
                   <CiSearch size={25} />
@@ -314,7 +335,7 @@ const NavBar = () => {
 
               {user ? (
                 <div className="relative group">
-                  <button className="h-9 w-9 rounded-full bg-[#002761] text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
+                  <button className="h-9 w-9 rounded-full bg-[#1944f1] text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
                     {userInitial}
                   </button>
                   <div className="absolute right-0 mt-2 w-56 bg-white shadow-2xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 py-2">
@@ -344,12 +365,15 @@ const NavBar = () => {
               ) : (
                 <>
                   <Link to="/login" className="text-[17px] text-[#0F2A4D] font-semibold hover:underline">Log In</Link>
-                  <Link to="/signup" className=" text-white px-[15px] py-[7px] rounded-[7px] text-[17px] font-semibold bg-[#22945c] transition-colors">Sign up</Link>
+                  <Link to="/choose-signup" className=" text-white px-[15px] py-[7px] rounded-[7px] text-[17px] font-semibold bg-[#1E40AF] transition-colors">Sign up</Link>
                 </>
               )}
             </div>
           </div>
-        </div>
+
+           </div>
+          
+        
 
 
 

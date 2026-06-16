@@ -8,6 +8,9 @@ import GlobalProgram from "../components/cards/GlobalProgram";
 import Hero from "../components/Hero";
 import UniversityMarquee from "../components/cards/UniversityMarquee";
 import Testimonials from "../components/Testimonials";
+import Facebook from "../components/Facebook";
+
+import Linkedinn from "../components/Linkedinn";
 
 const Home = () => {
   
@@ -23,6 +26,10 @@ const Home = () => {
       <GlobalProgram limit={4} />
 
       <Testimonials />
+
+      <Facebook />
+
+      <Linkedinn />
     </div>
 
       

@@ -8,7 +8,7 @@ body {
 @import "tailwindcss";
 
 @theme {
-  --color-blue-600: #22945c;
+  --color-blue-600:		#00A9E0;  /* #00A9F8  #282B8F  #0021f3 	#0013de #1944f1  #00A9E0  #00A9E0*/
   --color-blue-700: #091a30;
 }
 input[type="password"]::-ms-reveal,

@@ -18,6 +18,7 @@ import AdminOpportunityFormPage from "../pages/AdminOpportunityFormPage";
 import ApplicationFormBuilderPage from "../pages/ApplicationFormBuilderPage";
 import SuperAdminDashboard from "../pages/SuperAdminDashboard";
 import NotFound from "../pages/NotFound";
+import ChooseSignup from "../components/signup/ChooseSignup";
 
 const AppRoutes = () => {
   return (
@@ -31,6 +32,7 @@ const AppRoutes = () => {
       <Route path="/global-program" element={<GlobalProgramPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path='/choose-signup' element={<ChooseSignup />} />
       <Route path="/forget-password" element={<ForgetPassword />} />
 
       {/* Protected Routes (Any logged in user) */}

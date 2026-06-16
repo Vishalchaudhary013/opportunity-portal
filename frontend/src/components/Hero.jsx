@@ -26,7 +26,7 @@ const Hero = () => {
   };
   return (
     <>
-      <div className="w-full max-w-350 h-screen mx-auto px-4 sm:px-6 pt-12">
+      <div className="w-full max-w-350 h-screen mx-auto px-4 sm:px-6 pt-25">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-10 mb-8 sm:mb-15">
           <div className="w-full lg:w-1/2">
             <div className="relative">
