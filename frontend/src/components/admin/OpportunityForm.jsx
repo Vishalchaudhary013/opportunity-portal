@@ -3,7 +3,7 @@ import { FiFileText, FiTrash2, FiEdit2, FiCheck, FiX, FiCheckCircle, FiEye, FiEy
 import { useAdminContext } from "./AdminContext";
 import { API_BASE_URL } from "../../api/apiClient";
 import { useNavigate } from "react-router-dom";
-import RichTextEditor from "./RichTextEditor";
+import TextEditor from "./TextEditor";
 
 const CheckboxDropdown = ({ label, options, selected, onChange, required }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -389,7 +389,8 @@ const OpportunityForm = () => {
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Job Description</h4>
                 <div className="grid grid-cols-1 gap-6">
                   <div className="flex flex-col gap-2">
-                    <RichTextEditor 
+                    
+                    <TextEditor 
                       label="About the Program"
                       value={form.aboutProgram}
                       onChange={(html) => setForm(prev => ({ ...prev, aboutProgram: html }))}
@@ -487,22 +488,25 @@ const OpportunityForm = () => {
                   {/* Visibility section */}
                   <div className="flex flex-col gap-4 mt-4 md:col-span-2 p-4 bg-slate-50 rounded-xl">
                    
-                    <div className="flex flex-col sm:flex-row items-center gap-6 mt-2">
-                      <div className="w-20 h-20 rounded-xl bg-white border-2 border-dashed border-[#D6E2FC] flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {form.logo ? <img src={form.logo} alt="Preview" className="w-full h-full object-contain" /> : <FiGlobe className="text-slate-300" size={24} />}
-                      </div>
-                      <div className="flex-1 space-y-2">
-                        <label className="inline-flex items-center px-4 py-2 rounded-lg bg-blue-50 text-blue-600 font-bold text-xs cursor-pointer hover:bg-blue-100 transition-all border border-blue-100">
-                          <span>Upload Organization Logo</span>
-                          <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
-                        </label>
-                      </div>
+                    <div className="flex flex-col gap-2 mt-2">
+                      <span className="text-sm font-semibold text-slate-700">Upload Organization Logo</span>
+                      <label className="w-full h-40 rounded-xl bg-white border-2 border-dashed border-blue-200 flex items-center justify-center overflow-hidden cursor-pointer hover:bg-blue-50 transition-colors group relative">
+                        {form.logo ? (
+                          <img src={form.logo} alt="Preview" className="w-full h-full object-contain p-4 group-hover:opacity-75 transition-opacity" />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2">
+                            <FiGlobe className="text-slate-300 group-hover:text-blue-500 transition-colors" size={40} />
+                            <span className="text-xs text-slate-500 font-medium">Click to browse files</span>
+                          </div>
+                        )}
+                        <input type="file" accept="image/*" onChange={handleLogoChange} className="hidden" />
+                      </label>
                     </div>
                     
-                    <label className="flex items-center gap-3 text-sm font-semibold text-slate-700 mt-2 cursor-pointer">
+                    {/* <label className="flex items-center gap-3 text-sm font-semibold text-slate-700 mt-2 cursor-pointer">
                       <input type="checkbox" name="featuredListing" checked={form.featuredListing} onChange={handleChange} className="w-4 h-4 accent-blue-600" />
                       <span>Featured Listing (Push to top of the board)</span>
-                    </label>
+                    </label> */}
 
                     <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                       <span>Hiring Manager/POC LinkedIn</span>
@@ -543,7 +547,7 @@ const OpportunityForm = () => {
               </div>
 
               <div className="flex justify-end pt-8 border-t border-[#E2EAFC]">
-                <button type="submit" disabled={busy} className="px-12 py-4 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95 disabled:opacity-50">
+                <button type="submit" disabled={busy} className="px-12 py-4 rounded-2xl bg-blue-600 text-white font-bold  shadow-blue-200 transition-all active:scale-95 disabled:opacity-50">
                   {busy ? "Saving..." : editingId ? "Update Opportunity" : "Create Opportunity"}
                 </button>
               </div>

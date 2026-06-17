@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useOpportunities } from "../context/OpportunitiesContext";
-import { CiSearch } from "react-icons/ci";
+import { CiLocationOn, CiSearch } from "react-icons/ci";
+import { MdKeyboardArrowDown } from "react-icons/md";
+import { IoLanguageSharp, IoLocationSharp } from "react-icons/io5";
+import { FaLocationArrow } from "react-icons/fa6";
 const NavBar = () => {
   const [showExplore, setShowExplore] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -28,20 +31,48 @@ const NavBar = () => {
           new window.google.translate.TranslateElement(
             {
               pageLanguage: "en",
-              includedLanguages: "hi,pa,fr,es,de,zh,ja",
-              layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE
+              includedLanguages: "en,hi,pa,fr,es,de,zh,ja",
+              layout:
+                window.google.translate.TranslateElement.InlineLayout.SIMPLE,
+              autoDisplay: false,
             },
-            "google_translate_element"
+            "google_translate_element",
           );
         }
       };
 
       const script = document.createElement("script");
-      script.src = "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
+      script.src =
+        "//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit";
       script.async = true;
       document.body.appendChild(script);
     }
   }, []);
+
+  const changeLanguage = (langCode) => {
+    const select = document.querySelector(".goog-te-combo");
+    if (select) {
+      select.value = langCode;
+      // If the specific language code is not found, setting the value won't work,
+      // and it will remain whatever it was. To revert to the original language (English),
+      // we can set the value to empty string or 'en'
+      if (langCode === "en" && select.value !== "en") {
+        select.value = "en";
+      }
+      // Trigger the change event for google translate to pick it up
+      select.dispatchEvent(new Event("change"));
+    } else {
+      // Fallback
+      if (langCode === "en") {
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + window.location.hostname + "; path=/;";
+      } else {
+        document.cookie = `googtrans=/en/${langCode}; path=/;`;
+        document.cookie = `googtrans=/en/${langCode}; domain=${window.location.hostname}; path=/;`;
+      }
+      window.location.reload();
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -50,9 +81,13 @@ const NavBar = () => {
   };
 
   const resolveUserInitial = (user) => {
-    const emailInitial = String(user?.email || "").trim().charAt(0);
+    const emailInitial = String(user?.email || "")
+      .trim()
+      .charAt(0);
     if (emailInitial) return emailInitial.toUpperCase();
-    const nameInitial = String(user?.fullName || user?.name || "").trim().charAt(0);
+    const nameInitial = String(user?.fullName || user?.name || "")
+      .trim()
+      .charAt(0);
     return nameInitial ? nameInitial.toUpperCase() : "U";
   };
 
@@ -66,33 +101,102 @@ const NavBar = () => {
         )}
 
         {/*MAIN NAVBAR  */}
-        
-          <div className="border-b border-black/10 py-3">
 
-            <div className="max-w-[1400px] mx-auto px-6">
-              <div className="flex justify-between items-center text-[15px]">
-                <ul className="">
-                  <li><Link to='/'>
-                  Home
-                  </Link></li>
-                </ul>
-                <ul className="flex items-center gap-5">
-                  <li className="">EN | HINDI</li>
-                  <li className="">Login</li>
-                </ul>
-
-              </div>
+        <div className="border-b border-black/10 py-2">
+          <div className="max-w-[1400px] mx-auto px-6">
+            <div className="flex justify-between items-center text-[15px]">
+              <ul className="">
+                <li>
+                  <Link to="/" className="text-[16px] font-semibold">Home</Link>
+                </li>
+              </ul>
+              <ul className="flex items-center gap-5">
+                <li className="text-[16px] font-semibold flex items-center gap-2">
+                  <button onClick={() => changeLanguage('en')} className="hover:text-blue-600 transition-colors">EN</button> 
+                  <span className="text-[12px]">|</span> 
+                  <button onClick={() => changeLanguage('hi')} className="hover:text-blue-600 transition-colors">HINDI</button>
+                </li>
+                <li className="text-[16px] font-semibold flex items-center gap-0.5 border border-black/10 rounded-lg py-1.5 px-3"> <IoLocationSharp size={16}/>
+                <select name="" id="" className="outline-none pr-3">
+                  <option value="" className="">Locate</option>
+                  <option value="" className="">Delhi</option>
+                  <option value="" className="">Himachal</option>
+                  <option value="" className="">Punjab</option>
+                  <option value="" className=""></option>
+                  </select>
+                  </li>
+                <li className="flex gap-4 items-center">
+                  {user ? (
+                    <div className="relative group">
+                      <button className="h-9 w-9 rounded-full bg-blue-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
+                        {userInitial}
+                      </button>
+                      <div className="absolute right-0 mt-2 w-56 bg-white shadow-2xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 py-2">
+                        <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                          <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                            Signed in as
+                          </p>
+                          <p className="text-sm font-bold text-gray-900 truncate">
+                            {user.fullName || user.email}
+                          </p>
+                        </div>
+                        {isAdmin ? (
+                          <Link
+                            to={dashboardPath}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                          >
+                            <i className="bi bi-grid-1x2"></i> Admin Dashboard
+                          </Link>
+                        ) : (
+                          <>
+                            <Link
+                              to="/profile"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            >
+                              <i className="bi bi-person"></i> Profile
+                            </Link>
+                            <Link
+                              to="/favorites"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            >
+                              <i className="bi bi-heart"></i> Favorites
+                            </Link>
+                          </>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors mt-1 border-t border-gray-50"
+                        >
+                          <i className="bi bi-box-arrow-right"></i> Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        className="text-[16px] font-semibold hover:underline"
+                      >
+                        Log In
+                      </Link>
+                      <Link
+                        to="/choose-signup"
+                        className=" text-white px-4 py-1 rounded-4xl text-[17px] font-semibold bg-blue-600  transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                      >
+                        Sign up
+                      </Link>
+                    </>
+                  )}
+                </li>
+              </ul>
             </div>
-           
           </div>
+        </div>
 
-          <div className="max-w-[1400px] mx-auto px-6 ">
-
-            <div className="flex items-center justify-between h-[70px]">
-
+        <div className="max-w-[1400px] mx-auto px-6 ">
+          <div className="flex items-center justify-between h-[70px]">
             {/* LEFT SECTION */}
             <div className="flex items-center gap-[50px]">
-
               {/* LOGO */}
               <div
                 className="flex items-center cursor-pointer select-none"
@@ -111,7 +215,9 @@ const NavBar = () => {
                   edeco
                 </span>
 
-                <span className="mx-[2px] text-[22px] font-extrabold text-black">.</span>
+                <span className="mx-[2px] text-[22px] font-extrabold text-black">
+                  .
+                </span>
 
                 {/* ROTATING WORDS */}
                 <div className="edeco-rotator">
@@ -126,9 +232,6 @@ const NavBar = () => {
                 </div>
               </div>
 
-
-
-
               {/*  EXPLORE DROPDOWN  */}
               <div className="flex items-center mt-0.5">
                 <div
@@ -138,42 +241,52 @@ const NavBar = () => {
                 >
                   {/* EXPLORE BUTTON */}
                   <button
-                    className={`flex items-center gap-[10px] text-sm text-gray-700 border border-transparent px-[15px] py-6 rounded-[7px] cursor-pointer
+                    className={`flex items-center gap-1.5 text-sm text-gray-700 border border-transparent px-[15px] py-6 rounded-[7px] cursor-pointer
                   hover:text-blue-600 hover:bg-blue-50
                   ${showExplore ? "text-blue-600 bg-blue-50" : ""}
                 `}
                   >
                     Career Services
-                    <i
-                      className="bi bi-chevron-down"
-                      style={{
-                        fontSize: "10px",
-                        WebkitTextStroke: "0.7px",
-                        transform: showExplore ? "rotate(180deg)" : "rotate(0deg)",
+
+                    <MdKeyboardArrowDown size={25} className="" style={{
+                        
+                       
+                        transform: showExplore
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
                         transition: "transform 0.2s",
-                      }}
-                    ></i>
+                      }}/>
+                    {/* <i
+                      className="bi bi-chevron-down"
+                      
+                    ></i> */}
                   </button>
 
                   {/* MEGA DROPDOWN */}
                   {showExplore && (
                     <div className="absolute left-[-350px] top-[58px] w-[1670px] bg-white shadow-xl border border-gray-200 z-50">
-
                       {/* HOVER BRIDGE (IMPORTANT – invisible) */}
                       <div className="absolute -top-[20px] left-0 w-full h-[20px]"></div>
 
                       <div className="grid grid-cols-5 gap-8 p-8 w-[1000px] mx-auto">
-
                         {/* COLUMN 1 */}
                         <div>
                           <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
                             Internships & Work
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">Internships</li>
-                            <li className="hover:underline cursor-pointer">Work Experience</li>
-                            <li className="hover:underline cursor-pointer">Campus Ambassador</li>
-                            <li className="hover:underline cursor-pointer">Live Projects</li>
+                            <li className="hover:underline cursor-pointer">
+                              Internships
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Work Experience
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Campus Ambassador
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Live Projects
+                            </li>
                           </ul>
                         </div>
 
@@ -183,10 +296,18 @@ const NavBar = () => {
                             Master Classes
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">Technology</li>
-                            <li className="hover:underline cursor-pointer">Management</li>
-                            <li className="hover:underline cursor-pointer">Design</li>
-                            <li className="hover:underline cursor-pointer">Marketing</li>
+                            <li className="hover:underline cursor-pointer">
+                              Technology
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Management
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Design
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Marketing
+                            </li>
                           </ul>
                         </div>
 
@@ -196,9 +317,15 @@ const NavBar = () => {
                             Postgraduate Programs
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">PG Diplomas</li>
-                            <li className="hover:underline cursor-pointer">Executive Programs</li>
-                            <li className="hover:underline cursor-pointer">Hybrid Programs</li>
+                            <li className="hover:underline cursor-pointer">
+                              PG Diplomas
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Executive Programs
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Hybrid Programs
+                            </li>
                           </ul>
                         </div>
 
@@ -208,9 +335,15 @@ const NavBar = () => {
                             Master Degree
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">MBA</li>
-                            <li className="hover:underline cursor-pointer">M.Tech</li>
-                            <li className="hover:underline cursor-pointer">M.Sc</li>
+                            <li className="hover:underline cursor-pointer">
+                              MBA
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              M.Tech
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              M.Sc
+                            </li>
                           </ul>
                         </div>
 
@@ -220,9 +353,15 @@ const NavBar = () => {
                             Global Programs
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">Study Abroad</li>
-                            <li className="hover:underline cursor-pointer">Global Internships</li>
-                            <li className="hover:underline cursor-pointer">Exchange Programs</li>
+                            <li className="hover:underline cursor-pointer">
+                              Study Abroad
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Global Internships
+                            </li>
+                            <li className="hover:underline cursor-pointer">
+                              Exchange Programs
+                            </li>
                           </ul>
                         </div>
                       </div>
@@ -238,17 +377,13 @@ const NavBar = () => {
                   )}
                 </div>
 
-
                 {/* DEGREES */}
                 <NavLink
                   to="/degrees"
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
      hover:bg-blue-50 hover:text-blue-600
-     ${isActive
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700"
-                    }`
+     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   Degree Programs
@@ -258,10 +393,7 @@ const NavBar = () => {
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
      hover:bg-blue-50 hover:text-blue-600
-     ${isActive
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700"
-                    }`
+     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   Events
@@ -272,10 +404,7 @@ const NavBar = () => {
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
      hover:bg-blue-50 hover:text-blue-600
-     ${isActive
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700"
-                    }`
+     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   Resources
@@ -285,27 +414,22 @@ const NavBar = () => {
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
      hover:bg-blue-50 hover:text-blue-600
-     ${isActive
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-700"
-                    }`
+     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   More
                 </NavLink>
-
-
-
               </div>
             </div>
-
 
             {/* RIGHT ACTIONS */}
             <div className="flex items-center gap-4">
               <div
                 className="relative flex items-center h-[40px]"
                 onMouseEnter={() => setIsSearchOpen(true)}
-                onMouseLeave={() => { if (!searchValue) setIsSearchOpen(false); }}
+                onMouseLeave={() => {
+                  if (!searchValue) setIsSearchOpen(false);
+                }}
               >
                 <input
                   type="text"
@@ -323,60 +447,20 @@ const NavBar = () => {
                   onFocus={() => setIsSearchOpen(true)}
                 />
                 <button
-                  className="relative z-10 h-[36px] w-[36px] rounded-full bg-[#1944f1] text-white flex items-center justify-center shadow-md hover:bg-blue-700 transition-colors"
-                  onClick={() => { if (!searchValue) setIsSearchOpen(true); }}
+                  className="relative z-10 h-[36px] w-[36px] rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md transition-colors"
+                  onClick={() => {
+                    if (!searchValue) setIsSearchOpen(true);
+                  }}
                 >
                   <CiSearch size={25} />
                 </button>
               </div>
 
               {/* Google Translate Widget */}
-              {/* <div id="google_translate_element" className="flex items-center bg-[#002761] translate-widget-wrapper"></div> */}
-
-              {user ? (
-                <div className="relative group">
-                  <button className="h-9 w-9 rounded-full bg-[#1944f1] text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
-                    {userInitial}
-                  </button>
-                  <div className="absolute right-0 mt-2 w-56 bg-white shadow-2xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 py-2">
-                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">Signed in as</p>
-                      <p className="text-sm font-bold text-gray-900 truncate">{user.fullName || user.email}</p>
-                    </div>
-                    {isAdmin ? (
-                      <Link to={dashboardPath} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                        <i className="bi bi-grid-1x2"></i> Admin Dashboard
-                      </Link>
-                    ) : (
-                      <>
-                        <Link to="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                          <i className="bi bi-person"></i> Profile
-                        </Link>
-                        <Link to="/favorites" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-                          <i className="bi bi-heart"></i> Favorites
-                        </Link>
-                      </>
-                    )}
-                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors mt-1 border-t border-gray-50">
-                      <i className="bi bi-box-arrow-right"></i> Sign Out
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <Link to="/login" className="text-[17px] text-[#0F2A4D] font-semibold hover:underline">Log In</Link>
-                  <Link to="/choose-signup" className=" text-white px-[15px] py-[7px] rounded-[7px] text-[17px] font-semibold bg-[#1E40AF] transition-colors">Sign up</Link>
-                </>
-              )}
+              <div id="google_translate_element" className="opacity-0 absolute pointer-events-none w-0 h-0 overflow-hidden"></div>
             </div>
           </div>
-
-           </div>
-          
-        
-
-
-
+        </div>
       </header>
 
       <div className="h-[72px]" aria-hidden="true"></div>

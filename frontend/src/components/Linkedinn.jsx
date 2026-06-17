@@ -269,7 +269,7 @@ const Linkedinn = () => {
 
                         {/* Load More Button */}
                         <div className="w-full flex justify-center mb-4">
-                            <button className="px-6 py-3 rounded-lg bg-[#435b77] text-white hover:bg-[#3480DC]">
+                            <button className="px-6 py-3 rounded-lg bg-blue-600 text-white ">
                                 Load More Post
                             </button>
                         </div>

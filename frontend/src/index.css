@@ -146,9 +146,25 @@ input[type="number"] {
     display: none !important;
 }
 
+.skiptranslate > iframe.skiptranslate {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Hide the tooltip that shows original text */
+#goog-gt-tt, .goog-te-balloon-frame {
+    display: none !important;
+}
+
+.goog-text-highlight {
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
 /* Fix body shifting down by the top banner */
 body {
     top: 0px !important;
+    position: static !important;
 }
 
 /* Hide the Google logo, "Powered by" text, and any extra elements */
