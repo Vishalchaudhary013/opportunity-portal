@@ -35,7 +35,7 @@ const ConfirmReplaceModal = ({ isOpen, onConfirm, onCancel, oldType, newType }) 
             </button>
             <button
               onClick={onConfirm}
-              className="flex-1 px-4 py-2 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-100"
+              className="flex-1 px-4 py-2 text-xs font-semibold text-white bg-red-600 rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-100"
             >
               Yes, Replace
             </button>

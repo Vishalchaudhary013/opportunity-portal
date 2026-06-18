@@ -143,7 +143,7 @@ const SuperDirectory = () => {
                     //       </div>
                     //       <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                     //         <div
-                    //           className="h-full bg-blue-600"
+                    //           className="h-full bg-red-600"
                     //           style={{ width: `${adminPercent}%` }}
                     //         />
                     //       </div>
@@ -398,7 +398,7 @@ const SuperDirectory = () => {
                                             deletingUserId === item.id ||
                                             changingPasswordAdminId === item.id
                                           }
-                                          className="p-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50"
+                                          className="p-2 rounded-lg bg-blue-50 text-red-600 hover:bg-red-600 hover:text-white transition-all disabled:opacity-50"
                                         >
                                           <FiKey size={16} />
                                         </button>

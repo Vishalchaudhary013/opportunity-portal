@@ -32,7 +32,7 @@ const ChooseSignup = () => {
             </p>
             <button 
               onClick={() => navigate('/signup?type=student')}
-              className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg"
+              className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold text-lg"
             >
               Signup as Student
             </button>
@@ -50,7 +50,7 @@ const ChooseSignup = () => {
             </p>
             <button 
               onClick={() => navigate('/signup?type=employer')}
-              className="w-full bg-blue-600 text-white py-4 rounded-xl font-semibold text-lg"
+              className="w-full bg-red-600 text-white py-4 rounded-xl font-semibold text-lg"
             >
               Signup as Employer
             </button>

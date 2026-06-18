@@ -112,23 +112,31 @@ const NavBar = () => {
               </ul>
               <ul className="flex items-center gap-5">
                 <li className="text-[16px] font-semibold flex items-center gap-2">
-                  <button onClick={() => changeLanguage('en')} className="hover:text-blue-600 transition-colors">EN</button> 
-                  <span className="text-[12px]">|</span> 
-                  <button onClick={() => changeLanguage('hi')} className="hover:text-blue-600 transition-colors">HINDI</button>
+                  <button onClick={() => changeLanguage('en')} className="hover:text-red-600 transition-colors">ENG</button>
+                  <span className="text-[12px]">|</span>
+                  <button onClick={() => changeLanguage('hi')} className="hover:text-red-600 transition-colors">HINDI</button>
                 </li>
-                <li className="text-[16px] font-semibold flex items-center gap-0.5 border border-black/10 rounded-lg py-1.5 px-3"> <IoLocationSharp size={16}/>
-                <select name="" id="" className="outline-none pr-3">
-                  <option value="" className="">Locate</option>
-                  <option value="" className="">Delhi</option>
-                  <option value="" className="">Himachal</option>
-                  <option value="" className="">Punjab</option>
-                  <option value="" className=""></option>
-                  </select>
-                  </li>
+                <li className="group relative overflow-hidden rounded-lg p-[1px]">
+                  {/* Rotating border */}
+                  <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute inset-[-150%] bg-[conic-gradient(transparent,blue,transparent)] group-hover:animate-spin"></div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1">
+                    <IoLocationSharp size={16} />
+                    <select className="outline-none pr-3 bg-transparent">
+                      <option>Locate</option>
+                      <option>Delhi</option>
+                      <option>Himachal</option>
+                      <option>Punjab</option>
+                    </select>
+                  </div>
+                </li>
                 <li className="flex gap-4 items-center">
                   {user ? (
                     <div className="relative group">
-                      <button className="h-9 w-9 rounded-full bg-blue-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
+                      <button className="h-9 w-9 rounded-full bg-red-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
                         {userInitial}
                       </button>
                       <div className="absolute right-0 mt-2 w-56 bg-white shadow-2xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 py-2">
@@ -143,7 +151,7 @@ const NavBar = () => {
                         {isAdmin ? (
                           <Link
                             to={dashboardPath}
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
                           >
                             <i className="bi bi-grid-1x2"></i> Admin Dashboard
                           </Link>
@@ -151,13 +159,13 @@ const NavBar = () => {
                           <>
                             <Link
                               to="/profile"
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
                             >
                               <i className="bi bi-person"></i> Profile
                             </Link>
                             <Link
                               to="/favorites"
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
                             >
                               <i className="bi bi-heart"></i> Favorites
                             </Link>
@@ -181,7 +189,7 @@ const NavBar = () => {
                       </Link>
                       <Link
                         to="/choose-signup"
-                        className=" text-white px-4 py-1 rounded-4xl text-[17px] font-semibold bg-blue-600  transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                        className=" text-white px-4 py-1 rounded-4xl text-[17px] font-semibold bg-red-600  transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
                       >
                         Sign up
                       </Link>
@@ -211,23 +219,23 @@ const NavBar = () => {
                 }}
               >
                 {/* STATIC BRAND */}
-                <span className="text-[22px] font-extrabold text-black tracking-tight">
+                <span className="text-[22px] font-extrabold text-black tracking-tight text-red-600">
                   edeco
                 </span>
 
-                <span className="mx-[2px] text-[22px] font-extrabold text-black">
+                <span className="mx-[2px] text-[22px] font-extrabold text-black text-red-600">
                   .
                 </span>
 
                 {/* ROTATING WORDS */}
-                <div className="edeco-rotator">
-                  <div className="edeco-rotator-inner">
-                    <div>Internships</div>
-                    <div>Jobs</div>
-                    <div>Eduversity</div>
-                    <div>Global</div>
-                    <div>Innovations</div>
-                    <div>Events</div>
+                <div className="edeco-rotator text-red-600">
+                  <div className="edeco-rotator-inner ">
+                    <div className="text-red-600">Internships</div>
+                    <div className="text-red-600">Jobs</div>
+                    <div className="text-red-600">Eduversity</div>
+                    <div className="text-red-600">Global</div>
+                    <div className="text-red-600">Innovations</div>
+                    <div className="text-red-600">Events</div>
                   </div>
                 </div>
               </div>
@@ -241,21 +249,21 @@ const NavBar = () => {
                 >
                   {/* EXPLORE BUTTON */}
                   <button
-                    className={`flex items-center gap-1.5 text-sm text-gray-700 border border-transparent px-[15px] py-6 rounded-[7px] cursor-pointer
-                  hover:text-blue-600 hover:bg-blue-50
-                  ${showExplore ? "text-blue-600 bg-blue-50" : ""}
+                    className={`flex items-center gap-1.5 text-sm text-gray-700 border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+                  hover:text-red-600 hover:bg-blue-50
+                  ${showExplore ? "text-red-600 bg-blue-50" : ""}
                 `}
                   >
                     Career Services
 
                     <MdKeyboardArrowDown size={25} className="" style={{
-                        
-                       
-                        transform: showExplore
-                          ? "rotate(180deg)"
-                          : "rotate(0deg)",
-                        transition: "transform 0.2s",
-                      }}/>
+
+
+                      transform: showExplore
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                      transition: "transform 0.2s",
+                    }} />
                     {/* <i
                       className="bi bi-chevron-down"
                       
@@ -369,7 +377,7 @@ const NavBar = () => {
                       {/* BOTTOM STRIP */}
                       <div className="border-t-2 border-[#e6e0e0d6] px-8 py-4 text-sm text-gray-600 w-[1000px] mx-auto">
                         Not sure where to begin?
-                        <span className="text-blue-600 ml-2 hover:underline cursor-pointer">
+                        <span className="text-red-600 ml-2 hover:underline cursor-pointer">
                           Browse all programs →
                         </span>
                       </div>
@@ -382,8 +390,8 @@ const NavBar = () => {
                   to="/degrees"
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-blue-600
-     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   Degree Programs
@@ -392,8 +400,8 @@ const NavBar = () => {
                   to="/events"
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-blue-600
-     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   Events
@@ -403,8 +411,8 @@ const NavBar = () => {
                   to="/resources"
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-blue-600
-     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   Resources
@@ -413,8 +421,8 @@ const NavBar = () => {
                   to="/more"
                   className={({ isActive }) =>
                     `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-blue-600
-     ${isActive ? "text-blue-600 bg-blue-50" : "text-gray-700"}`
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
                   }
                 >
                   More
@@ -442,12 +450,12 @@ const NavBar = () => {
                   px-4 pr-10 text-sm
                   transition-all duration-300 ease-in-out
                   focus:outline-none bg-white
-                  ${isSearchOpen ? "w-[250px] opacity-100" : "w-[40px] opacity-0 pointer-events-none"}
+                  ${isSearchOpen ? "w-[350px] opacity-100" : "w-[40px] opacity-0 pointer-events-none"}
                 `}
                   onFocus={() => setIsSearchOpen(true)}
                 />
                 <button
-                  className="relative z-10 h-[36px] w-[36px] rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md transition-colors"
+                  className="relative z-10 h-[36px] w-[36px] rounded-full bg-red-600 text-white flex items-center justify-center shadow-md transition-colors"
                   onClick={() => {
                     if (!searchValue) setIsSearchOpen(true);
                   }}
@@ -469,3 +477,4 @@ const NavBar = () => {
 };
 
 export default NavBar;
+

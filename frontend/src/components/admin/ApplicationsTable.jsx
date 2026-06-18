@@ -52,7 +52,7 @@ const ApplicationsTable = () => {
 //                       <h2 className="text-2xl font-semibold text-slate-800">
 //                         Application Forms
 //                         {filterOpportunityId && (
-//                           <span className="ml-3 text-sm font-normal text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+//                           <span className="ml-3 text-sm font-normal text-red-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
 //                             Filtered for:{" "}
 //                             {filteredOpportunities.find(
 //                               (o) => (o.id || o._id) === filterOpportunityId,

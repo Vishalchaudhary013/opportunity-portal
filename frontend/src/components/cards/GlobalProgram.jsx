@@ -24,10 +24,10 @@ const GlobalProgram = ({ limit }) => {
     <>
       <div>
         <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8 sm:mb-10">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8 sm:mb-10">
             <ul>
 
-              <SectionTitle title="Global Programs" subtitle="Prestigious Global Programs"/>
+              <SectionTitle title="Global Programs" subtitle="Join international programs curated by top institutions and mentors"/>
 
               {/* <li className="text-2xl font-semibold">Global Programs</li>
               <li className="text-xl font-medium">
@@ -39,7 +39,7 @@ const GlobalProgram = ({ limit }) => {
               <li>
                 <Link
                   to="/global-program"
-                  className="font-medium flex gap-2 items-center text-slate-900 bg-[#1E40AF] text-white py-1 px-4 rounded-md"
+                  className="font-medium flex gap-2 items-center text-slate-900 bg-red-600 text-white py-1 px-4 rounded-md"
                 >
                   View All
                   <FaLongArrowAltRight />
@@ -48,7 +48,7 @@ const GlobalProgram = ({ limit }) => {
             </ul>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {visibleGlobalPrograms.map((data) => (
               <div
                 key={data.id}
@@ -140,7 +140,7 @@ const GlobalProgram = ({ limit }) => {
                 </div>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
       <ApplicationFormModal

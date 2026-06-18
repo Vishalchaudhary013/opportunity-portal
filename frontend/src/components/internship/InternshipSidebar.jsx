@@ -52,7 +52,7 @@ const InternshipSidebar = ({
         <button
           type="button"
           onClick={onResetFilters}
-          className="mt-5 w-full rounded-lg bg-blue-600 py-2 text-sm font-semibold text-white"
+          className="mt-5 w-full rounded-lg bg-red-600 py-2 text-sm font-semibold text-white"
         >
           Reset Filters
         </button>

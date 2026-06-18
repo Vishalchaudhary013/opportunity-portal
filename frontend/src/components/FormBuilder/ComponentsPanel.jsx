@@ -60,7 +60,7 @@ const ComponentsPanel = () => {
           onClick={() => setSidebarTab('builder')}
           className={`flex-1 py-3 text-sm font-semibold transition-all duration-200 border-b-2 ${
             sidebarTab === 'builder'
-              ? 'text-blue-600 border-blue-600 bg-blue-50/30'
+              ? 'text-red-600 border-red-600 bg-blue-50/30'
               : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -70,7 +70,7 @@ const ComponentsPanel = () => {
           onClick={() => setSidebarTab('properties')}
           className={`flex-1 py-3 text-sm font-semibold transition-all duration-200 border-b-2 ${
             sidebarTab === 'properties'
-              ? 'text-blue-600 border-blue-600 bg-blue-50/30'
+              ? 'text-red-600 border-red-600 bg-blue-50/30'
               : 'text-gray-500 border-transparent hover:text-gray-700 hover:bg-gray-50'
           }`}
         >
@@ -98,7 +98,7 @@ const ComponentsPanel = () => {
                         onClick={() => handleComponentClick(component)}
                         className="flex items-center gap-3 p-3 bg-[#F0F7FF] border border-[#D0E5FF] rounded-lg cursor-move hover:border-blue-400 hover:shadow-md transition-all group active:scale-[0.98]"
                       >
-                        <div className="text-blue-600 bg-white p-1.5 rounded-md shadow-sm border border-blue-100 group-hover:scale-110 transition-transform">
+                        <div className="text-red-600 bg-white p-1.5 rounded-md shadow-sm border border-blue-100 group-hover:scale-110 transition-transform">
                           {component.icon}
                         </div>
                         <span className="text-sm font-medium text-blue-800 tracking-tight">

@@ -40,7 +40,7 @@ const CheckboxDropdown = ({ label, options, selected, onChange, required }) => {
             <label key={option} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors">
               <input 
                 type="checkbox" 
-                className="accent-blue-600 w-4 h-4 rounded"
+                className="accent-red-600 w-4 h-4 rounded"
                 checked={selected?.includes(option)} 
                 onChange={(e) => onChange(e, option)}
               />
@@ -112,7 +112,7 @@ const OpportunityForm = () => {
 
             <div className="w-full bg-[#E2EAFC] h-1.5 rounded-full mb-10 overflow-hidden">
               <div
-                className="bg-blue-600 h-full transition-all duration-300"
+                className="bg-red-600 h-full transition-all duration-300"
                 style={{ width: currentStep === 1 ? "40%" : "100%" }}
               ></div>
             </div>
@@ -125,8 +125,8 @@ const OpportunityForm = () => {
                 className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
                 disabled={!editingId && currentStep !== 1}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 1 ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-600 group-hover:bg-blue-200"}`}>1</div>
-                <span className={`font-semibold text-sm transition-colors ${currentStep === 1 ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"}`}>Program Details</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 1 ? "bg-red-600 text-white" : "bg-blue-100 text-red-600 group-hover:bg-blue-200"}`}>1</div>
+                <span className={`font-semibold text-sm transition-colors ${currentStep === 1 ? "text-red-600" : "text-slate-400 group-hover:text-slate-600"}`}>Program Details</span>
               </button>
               <button
                 type="button"
@@ -141,8 +141,8 @@ const OpportunityForm = () => {
                 className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
                 disabled={!editingId}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 2 ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>2</div>
-                <span className={`font-semibold text-sm transition-colors ${currentStep === 2 ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"}`}>Application Form</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 2 ? "bg-red-600 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>2</div>
+                <span className={`font-semibold text-sm transition-colors ${currentStep === 2 ? "text-red-600" : "text-slate-400 group-hover:text-slate-600"}`}>Application Form</span>
               </button>
             </div>
 
@@ -202,7 +202,7 @@ const OpportunityForm = () => {
                     <div className="flex gap-4 mt-2">
                       {["On-site", "Remote", "Hybrid"].map(mode => (
                         <label key={mode} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="workMode" value={mode} checked={form.workMode === mode} onChange={handleChange} className="accent-blue-600" />
+                          <input type="radio" name="workMode" value={mode} checked={form.workMode === mode} onChange={handleChange} className="accent-red-600" />
                           <span>{mode}</span>
                         </label>
                       ))}
@@ -233,7 +233,7 @@ const OpportunityForm = () => {
                     <div className="flex gap-4 mt-2">
                       {["Summer", "Winter", "Full-year"].map(type => (
                         <label key={type} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="internshipType" value={type} checked={form.internshipType === type} onChange={handleChange} className="accent-blue-600" />
+                          <input type="radio" name="internshipType" value={type} checked={form.internshipType === type} onChange={handleChange} className="accent-red-600" />
                           <span>{type}</span>
                         </label>
                       ))}
@@ -245,7 +245,7 @@ const OpportunityForm = () => {
                     <div className="flex gap-4 mt-2">
                       {["Full-time", "Part-time"].map(hours => (
                         <label key={hours} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="workingHours" value={hours} checked={form.workingHours === hours} onChange={handleChange} className="accent-blue-600" required />
+                          <input type="radio" name="workingHours" value={hours} checked={form.workingHours === hours} onChange={handleChange} className="accent-red-600" required />
                           <span>{hours}</span>
                         </label>
                       ))}
@@ -286,7 +286,7 @@ const OpportunityForm = () => {
                     <div className="flex gap-4 mt-2">
                       {["Fixed", "Performance-based", "Unpaid"].map(type => (
                         <label key={type} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="stipendType" value={type} checked={form.stipendType === type} onChange={(e) => { handleChange(e); setForm(prev => ({...prev, isUnpaid: type === "Unpaid", stipend: type === "Unpaid" ? "" : prev.stipend})) }} className="accent-blue-600" required />
+                          <input type="radio" name="stipendType" value={type} checked={form.stipendType === type} onChange={(e) => { handleChange(e); setForm(prev => ({...prev, isUnpaid: type === "Unpaid", stipend: type === "Unpaid" ? "" : prev.stipend})) }} className="accent-red-600" required />
                           <span>{type}</span>
                         </label>
                       ))}
@@ -316,7 +316,7 @@ const OpportunityForm = () => {
                     <div className="flex flex-wrap gap-4 mt-2">
                       {["Certificate", "LOR", "PPO", "Flexible Hours"].map(perk => (
                         <label key={perk} className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" checked={form.perks?.includes(perk)} onChange={(e) => handleCheckboxChange(e, 'perks', perk)} className="accent-blue-600 w-4 h-4 rounded" />
+                          <input type="checkbox" checked={form.perks?.includes(perk)} onChange={(e) => handleCheckboxChange(e, 'perks', perk)} className="accent-red-600 w-4 h-4 rounded" />
                           <span>{perk}</span>
                         </label>
                       ))}
@@ -360,7 +360,7 @@ const OpportunityForm = () => {
                     <div className="flex gap-4 mt-2">
                       {["Beginner", "Intermediate", "Advanced"].map(level => (
                         <label key={level} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="experienceLevel" value={level} checked={form.experienceLevel === level} onChange={handleChange} className="accent-blue-600" required />
+                          <input type="radio" name="experienceLevel" value={level} checked={form.experienceLevel === level} onChange={handleChange} className="accent-red-600" required />
                           <span>{level}</span>
                         </label>
                       ))}
@@ -417,7 +417,7 @@ const OpportunityForm = () => {
                     <div className="flex flex-wrap gap-4 mt-2">
                       {["Resume Shortlist", "Assignment", "Interview"].map(round => (
                         <label key={round} className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" checked={form.selectionRounds?.includes(round)} onChange={(e) => handleCheckboxChange(e, 'selectionRounds', round)} className="accent-blue-600 w-4 h-4 rounded" />
+                          <input type="checkbox" checked={form.selectionRounds?.includes(round)} onChange={(e) => handleCheckboxChange(e, 'selectionRounds', round)} className="accent-red-600 w-4 h-4 rounded" />
                           <span>{round}</span>
                         </label>
                       ))}
@@ -504,7 +504,7 @@ const OpportunityForm = () => {
                     </div>
                     
                     {/* <label className="flex items-center gap-3 text-sm font-semibold text-slate-700 mt-2 cursor-pointer">
-                      <input type="checkbox" name="featuredListing" checked={form.featuredListing} onChange={handleChange} className="w-4 h-4 accent-blue-600" />
+                      <input type="checkbox" name="featuredListing" checked={form.featuredListing} onChange={handleChange} className="w-4 h-4 accent-red-600" />
                       <span>Featured Listing (Push to top of the board)</span>
                     </label> */}
 
@@ -547,7 +547,7 @@ const OpportunityForm = () => {
               </div>
 
               <div className="flex justify-end pt-8 border-t border-[#E2EAFC]">
-                <button type="submit" disabled={busy} className="px-12 py-4 rounded-2xl bg-blue-600 text-white font-bold  shadow-blue-200 transition-all active:scale-95 disabled:opacity-50">
+                <button type="submit" disabled={busy} className="px-12 py-4 rounded-2xl bg-red-600 text-white font-bold  shadow-blue-200 transition-all active:scale-95 disabled:opacity-50">
                   {busy ? "Saving..." : editingId ? "Update Opportunity" : "Create Opportunity"}
                 </button>
               </div>
@@ -562,7 +562,7 @@ const OpportunityForm = () => {
           <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-800">Confirm Program Details</h2>
-              <button onClick={() => showPreviewModal(false)} className="text-blue-600 font-bold hover:underline text-sm">Edit</button>
+              <button onClick={() => showPreviewModal(false)} className="text-red-600 font-bold hover:underline text-sm">Edit</button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50">
                <p className="text-slate-600 font-medium">Ready to save the following opportunity?</p>
@@ -570,7 +570,7 @@ const OpportunityForm = () => {
             </div>
             <div className="p-6 border-t border-slate-100 flex items-center justify-end gap-4 bg-white">
               <button type="button" onClick={() => resetForm()} className="px-6 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">Cancel</button>
-              <button type="button" onClick={handleConfirmSubmit} disabled={busy} className="px-8 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 min-w-[160px]">
+              <button type="button" onClick={handleConfirmSubmit} disabled={busy} className="px-8 py-3 rounded-xl bg-red-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 disabled:opacity-50 min-w-[160px]">
                 {busy ? "Publishing..." : "Confirm & Create"}
               </button>
             </div>

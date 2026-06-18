@@ -53,7 +53,7 @@ const InternshipSearchBar = ({
 
         <button
           type="button"
-          className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white"
+          className="rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white"
         >
           Find Opportunities
         </button>
@@ -70,7 +70,7 @@ const InternshipSearchBar = ({
               onClick={() => onQuickFilterChange(filter.key)}
               className={`shrink-0 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
                 active
-                  ? "border-[#0B4AA6] bg-blue-600 text-white"
+                  ? "border-[#0B4AA6] bg-red-600 text-white"
                   : "border-[#E0E8FA] bg-white text-[#445985] hover:border-[#BDD0F3]"
               }`}
             >

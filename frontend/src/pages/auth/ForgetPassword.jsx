@@ -195,7 +195,7 @@ const ForgetPassword = () => {
                   setConfirmPassword("");
                   setError("");
                 }}
-                className="text-sm text-blue-600 block mx-auto mb-4"
+                className="text-sm text-red-600 block mx-auto mb-4"
               >
                 Resend code
               </button>
@@ -203,7 +203,7 @@ const ForgetPassword = () => {
 
             <p className="text-sm text-center">
               Remember your password?{" "}
-              <Link to="/login" className="text-blue-600">
+              <Link to="/login" className="text-red-600">
                 Sign In
               </Link>
             </p>

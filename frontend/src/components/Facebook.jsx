@@ -38,16 +38,16 @@ const Facebook = () => {
               target="_blank"
               rel="noopener noreferrer" className="relative w-[90%] max-w-4xl">
               <div className="absolute left-1/2 -translate-x-1/2 -top-12 z-10">
-                <div className="w-20 h-20 rounded-full border-3 border-blue-500 bg-white flex items-center justify-center shadow-lg">
+                <div className="w-20 h-20 rounded-full border-3 border-red-600 bg-white flex items-center justify-center shadow-lg">
                   <div className="w-16 h-16 rounded-full flex items-center justify-center">
-                    <FaFacebook className="text-blue-600 text-[98px]" />
+                    <FaFacebook className="text-red-600 text-[98px]" />
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-center mb-20">
                 <h3
-                  className="relative isolate z-0 bg-[#1E40AF] p-10 text-white text-[40px]
+                  className="relative isolate z-0 bg-red-600 p-10 text-white text-[40px]
                   font-semibold rounded-2xl shadow-2xl
                   "
                 >

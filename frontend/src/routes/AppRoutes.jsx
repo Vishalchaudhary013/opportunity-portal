@@ -19,6 +19,7 @@ import ApplicationFormBuilderPage from "../pages/ApplicationFormBuilderPage";
 import SuperAdminDashboard from "../pages/SuperAdminDashboard";
 import NotFound from "../pages/NotFound";
 import ChooseSignup from "../components/signup/ChooseSignup";
+import DegreePage from "../pages/DegreePage";
 
 const AppRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const AppRoutes = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path='/choose-signup' element={<ChooseSignup />} />
       <Route path="/forget-password" element={<ForgetPassword />} />
+      <Route path='/degrees' element={<DegreePage />}/>
 
       {/* Protected Routes (Any logged in user) */}
       <Route element={<ProtectedRoute />}>

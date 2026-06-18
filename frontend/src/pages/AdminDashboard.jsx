@@ -202,7 +202,7 @@ const AdminDashboardContent = () => {
 
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3 rounded-xl bg-[#F5F8FF] border border-[#DEE8FF] px-3 py-1.5">
-                      <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
+                      <div className="w-8 h-8 rounded-full bg-red-600 text-white font-bold flex items-center justify-center text-sm shadow-sm">
                         {(user?.fullName || "A").charAt(0).toUpperCase()}
                       </div>
                       <div className="hidden sm:block">

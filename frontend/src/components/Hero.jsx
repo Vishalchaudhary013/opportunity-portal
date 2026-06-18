@@ -114,7 +114,7 @@ const Hero = () => {
               >
                 <LuRocket
                   size={25}
-                  className="text-white bg-blue-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
+                  className="text-white bg-red-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
                 />
                 <ul className="leading-5 min-w-0">
                   <li className="font-medium">Start my career</li>
@@ -129,7 +129,7 @@ const Hero = () => {
               >
                 <FaArrowTrendUp
                   size={25}
-                  className="text-white bg-blue-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
+                  className="text-white bg-red-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
                 />
                 <ul className="leading-5 min-w-0">
                   <li className="font-medium">Upskill myself</li>
@@ -145,7 +145,7 @@ const Hero = () => {
               >
                 <TbSwitch3
                   size={25}
-                  className="text-white bg-blue-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
+                  className="text-white bg-red-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
                 />
                 <ul className="leading-5 min-w-0">
                   <li className="font-medium">Switch my career</li>
@@ -161,7 +161,7 @@ const Hero = () => {
               >
                 <AiOutlineGlobal
                   size={25}
-                  className="text-white bg-blue-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
+                  className="text-white bg-red-600 w-10 h-10 p-2 rounded-lg flex justify-center items-center"
                 />
                 <ul className="leading-5 min-w-0">
                   <li className="font-medium">Explore global opportunities</li>

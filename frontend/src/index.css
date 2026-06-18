@@ -8,7 +8,7 @@ body {
 @import "tailwindcss";
 
 @theme {
-  --color-blue-600:		#00A9E0;  /* #00A9F8  #282B8F  #0021f3 	#0013de #1944f1  #00A9E0  #00A9E0*/
+  --color-red-600:		 #00A9E0 ;  /* #00A9F8  #282B8F  #0021f3 	#0013de #1944f1  #00A9E0  #00A9E0 	#ff0000  #FF1F39*/
   --color-blue-700: #091a30;
 }
 input[type="password"]::-ms-reveal,
@@ -88,7 +88,7 @@ select option:focus {
   line-height: 31px;
   font-size: 13px;
   font-weight: 600;
-  color: #000;
+  /* color: #000; */
   white-space: nowrap;
 }
 
@@ -216,4 +216,18 @@ body {
 .translate-widget-wrapper .goog-te-combo:focus {
     border-color: #3b82f6 !important;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+}
+
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
 }

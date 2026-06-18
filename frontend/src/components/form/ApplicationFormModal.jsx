@@ -269,11 +269,11 @@ const ApplicationFormModal = ({
                       return (
                         <div key={field.id} className="w-full h-full flex items-center justify-center bg-blue-50">
                           <div className="text-center p-8">
-                            <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                            <div className="w-20 h-20 bg-blue-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
                               <Icons.PdfUpload size={40} />
                             </div>
                             <h3 className="text-xl font-bold text-blue-900">PDF Document Included</h3>
-                            <p className="text-blue-600 mt-2">This application form includes a document for your reference.</p>
+                            <p className="text-red-600 mt-2">This application form includes a document for your reference.</p>
                           </div>
                         </div>
                       );
@@ -319,7 +319,7 @@ const ApplicationFormModal = ({
 
                   {isLoadingForm ? (
                     <div className="flex flex-col items-center justify-center py-20 gap-4">
-                      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full animate-spin"></div>
                       <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading Form...</p>
                     </div>
                   ) : (

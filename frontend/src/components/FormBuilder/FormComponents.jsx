@@ -561,13 +561,13 @@ const FormComponents = ({ field, isPreview, onChange = () => {}, onCheckboxChang
       return (
         <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
           <div className="p-2 bg-white rounded-md shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-blue-900 truncate">Attached PDF Document</p>
-            <p className="text-xs text-blue-600">Included in application</p>
+            <p className="text-xs text-red-600">Included in application</p>
           </div>
         </div>
       );

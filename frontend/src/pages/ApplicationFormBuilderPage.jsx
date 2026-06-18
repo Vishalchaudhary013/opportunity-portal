@@ -81,7 +81,7 @@ const ApplicationFormBuilderPageContent = () => {
                   <p className="text-[10px] tracking-[0.16em] text-slate-500 mt-1 font-semibold">PORTAL</p>
                 </div>
               ) : (
-                <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
+                <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200">
                   <FiShield className="text-white" size={20} />
                 </div>
               )}
@@ -94,7 +94,7 @@ const ApplicationFormBuilderPageContent = () => {
                   type="button"
                   title={!isSidebarHovered ? item.label : ""}
                   onClick={() => handleSidebarClick(item.key)}
-                  className={`flex items-center gap-3 rounded-xl transition-all group relative ${isSidebarHovered ? 'w-full px-4 py-3 justify-start' : 'w-12 h-12 justify-center'} ${isSidebarHovered ? 'text-slate-700 hover:bg-white hover:text-blue-600' : 'text-slate-600 hover:bg-white/70 hover:text-blue-600'}`}
+                  className={`flex items-center gap-3 rounded-xl transition-all group relative ${isSidebarHovered ? 'w-full px-4 py-3 justify-start' : 'w-12 h-12 justify-center'} ${isSidebarHovered ? 'text-slate-700 hover:bg-white hover:text-red-600' : 'text-slate-600 hover:bg-white/70 hover:text-red-600'}`}
                 >
                   <div className="shrink-0">
                     {item.key === "Program Details" && <FiEdit2 size={isSidebarHovered ? 18 : 20} />}

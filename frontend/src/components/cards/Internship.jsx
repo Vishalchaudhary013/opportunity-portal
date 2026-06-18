@@ -31,23 +31,41 @@ import {
   Sigma,
 } from "lucide-react";
 import SectionTitle from "../SectionTitle";
-
+import {
+  Building2,
+  BookOpen,
+  GraduationCap,
+  Handshake,
+  Landmark,
+  Search,
+  ClipboardCheck,
+  CalendarDays,
+} from "lucide-react";
 const Internship = ({ limit }) => {
   const [selectedCategory, setSelectedCategory] = React.useState(null);
 
   const categories = [
-    { name: "Business", icon: <Briefcase size={16} /> },
-    { name: "Artificial Intelligence", icon: <Cpu size={16} /> },
-    { name: "Data Science", icon: <LineChart size={16} /> },
-    { name: "Computer Science", icon: <Code size={16} /> },
-    { name: "Information Technology", icon: <Monitor size={16} /> },
-    { name: "Personal Development", icon: <User size={16} /> },
-    { name: "Healthcare", icon: <HeartPulse size={16} /> },
-    { name: "Language Learning", icon: <Globe size={16} /> },
-    { name: "Social Sciences", icon: <Users size={16} /> },
-    { name: "Arts and Humanities", icon: <Palette size={16} /> },
-    { name: "Physical Science", icon: <FlaskConical size={16} /> },
-    { name: "Math & Logic", icon: <Sigma size={16} /> },
+    // { name: "Business", icon: <Briefcase size={16} /> },
+    // { name: "Artificial Intelligence", icon: <Cpu size={16} /> },
+    // { name: "Data Science", icon: <LineChart size={16} /> },
+    // { name: "Computer Science", icon: <Code size={16} /> },
+    // { name: "Information Technology", icon: <Monitor size={16} /> },
+    // { name: "Personal Development", icon: <User size={16} /> },
+    // { name: "Healthcare", icon: <HeartPulse size={16} /> },
+    // { name: "Language Learning", icon: <Globe size={16} /> },
+    // { name: "Social Sciences", icon: <Users size={16} /> },
+    // { name: "Arts and Humanities", icon: <Palette size={16} /> },
+    // { name: "Physical Science", icon: <FlaskConical size={16} /> },
+    // { name: "Math & Logic", icon: <Sigma size={16} /> },
+
+    { name: "Corporate", icon: <Building2 size={16} /> },
+    { name: "Training", icon: <BookOpen size={16} /> },
+    { name: "Teaching", icon: <GraduationCap size={16} /> },
+    { name: "NGO / Social Work", icon: <Handshake size={16} /> },
+    { name: "Government", icon: <Landmark size={16} /> },
+    { name: "Research", icon: <Search size={16} /> },
+    { name: "Assessment", icon: <ClipboardCheck size={16} /> },
+    { name: "Summer / Winter Break", icon: <CalendarDays size={16} /> },
   ];
 
   const { opportunities, isInternshipSaved, toggleSavedInternship } =
@@ -75,12 +93,104 @@ const Internship = ({ limit }) => {
   }, [intershipData, selectedCategory, limit]);
 
   return (
+    //   <>
+    //   <div
+    //     className="bg-white rounded-[8px] w-[260px] hover:-translate-y-1 transition overflow-hidden"
+    //     style={{ boxShadow: "rgba(0,0,0,0.2) 0px 3px 8px" }}
+    //   >
+    //     {/* TOP SECTION */}
+    //     <div className="bg-[#cfe3e6] p-[15px] relative">
+
+    //       {/* LOGO FIX */}
+    //       <div className="w-[40px] h-[40px] bg-white rounded-xl flex items-center justify-center overflow-hidden">
+    //         <img
+    //           src={
+    //             job.logo
+    //               ? `http://localhost:5000/uploads/${encodeURIComponent(job.logo)}`
+    //               : "/default-logo.png"
+    //           }
+    //           alt="logo"
+    //           className="h-[30px] object-contain"
+    //           onError={(e) => {
+    //             e.target.src = "/default-logo.png";
+    //           }}
+    //         />
+    //       </div>
+
+    //       {/* DATE BADGE + TOOLTIP */}
+    //       <div
+    //         className="absolute top-4 right-4 bg-white rounded-xl w-[40px] h-[40px] text-xs flex flex-col items-center justify-center cursor-pointer"
+    //         title={`Joining Date: ${startDate.toDateString()}`}
+    //       >
+    //         <span className="bg-black text-white w-full text-center text-[10px] rounded-t-xl">
+    //           {month}
+    //         </span>
+    //         <span className="font-bold">{day}</span>
+    //         <span className="text-[10px] text-gray-500">{weekday}</span>
+    //       </div>
+
+    //       {/* COMPANY */}
+    //       <p className="mt-3 text-sm text-gray-700 font-medium">
+    //         {job.companyName}
+    //       </p>
+
+    //       {/* TITLE */}
+    //       <h2 className="text-[15px] font-semibold">
+    //         {job.workProfile}
+    //       </h2>
+
+    //       {/* TAGS */}
+    //       <div className="flex gap-2 mt-2 text-[10px] flex-wrap">
+    //         <span className="bg-white px-2 py-[2px] rounded border">
+    //           {job.workType}
+    //         </span>
+    //       </div>
+
+    //       {/*  DAYS LEFT */}
+    //       <div className="flex justify-between mt-3 text-[12px] text-gray-700">
+    //         <span
+    //           className="cursor-pointer"
+    //           title={`${daysLeft} days left to apply`}
+    //         >
+    //           {daysLeft > 0 ? `${daysLeft} days left` : "Expired"}
+    //         </span>
+
+    //         <span>{job.location}</span>
+    //       </div>
+    //     </div>
+
+    //     {/* BOTTOM */}
+    //     <div className="flex justify-between items-center p-[12px]">
+    //       <span className="text-sm font-medium">{reward}</span>
+
+    //       <div className="flex gap-2">
+    // {/* VIEW */}
+    // <button
+    //   onClick={() => {
+    //     console.log("VIEW CLICKED:", job._id);
+    //     navigate(`/internship/${job._id}`);
+    //   }}
+    //   className="bg-black text-white px-3 py-1 rounded text-xs"
+    // >
+    //   View
+    // </button>
+
+    // {/* APPLY */}
+    //   <button
+    //     onClick={handleApplyClick}
+    //     className="bg-red-600 text-white px-3 py-1 rounded text-xs"
+    //   >
+    //     Apply
+    //   </button>
+    //   </div>
+    //     </div>
+    //   </div>
+    //   </>
     <>
       <div className="bg-gray-50/60">
         <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-8 sm:mb-10">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8 sm:mb-10">
             <ul>
-
               {/* <h2 className="text-[25px] font-[700] text-black bg-clip-text leading-snug">Internships & Work Experience</h2>
               <span className="text-[16px] md:text-[18px] text-gray-500 font-light">Gain practical experience through on-job training</span> */}
               <SectionTitle
@@ -93,7 +203,7 @@ const Internship = ({ limit }) => {
               <li>
                 <Link
                   to="/intership"
-                  className="font-medium flex gap-2 items-center text-slate-900  bg-[#1E40AF] text-white py-1 px-4 rounded-md"
+                  className="font-medium flex gap-2 items-center text-slate-900  bg-red-600 text-white py-1 px-4 rounded-md"
                 >
                   View All
                   <FaLongArrowAltRight />
@@ -111,10 +221,11 @@ const Internship = ({ limit }) => {
                     selectedCategory === cat.name ? null : cat.name,
                   )
                 }
-                className={`flex items-center gap-2 px-[15px] py-[6px] border rounded-full text-[12px] transition-all duration-200 ${selectedCategory === cat.name
-                    ? "bg-blue-600 text-white border-blue-600 shadow-md transform scale-105"
+                className={`flex items-center gap-2 px-[15px] py-[6px] border rounded-full text-[12px] transition-all duration-200 ${
+                  selectedCategory === cat.name
+                    ? "bg-red-600 text-white border-red-600 shadow-md transform scale-105"
                     : "bg-[#F0F6FF] text-slate-700 border-[#D6E2FC] hover:bg-blue-50"
-                  }`}
+                }`}
               >
                 {cat.icon}
                 {cat.name}
@@ -151,10 +262,12 @@ const Internship = ({ limit }) => {
                           )}
                         </li>
                         <li className="flex flex-col min-w-0">
-                          <span className="text-sm text-blue-600 font-medium">
+                          <span className="text-sm text-red-600 font-medium">
                             {data.company}
                           </span>
-                          <span className="font-medium truncate">{data.title}</span>
+                          <span className="font-medium truncate">
+                            {data.title}
+                          </span>
                         </li>
                       </ul>
                       <button
@@ -165,7 +278,9 @@ const Internship = ({ limit }) => {
                           event.stopPropagation();
                           toggleSavedInternship(data.id);
                         }}
-                        aria-label={isSaved ? "Unsave internship" : "Save internship"}
+                        aria-label={
+                          isSaved ? "Unsave internship" : "Save internship"
+                        }
                         title={isSaved ? "Saved" : "Save for later"}
                       >
                         {isSaved ? (
@@ -216,9 +331,7 @@ const Internship = ({ limit }) => {
                 </div>
 
                 <div className="border border-black/5 rounded-xl p-4 bg-white mb-6">
-                  <p className="text-sm  font-medium uppercase">
-                    Stipend
-                  </p>
+                  <p className="text-sm  font-medium uppercase">Stipend</p>
 
                   <h2 className="text-lg font-semibold mt-1">
                     {formatStipendText(data)}

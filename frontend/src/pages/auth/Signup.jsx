@@ -324,7 +324,7 @@ const Signup = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting || isEmailVerified}
-                        className="px-4 rounded-lg bg-blue-600 text-white text-sm disabled:opacity-60"
+                        className="px-4 rounded-lg bg-red-600 text-white text-sm disabled:opacity-60"
                       >
                         {isEmailVerified ? "Verified" : "Verify"}
                       </button>
@@ -348,7 +348,7 @@ const Signup = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting || isPhoneVerified}
-                        className="px-4 rounded-lg bg-blue-600 text-white text-sm disabled:opacity-60"
+                        className="px-4 rounded-lg bg-red-600 text-white text-sm disabled:opacity-60"
                       >
                         {isPhoneVerified ? "Verified" : "Verify"}
                       </button>
@@ -360,7 +360,7 @@ const Signup = () => {
                     type="button"
                     onClick={handleResendCodes}
                     disabled={isSubmitting}
-                    className="text-sm text-blue-600 mb-6"
+                    className="text-sm text-red-600 mb-6"
                   >
                     Resend codes
                   </button>
@@ -634,7 +634,7 @@ const Signup = () => {
 
                   <label
                     htmlFor="student-resume-upload"
-                    className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-600 flex items-center gap-3 cursor-pointer hover:border-blue-400 hover:text-blue-600 transition font-medium"
+                    className="w-full border border-dashed border-gray-300 rounded-lg px-4 py-3 mb-2 text-gray-600 flex items-center gap-3 cursor-pointer hover:border-blue-400 hover:text-red-600 transition font-medium"
                   >
                     <FiUpload className="text-lg" />
                     <span className="text-base">Upload resume (PDF Only)</span>
@@ -646,7 +646,7 @@ const Signup = () => {
                     <div className="mb-6" />
                   )}
 
-                  <div className="flex justify-center py-3 rounded-lg bg-blue-600 text-white text-sm font-medium mb-5">
+                  <div className="flex justify-center py-3 rounded-lg bg-red-600 text-white text-sm font-medium mb-5">
                     <button type="submit" disabled={isSubmitting}>
                       {isSubmitting
                         ? "Submitting..."
@@ -877,11 +877,11 @@ const Signup = () => {
                       }
                     />
                     <span className="text-sm text-gray-600 font-medium">
-                      I agree to edeco <Link to='' className="text-blue-600">Terms & Conditions</Link> and <Link to='' className="text-blue-600">Privacy Policy</Link>
+                      I agree to edeco <Link to='' className="text-red-600">Terms & Conditions</Link> and <Link to='' className="text-red-600">Privacy Policy</Link>
                     </span>
                   </div>
 
-                  <div className="flex justify-center py-3 rounded-lg bg-blue-600 text-white text-sm font-medium mb-5">
+                  <div className="flex justify-center py-3 rounded-lg bg-red-600 text-white text-sm font-medium mb-5">
                     <button type="submit" disabled={isSubmitting}>
                       {isSubmitting
                         ? "Submitting..."
@@ -891,7 +891,7 @@ const Signup = () => {
 
                   <p className="text-sm text-center">
                     Already have an account?{" "}
-                    <Link to="/login" className="text-blue-600">
+                    <Link to="/login" className="text-red-600">
                       Log in
                     </Link>
                   </p>

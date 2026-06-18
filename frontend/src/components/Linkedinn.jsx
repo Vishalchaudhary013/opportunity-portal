@@ -142,8 +142,8 @@ const Linkedinn = () => {
                                 className="relative w-[90%] max-w-4xl"
                             >
                                 <div className="absolute left-1/2 -translate-x-1/2 -top-12 z-10">
-                                    <div className="w-20 h-20 rounded-full border-3 border-blue-500 bg-white flex items-center justify-center shadow-lg">
-                                        <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center">
+                                    <div className="w-20 h-20 rounded-full border-3 border-red-600 bg-white flex items-center justify-center shadow-lg">
+                                        <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center">
   <FaLinkedinIn className="text-white text-4xl" />
 </div>
                                     </div>
@@ -151,7 +151,7 @@ const Linkedinn = () => {
 
                                 <div className="flex justify-center mb-20">
                                     <h3
-                                        className="relative isolate z-0 bg-[#1E40AF] py-6 px-12 text-white text-[40px]
+                                        className="relative isolate z-0 bg-red-600 py-6 px-12 text-white text-[40px]
         font-semibold rounded-2xl shadow-2xl"
                                     >
                                         Follow us on LinkedIn
@@ -188,7 +188,7 @@ const Linkedinn = () => {
                                                 >
                                                     Saurabh Dutta
                                                 </h5>
-                                                <span className="font-medium text-blue-500">
+                                                <span className="font-medium text-red-600">
                                                     {/* {post.date} */}
                                                     @username
                                                 </span>
@@ -199,7 +199,7 @@ const Linkedinn = () => {
                                             
                                         </ul>
                                         <ul className="">
-                                            <li><FaLinkedin className="text-blue-600 text-3xl"/></li>
+                                            <li><FaLinkedin className="text-blue-500 text-3xl"/></li>
                                         </ul>
                                         
                                     </div>
@@ -217,7 +217,7 @@ const Linkedinn = () => {
                                     {(post.text1 || post.text2) && (
                                         <button
                                             onClick={() => toggleExpand(post.id)}
-                                            className="text-blue-600 hover:text-blue-800 text-[14px] font-medium mb-5"
+                                            className="text-red-600  text-[14px] font-medium mb-5"
                                         >
                                             {expandedPosts[post.id] ? "Read less" : "Read more"}
                                         </button>
@@ -252,7 +252,7 @@ const Linkedinn = () => {
                                     <ul className="flex gap-5 items-center text-gray-700">
                                         <li className="flex items-center gap-0.5">
                                             
-                                            {/* <BiSolidLike className="text-xl"/> */}
+                                            <BiSolidLike className="text-xl"/>
                                             <p> {post.likes} <span className="text-[15px] font-medium">Likes</span></p>
                                            
                                         </li>
@@ -269,8 +269,8 @@ const Linkedinn = () => {
 
                         {/* Load More Button */}
                         <div className="w-full flex justify-center mb-4">
-                            <button className="px-6 py-3 rounded-lg bg-blue-600 text-white ">
-                                Load More Post
+                            <button className="px-6 py-3 rounded-lg bg-red-600 text-white ">
+                                View More Post
                             </button>
                         </div>
 

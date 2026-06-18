@@ -15,7 +15,7 @@ const GenderRadioGroup = ({ value, onChange, disabled }) => {
               checked={value === gender}
               onChange={(e) => onChange(e.target.value)}
               disabled={disabled}
-              className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+              className="h-4 w-4 text-red-600 border-gray-300 focus:ring-blue-500"
             />
             <label
               htmlFor={`gender-${gender}`}
