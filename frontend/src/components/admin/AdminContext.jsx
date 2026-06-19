@@ -492,12 +492,12 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
     setBusy(true);
     const shouldIncludeInternshipCardFields = form.type === "Internship";
     const stipendCurrencySymbol = form.stipendCurrency === "USD" ? "$" : "₹";
-    const requiredSkillsValue = requiredSkillInputs.map((skill) => String(skill || "").trim()).filter(Boolean).join(", ");
     const payload = {
       ...form,
       duration: form.duration ? `${form.duration} ${form.durationUnit || 'Months'}` : form.duration,
+      experienceLevel: form.experienceLevel ? `${form.experienceLevel} ${form.experienceUnit || 'Years'}` : form.experienceLevel,
       skills: form.skills,
-      requiredSkills: shouldIncludeInternshipCardFields ? requiredSkillsValue : form.requiredSkills,
+      requiredSkills: form.requiredSkills,
       benefits: form.benefits,
       deadline: new Date(form.deadline).toISOString(),
       startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
@@ -548,6 +548,12 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
       stipend: String(item.stipend || "").replace(/[₹$]/g, "").trim(),
       stipendCurrency: String(item.stipend || "").includes("$") ? "USD" : "INR",
       isUnpaid: String(item.stipend || "").toLowerCase().includes("unpaid") || item.stipend === "0" || !item.stipend,
+      duration: item.duration ? String(item.duration).split(" ")[0] : "",
+      durationUnit: item.duration && String(item.duration).split(" ").length > 1 ? String(item.duration).split(" ").slice(1).join(" ") : "Months",
+      experienceLevel: item.experienceLevel ? String(item.experienceLevel).split(" ")[0] : "",
+      experienceUnit: item.experienceLevel && String(item.experienceLevel).split(" ").length > 1 ? String(item.experienceLevel).split(" ").slice(1).join(" ") : "Years",
+      hasOpenings: item.openings != null && String(item.openings).trim() !== "",
+      requiredSkills: Array.isArray(item.requiredSkills) ? item.requiredSkills.join(", ") : item.requiredSkills || "",
     };
     const skillsArray = Array.isArray(item.requiredSkills) ? item.requiredSkills : String(item.requiredSkills || "").split(/,|\n/).map((s) => s.trim()).filter(Boolean);
     setRequiredSkillInputs(skillsArray.length > 0 ? skillsArray : ["", "", ""]);
@@ -792,7 +798,7 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
     passwordEditorAdminId, adminPasswordForm, showAdminPassword, changingPasswordAdminId, passwordChangeMessage, adminApprovalMessage, approvingAdminId,
     visiblePasswords, openingAdminId, deletingUserId,
     // Application detail
-    selectedApplication, setSelectedApplication,
+    selectedApplication, setSelectedApplication, filterOpportunityId, setFilterOpportunityId,
     // Status
     statusChangingId, statusChangeMessage,
     // Error

@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo, useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { CiSearch } from "react-icons/ci";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import {
@@ -154,9 +154,17 @@ const getExperienceMatch = (item, selectedExperienceLevels) => {
 
 const InternshipPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { opportunities, isInternshipSaved, toggleSavedInternship } = useOpportunities();
   const [query, setQuery] = useState("");
-  const [locationQuery, setLocationQuery] = useState("");
+  const [locationQuery, setLocationQuery] = useState(searchParams.get("location") || "");
+
+  useEffect(() => {
+    if (searchParams.has("location")) {
+      setLocationQuery(searchParams.get("location"));
+    }
+  }, [searchParams]);
+
   const [activeQuickFilter, setActiveQuickFilter] = useState("all");
   const [selectedJobTypes, setSelectedJobTypes] = useState([]);
   const [selectedExperienceLevels, setSelectedExperienceLevels] = useState([]);
@@ -260,7 +268,7 @@ const InternshipPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-6 sm:py-8">
-      <div className="w-full max-w-350 mx-auto px-4 sm:px-6">
+      <div className="w-full max-w-350 mx-auto px-4 sm:px-6 mt-15">
         <h2 className="text-3xl sm:text-4xl font-medium mb-2">Explore Internships</h2>
         <p className="text-base sm:text-lg text-black/60 mb-8 sm:mb-10">
           Find the perfect internship to kickstart your career.

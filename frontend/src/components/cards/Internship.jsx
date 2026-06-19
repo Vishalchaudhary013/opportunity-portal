@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CiLocationOn } from "react-icons/ci";
 import { CiCalendar } from "react-icons/ci";
 import { FaLongArrowAltRight } from "react-icons/fa";
@@ -43,6 +43,9 @@ import {
 } from "lucide-react";
 const Internship = ({ limit }) => {
   const [selectedCategory, setSelectedCategory] = React.useState(null);
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const locationFilter = searchParams.get("location");
 
   const categories = [
     // { name: "Business", icon: <Briefcase size={16} /> },
@@ -89,8 +92,15 @@ const Internship = ({ limit }) => {
           (item.title && item.title.toLowerCase().includes(query)),
       );
     }
+    if (locationFilter) {
+      const normalizedLocationFilter = locationFilter.trim().toLowerCase();
+      data = data.filter((item) => {
+        const loc = String(item.location || "").toLowerCase();
+        return loc.includes(normalizedLocationFilter);
+      });
+    }
     return typeof limit === "number" ? data.slice(0, limit) : data;
-  }, [intershipData, selectedCategory, limit]);
+  }, [intershipData, selectedCategory, limit, locationFilter]);
 
   return (
     //   <>
@@ -188,7 +198,7 @@ const Internship = ({ limit }) => {
     //   </>
     <>
       <div className="bg-gray-50/60">
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10 ">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8 sm:mb-10">
             <ul>
               {/* <h2 className="text-[25px] font-[700] text-black bg-clip-text leading-snug">Internships & Work Experience</h2>

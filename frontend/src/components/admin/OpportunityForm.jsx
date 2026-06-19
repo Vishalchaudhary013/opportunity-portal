@@ -53,6 +53,95 @@ const CheckboxDropdown = ({ label, options, selected, onChange, required }) => {
   );
 };
 
+const CreatableCheckboxDropdown = ({ label, defaultOptions, selected, onChange, required, className = "" }) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [options, setOptions] = React.useState(defaultOptions);
+  const [inputValue, setInputValue] = React.useState("");
+  const dropdownRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Update options if selected items contain something not in default options
+  React.useEffect(() => {
+    if (selected && selected.length > 0) {
+      const newOptions = selected.filter(s => !options.includes(s));
+      if (newOptions.length > 0) {
+        setOptions(prev => [...prev, ...newOptions]);
+      }
+    }
+  }, [selected, options]);
+
+  const handleAddOption = (e) => {
+    e.preventDefault();
+    const newOption = inputValue.trim();
+    if (newOption && !options.includes(newOption)) {
+      setOptions([...options, newOption]);
+      // Also automatically select the new option
+      onChange({ target: { checked: true } }, newOption);
+    }
+    setInputValue("");
+  };
+
+  return (
+    <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 relative" ref={dropdownRef}>
+      <span>{label} {required && <span className="text-rose-600">*</span>}</span>
+      <div 
+        className={`border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 cursor-pointer flex justify-between transition-all hover:bg-white flex-1 ${className || 'items-center'}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className="font-normal text-slate-600 truncate">
+          {selected?.length > 0 ? selected.join(', ') : "Select options..."}
+        </span>
+        <svg className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+      </div>
+      
+      {isOpen && (
+        <div className="absolute top-[100%] left-0 w-full mt-2 bg-white border border-[#D6E2FC] rounded-xl shadow-lg z-10 max-h-72 flex flex-col">
+          <div className="p-2 border-b border-slate-100 flex gap-2">
+            <input 
+              type="text" 
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddOption(e); } }}
+              placeholder="Create new perk..." 
+              className="flex-1 border border-[#D6E2FC] rounded-lg px-3 py-2 text-sm font-normal outline-none focus:ring-1 focus:ring-blue-500"
+            />
+            <button 
+              type="button" 
+              onClick={handleAddOption}
+              className="bg-slate-800 text-white px-3 py-2 rounded-lg text-xs font-bold hover:bg-slate-700"
+            >
+              Add
+            </button>
+          </div>
+          <div className="overflow-y-auto p-2 max-h-48">
+            {options.map(option => (
+              <label key={option} className="flex items-center gap-3 px-3 py-2 hover:bg-slate-50 rounded-lg cursor-pointer transition-colors">
+                <input 
+                  type="checkbox" 
+                  className="accent-red-600 w-4 h-4 rounded"
+                  checked={selected?.includes(option)} 
+                  onChange={(e) => onChange(e, option)}
+                />
+                <span className="font-normal text-slate-700">{option}</span>
+              </label>
+            ))}
+            {options.length === 0 && <div className="p-3 text-slate-500 text-sm text-center">No options available</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const OpportunityForm = () => {
   const {
     isSuperDashboard,
@@ -95,7 +184,66 @@ const OpportunityForm = () => {
     setForm(prev => ({ ...prev, socialProofLinks: { ...prev.socialProofLinks, [name]: value } }));
   };
 
-   const today = new Date();
+  const isSectionFilled = (sectionId) => {
+    switch (sectionId) {
+      case "section-program-specifics":
+        return !!form.title && !!form.departmentCategory && (form.workMode === 'Remote' || !!form.cityState) && !!form.duration && !!form.workMode && !!form.workingHours && !!form.experienceLevel && (form.hasOpenings === false || !!form.openings);
+      case "section-program-timeline":
+        return !!form.deadline && !!form.startDate;
+      case "section-financials":
+        return !!form.stipendType && (form.stipendType === "Unpaid" || !!form.stipend);
+      case "section-requirements":
+        return form.targetEducation?.length > 0 && form.batchEligibility?.length > 0 && !!form.requiredSkills;
+      case "section-qualifications":
+        return !!form.minimumRequirements || !!form.preferredQualifications;
+      case "section-job-description":
+        return !!form.description;
+      case "section-selection-process":
+        return (form.selectionRounds && form.selectionRounds.length > 0) || !!form.assignmentLink || !!form.customScreeningQuestion;
+      case "section-about-company":
+        return !!form.company;
+      default:
+        return false;
+    }
+  };
+
+  const [activeSubStep, setActiveSubStep] = React.useState("section-program-specifics");
+
+  React.useEffect(() => {
+    if (!showOpportunityForm || currentStep !== 1) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        let mostVisible = null;
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (!mostVisible || entry.intersectionRatio > mostVisible.intersectionRatio) {
+              mostVisible = entry;
+            }
+          }
+        });
+        if (mostVisible) {
+          setActiveSubStep(mostVisible.target.id);
+        }
+      },
+      { root: document.getElementById('opportunity-form-container'), rootMargin: "-10% 0px -70% 0px", threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    const ids = [
+      "section-program-specifics", "section-program-timeline", "section-financials",
+      "section-requirements", "section-qualifications", "section-job-description",
+      "section-selection-process", "section-about-company"
+    ];
+    // small delay to ensure DOM is ready
+    setTimeout(() => {
+      ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer.observe(el);
+      });
+    }, 100);
+    return () => observer.disconnect();
+  }, [showOpportunityForm, currentStep]);
+
+  const today = new Date();
   today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
 
   const minDate = today.toISOString().split("T")[0];
@@ -112,22 +260,79 @@ const OpportunityForm = () => {
 
             <div className="w-full bg-[#E2EAFC] h-1.5 rounded-full mb-10 overflow-hidden">
               <div
-                className="bg-red-600 h-full transition-all duration-300"
+                className="bg-[#00A9E0] h-full transition-all duration-300"
                 style={{ width: currentStep === 1 ? "40%" : "100%" }}
               ></div>
             </div>
 
-            <div className="space-y-10 relative">
+            <div className="space-y-7 relative">
               <div className="absolute left-[15px] top-4 bottom-4 w-0.5 bg-[#E2EAFC]"></div>
-              <button
-                type="button"
-                onClick={() => setCurrentStep(1)}
-                className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
-                disabled={!editingId && currentStep !== 1}
-              >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 1 ? "bg-red-600 text-white" : "bg-blue-100 text-red-600 group-hover:bg-blue-200"}`}>1</div>
-                <span className={`font-semibold text-sm transition-colors ${currentStep === 1 ? "text-red-600" : "text-slate-400 group-hover:text-slate-600"}`}>Program Details</span>
-              </button>
+              <div className="flex flex-col gap-4 w-full">
+                <button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
+                  disabled={!editingId && currentStep !== 1}
+                >
+                  <div className={`w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 1 ? "bg-[#00A9E0] text-white" : "bg-blue-100 text-[#00A9E0] group-hover:bg-blue-200"}`}>1</div>
+                  <span className={`font-semibold text-sm transition-colors ${currentStep === 1 ? "text-[#00A9E0]" : "text-slate-400 group-hover:text-slate-600"}`}>Program Details</span>
+                </button>
+                {currentStep === 1 && (
+                  <div className="flex flex-col gap-5 pl-8 relative z-10 mt-3 mb-2">
+                    {/* Inner vertical line for sub-steps */}
+                    <div className="absolute left-[48px] top-4 bottom-4 w-0.5 bg-[#E2EAFC] -z-10"></div>
+                    {[
+                      { id: "section-program-specifics", label: "Program Specifics" },
+                      { id: "section-program-timeline", label: "Program Timeline" },
+                      { id: "section-financials", label: "Financials & Incentives" },
+                      { id: "section-requirements", label: "Requirements" },
+                      { id: "section-qualifications", label: "Qualifications" },
+                      { id: "section-job-description", label: "Job Description" },
+                      { id: "section-selection-process", label: "Selection Process" },
+                      { id: "section-about-company", label: "About the Company" },
+                    ].map((subStep, i) => {
+                      const isFilled = isSectionFilled(subStep.id);
+                      const isActive = activeSubStep === subStep.id;
+                      
+                      return (
+                        <button 
+                          key={subStep.id}
+                          type="button"
+                          onClick={() => {
+                            const el = document.getElementById(subStep.id);
+                            const container = document.getElementById('opportunity-form-container');
+                            if (el && container) {
+                              const top = el.offsetTop - 24; 
+                              container.scrollTo({ top, behavior: 'smooth' });
+                            }
+                          }}
+                          className="flex items-start gap-4 relative z-10 w-full text-left group"
+                        >
+                          <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                            isFilled && !isActive ? 'bg-[#E8F8F2] text-[#21B573]' : 
+                            isActive ? 'bg-[#00A9E0] text-white shadow-md' : 
+                            'bg-white border-2 border-slate-300 text-slate-500'
+                          }`}>
+                            {isFilled && !isActive ? <FiCheck className="w-5 h-5" /> : (i + 1)}
+                          </div>
+                          <div className="flex flex-col mt-[5px]">
+                            <span className={`font-bold text-[13px] leading-tight transition-colors ${
+                              isActive ? 'text-[#00A9E0]' : 
+                              isFilled ? 'text-slate-700' : 
+                              'text-slate-500 group-hover:text-slate-700'
+                            }`}>
+                              {subStep.label}
+                            </span>
+                            {isFilled && !isActive && (
+                              <span className="text-[11px] font-bold text-red-600/80 mt-0.5">Complete</span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -141,8 +346,8 @@ const OpportunityForm = () => {
                 className={`flex items-center gap-4 relative z-10 w-full text-left group ${editingId ? "cursor-pointer" : "cursor-default"}`}
                 disabled={!editingId}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 2 ? "bg-red-600 text-white" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>2</div>
-                <span className={`font-semibold text-sm transition-colors ${currentStep === 2 ? "text-red-600" : "text-slate-400 group-hover:text-slate-600"}`}>Application Form</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${currentStep === 2 ? "bg-[#00A9E0] text-white" : "bg-slate-100 text-slate-400 group-hover:bg-slate-200"}`}>2</div>
+                <span className={`font-semibold text-sm transition-colors ${currentStep === 2 ? "text-[#00A9E0]" : "text-slate-400 group-hover:text-slate-600"}`}>Application Form</span>
               </button>
             </div>
 
@@ -154,11 +359,11 @@ const OpportunityForm = () => {
           </div>
 
           {/* RIGHT FORM CONTENT */}
-          <div className="flex-1 p-8 pb-6 bg-[#F8FBFF]/50 overflow-y-auto custom-scrollbar max-h-[94vh]">
+          <div id="opportunity-form-container" className="flex-1 p-8 pb-6 bg-[#F8FBFF]/50 overflow-y-auto custom-scrollbar max-h-[94vh]">
             <form id="opportunity-form" onSubmit={handleSubmit} className="space-y-8">
               
               {/* SECTION 1: PROGRAM SPECIFICS */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-program-specifics" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Program Specifics</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
@@ -183,18 +388,58 @@ const OpportunityForm = () => {
                       <option value="Summer / Winter Break">Summer / Winter Break</option>
                     </select>
                   </label>
+
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                    <span>Number of Openings <span className="text-rose-600">*</span></span>
-                    <input type="number" name="openings" value={form.openings} onChange={handleChange} placeholder="e.g. 5" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                    <span>City/State {form.workMode !== 'Remote' && <span className="text-rose-600">*</span>}</span>
+                    <span> Job Location (City/State) {form.workMode !== 'Remote' && <span className="text-rose-600">*</span>}</span>
                     <input name="cityState" value={form.cityState} onChange={handleChange} placeholder="e.g. Bangalore, Karnataka" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required={form.workMode !== 'Remote'} />
                   </label>
-                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
+
+                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700 ">
                     <span>Company Location Link</span>
                     <input type="url" name="googleLocationLink" value={form.googleLocationLink} onChange={handleChange} placeholder="https://maps.google.com/..." className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
                   </label>
+                 
+                  
+
+                  <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                    <div className="flex items-center justify-between">
+                      <span>Number of Openings {form.hasOpenings !== false && <span className="text-rose-600">*</span>}</span>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          className="sr-only peer" 
+                          checked={form.hasOpenings !== false} 
+                          onChange={(e) => setForm(prev => ({...prev, hasOpenings: e.target.checked, openings: e.target.checked ? prev.openings : ""} ))} 
+                        />
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+                      </label>
+                    </div>
+                    {form.hasOpenings !== false && (
+                      <input type="number" name="openings" value={form.openings} onChange={handleChange} placeholder="e.g. 5" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
+                    )}
+                  </div>
+
+                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                    <span>Duration <span className="text-rose-600">*</span></span>
+                      <div className="flex gap-2">
+                    <input type="number" name="duration" value={form.duration} onChange={handleChange} className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
+                    
+                      {/* <select name="duration" value={form.duration} onChange={handleChange} className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required>
+                        <option value="">Select Duration</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="6">6</option>
+                      </select> */}
+                      <select name="durationUnit" value={form.durationUnit} onChange={handleChange} className="w-[120px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none">
+                        
+                        <option value="day">Days</option><option value="Months">Months</option>
+                        <option value="Year">Year</option>
+                      </select>
+                    </div>
+                  </label>
+
+                  
                   
                   {/* Radios / Selects */}
                   <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
@@ -209,25 +454,7 @@ const OpportunityForm = () => {
                     </div>
                   </div>
                   
-                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                    <span>Duration <span className="text-rose-600">*</span></span>
-                      <div className="flex gap-2">
-                    <input type="number" name="duration" value={form.duration} onChange={handleChange} className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
-                    
-                      {/* <select name="duration" value={form.duration} onChange={handleChange} className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required>
-                        <option value="">Select Duration</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="6">6</option>
-                      </select> */}
-                      <select name="durationUnit" value={form.durationUnit} onChange={handleChange} className="w-[120px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none">
-                        <option value="Months">Months</option>
-                        <option value="Year">Year</option>
-                      </select>
-                    </div>
-                  </label>
-
+                  
                   <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                     <span>Internship Type</span>
                     <div className="flex gap-4 mt-2">
@@ -251,11 +478,22 @@ const OpportunityForm = () => {
                       ))}
                     </div>
                   </div>
+
+                  <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                    <span>Experience Level</span>
+                    <div className="flex gap-2">
+                      <input type="text" name="experienceLevel" value={form.experienceLevel || ''} onChange={handleChange} placeholder="e.g. 0-6 or 1" className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
+                      <select name="experienceUnit" value={form.experienceUnit || 'Years'} onChange={handleChange} className="w-[120px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none">
+                        <option value="Months">Months</option>
+                        <option value="Years">Years</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* SECTION 2: PROGRAM TIMELINE */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-program-timeline" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Program Timeline</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
@@ -278,10 +516,10 @@ const OpportunityForm = () => {
               </div>
 
               {/* SECTION 3: FINANCIALS & INCENTIVES */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-financials" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Financials & Incentives</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
+                  <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 ">
                     <span>Stipend Type <span className="text-rose-600">*</span></span>
                     <div className="flex gap-4 mt-2">
                       {["Fixed", "Performance-based", "Unpaid"].map(type => (
@@ -308,25 +546,20 @@ const OpportunityForm = () => {
 
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                     <span>Incentives/Bonuses</span>
-                    <textarea name="incentivesBonuses" value={form.incentivesBonuses} onChange={handleChange} placeholder="e.g., Success fee per candidate" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none min-h-[80px]" />
+                    <textarea name="incentivesBonuses" value={form.incentivesBonuses || ''} onChange={handleChange} placeholder="e.g., Success fee per candidate" className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none resize-y min-h-[48px]" rows="1" />
                   </label>
 
-                  <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
-                    <span>Perks</span>
-                    <div className="flex flex-wrap gap-4 mt-2">
-                      {["Certificate", "LOR", "PPO", "Flexible Hours"].map(perk => (
-                        <label key={perk} className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" checked={form.perks?.includes(perk)} onChange={(e) => handleCheckboxChange(e, 'perks', perk)} className="accent-red-600 w-4 h-4 rounded" />
-                          <span>{perk}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
+                  <CreatableCheckboxDropdown
+                    label="Perks"
+                    defaultOptions={["Certificate", "LOR", "PPO", "Flexible Hours"]}
+                    selected={form.perks || []}
+                    onChange={(e, value) => handleCheckboxChange(e, 'perks', value)}
+                  />
                 </div>
               </div>
 
               {/* SECTION 4: CANDIDATE REQUIREMENTS */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-requirements" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Candidate Requirements</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <CheckboxDropdown
@@ -352,25 +585,14 @@ const OpportunityForm = () => {
 
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                     <span>Required Skills <span className="text-rose-600">*</span></span>
-                    <input name="requiredSkills" value={form.requiredSkills} onChange={handleChange} placeholder="Comma separated tags e.g. React, Node.js" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
+                    <input name="requiredSkills" value={form.requiredSkills} onChange={handleChange} placeholder="e.g. React, Node.js, Python" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
                   </label>
 
-                  <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                    <span>Experience Level <span className="text-rose-600">*</span></span>
-                    <div className="flex gap-4 mt-2">
-                      {["Beginner", "Intermediate", "Advanced"].map(level => (
-                        <label key={level} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="experienceLevel" value={level} checked={form.experienceLevel === level} onChange={handleChange} className="accent-red-600" required />
-                          <span>{level}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
                 </div>
               </div>
 
               {/* SECTION 5: QUALIFICATIONS */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-qualifications" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Qualifications</h4>
                 <div className="grid grid-cols-1 gap-6">
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
@@ -385,7 +607,7 @@ const OpportunityForm = () => {
               </div>
 
               {/* SECTION 6: JOB DESCRIPTION */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-job-description" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Job Description</h4>
                 <div className="grid grid-cols-1 gap-6">
                   <div className="flex flex-col gap-2">
@@ -409,7 +631,7 @@ const OpportunityForm = () => {
               </div>
 
               {/* SECTION 7: SELECTION PROCESS */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-selection-process" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Selection Process</h4>
                 <div className="grid grid-cols-1 gap-6">
                   <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
@@ -435,7 +657,7 @@ const OpportunityForm = () => {
               </div>
 
               {/* SECTION 8: ABOUT THE COMPANY */}
-              <div className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
+              <div id="section-about-company" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">About the Company</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">

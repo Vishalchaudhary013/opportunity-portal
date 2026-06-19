@@ -31,7 +31,7 @@ const internshipOpportunitySchema = new mongoose.Schema(
     batchEligibility: { type: [String], default: [] },
     minimumCGPA: { type: Number, default: null },
     requiredSkills: { type: [String], default: [] },
-    experienceLevel: { type: String, enum: ["Beginner", "Intermediate", ""], default: "", trim: true },
+    experienceLevel: { type: String, default: "", trim: true },
 
     //  5. Qualifications 
     minimumRequirements: { type: String, default: "", trim: true }, // Bullet points

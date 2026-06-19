@@ -14,7 +14,7 @@ const Jobs = () => {
                             <SectionTitle title={"Jobs"} subtitle={"xplore exciting job opportunities with leading companies and grow your career."} />
                         </div>
                         <Link
-                            to="/bootcamps"
+                            to="/jobs"
                             className="font-medium flex gap-2 items-center text-slate-900 bg-red-600 text-white py-1 px-4 rounded-md"
                         >
                             View All

@@ -111,25 +111,62 @@ const NavBar = () => {
                 </li>
               </ul>
               <ul className="flex items-center gap-5">
-                <li className="text-[16px] font-semibold flex items-center gap-2">
+                <li className="text-[13px] font-medium flex items-center gap-2">
                   <button onClick={() => changeLanguage('en')} className="hover:text-red-600 transition-colors">ENG</button>
                   <span className="text-[12px]">|</span>
                   <button onClick={() => changeLanguage('hi')} className="hover:text-red-600 transition-colors">HINDI</button>
                 </li>
-                <li className="group relative overflow-hidden rounded-lg p-[1px]">
+                <li className="group relative overflow-hidden rounded-lg p-[1.5px]">
                   {/* Rotating border */}
                   <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div className="absolute inset-[-150%] bg-[conic-gradient(transparent,blue,transparent)] group-hover:animate-spin"></div>
+                    <div className="absolute inset-[-150%] bg-[conic-gradient(transparent,#00A9E0,transparent)] group-hover:animate-spin"></div>
                   </div>
 
                   {/* Content */}
                   <div className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1">
                     <IoLocationSharp size={16} />
-                    <select className="outline-none pr-3 bg-transparent">
-                      <option>Locate</option>
-                      <option>Delhi</option>
-                      <option>Himachal</option>
-                      <option>Punjab</option>
+                    <select 
+                      className="outline-none pr-3 bg-transparent cursor-pointer"
+                      value={new URLSearchParams(location.search).get("location") || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const currentPath = location.pathname;
+                        if (val) {
+                          navigate(`${currentPath}?location=${encodeURIComponent(val)}`);
+                        } else {
+                          navigate(currentPath);
+                        }
+                      }}
+                    >
+                      <option value="">Locate</option>
+                      {/* <option value="Andhra Pradesh">Andhra Pradesh</option>
+                      <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                      <option value="Assam">Assam</option>
+                      <option value="Bihar">Bihar</option>
+                      <option value="Chhattisgarh">Chhattisgarh</option>
+                      <option value="Goa">Goa</option>
+                      <option value="Gujarat">Gujarat</option>
+                      <option value="Haryana">Haryana</option>
+                      <option value="Himachal Pradesh">Himachal Pradesh</option>
+                      <option value="Jharkhand">Jharkhand</option>
+                      <option value="Karnataka">Karnataka</option>
+                      <option value="Kerala">Kerala</option>
+                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                      <option value="Maharashtra">Maharashtra</option>
+                      <option value="Manipur">Manipur</option>
+                      <option value="Meghalaya">Meghalaya</option>
+                      <option value="Mizoram">Mizoram</option>
+                      <option value="Nagaland">Nagaland</option>
+                      <option value="Odisha">Odisha</option>
+                      <option value="Punjab">Punjab</option>
+                      <option value="Rajasthan">Rajasthan</option>
+                      <option value="Sikkim">Sikkim</option>
+                      <option value="Tamil Nadu">Tamil Nadu</option>
+                      <option value="Telangana">Telangana</option>
+                      <option value="Tripura">Tripura</option>
+                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                      <option value="Uttarakhand">Uttarakhand</option>
+                      <option value="West Bengal">West Bengal</option> */}
                     </select>
                   </div>
                 </li>
