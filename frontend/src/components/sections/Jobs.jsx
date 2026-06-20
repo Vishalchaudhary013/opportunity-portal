@@ -9,18 +9,9 @@ const Jobs = () => {
 
     <div className="">
         <div className="w-[1350px] mx-auto py-10">
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <SectionTitle title={"Jobs"} subtitle={"xplore exciting job opportunities with leading companies and grow your career."} />
-                        </div>
-                        <Link
-                            to="/jobs"
-                            className="font-medium flex gap-2 items-center text-slate-900 bg-red-600 text-white py-1 px-4 rounded-md"
-                        >
-                            View All
-                            <FaLongArrowAltRight />
-                        </Link>
-                    </div>
+                   <div className="mb-5">
+            <SectionTitle title="Entry-Level Jobs" subtitle="Kickstart Your Professional Career with Roles Built for Freshers"  defination="Full-time corporate openings designed specifically for recent graduates. These positions expect limited professional experience and prioritize potential, adaptability, and fundamental skill sets."/>
+          </div>
                 </div>
     </div>
       

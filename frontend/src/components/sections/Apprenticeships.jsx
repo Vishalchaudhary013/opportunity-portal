@@ -3,13 +3,13 @@ import SectionTitle from '../SectionTitle'
 import { Link } from 'react-router-dom'
 import { FaLongArrowAltRight } from 'react-icons/fa'
 
-const Bootcamps = () => {
+const Apprenticeships = () => {
     return (
         <>
             <div className="">
                 <div className="w-[1350px] mx-auto py-10">
                    <div className="mb-5">
-            <SectionTitle title="Workshops & Bootcamps" subtitle="Master Specific, High-Income Skills in Intensive, Fast-Paced Formats" defination={"Short, high-intensity immersive training modules designed to rapidly upskill candidates in a specific tool, framework, or methodology through project-based learning."}/>
+            <SectionTitle title="Apprenticeships" subtitle="Earn While You Learn with Structured On-the-Job Training" defination="A formal, long-term training program combining paid employment with technical instruction. Apprenticeships focus on developing highly specific, mastery-level trade and corporate skills."/>
           </div>
                 </div>
             </div>
@@ -17,4 +17,4 @@ const Bootcamps = () => {
     )
 }
 
-export default Bootcamps
+export default Apprenticeships

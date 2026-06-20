@@ -40,6 +40,10 @@ import {
   Search,
   ClipboardCheck,
   CalendarDays,
+  Coins,
+  Wallet,
+  Clock,
+  Network
 } from "lucide-react";
 const Internship = ({ limit }) => {
   const [selectedCategory, setSelectedCategory] = React.useState(null);
@@ -61,14 +65,14 @@ const Internship = ({ limit }) => {
     // { name: "Physical Science", icon: <FlaskConical size={16} /> },
     // { name: "Math & Logic", icon: <Sigma size={16} /> },
 
-    { name: "Corporate", icon: <Building2 size={16} /> },
-    { name: "Training", icon: <BookOpen size={16} /> },
-    { name: "Teaching", icon: <GraduationCap size={16} /> },
-    { name: "NGO / Social Work", icon: <Handshake size={16} /> },
-    { name: "Government", icon: <Landmark size={16} /> },
-    { name: "Research", icon: <Search size={16} /> },
-    { name: "Assessment", icon: <ClipboardCheck size={16} /> },
-    { name: "Summer / Winter Break", icon: <CalendarDays size={16} /> },
+    { name: "Paid", icon: <Coins size={16} /> },
+    { name: "Stipended", icon: <Wallet size={16} /> },
+    { name: "Flexible Hours", icon: <Clock size={16} /> },
+    { name: "Pre-Placement Offers", icon: <Handshake size={16} /> },
+    { name: "Network Building", icon: <Network size={16} /> },
+    // { name: "Research", icon: <Search size={16} /> },
+    // { name: "Assessment", icon: <ClipboardCheck size={16} /> },
+    // { name: "Summer / Winter Break", icon: <CalendarDays size={16} /> },
   ];
 
   const { opportunities, isInternshipSaved, toggleSavedInternship } =
@@ -197,30 +201,17 @@ const Internship = ({ limit }) => {
     //   </div>
     //   </>
     <>
-      <div className="bg-gray-50/60">
+      <div className="bg-gray-50">
         <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10 ">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8 sm:mb-10">
-            <ul>
-              {/* <h2 className="text-[25px] font-[700] text-black bg-clip-text leading-snug">Internships & Work Experience</h2>
-              <span className="text-[16px] md:text-[18px] text-gray-500 font-light">Gain practical experience through on-job training</span> */}
-              <SectionTitle
-                title="Internships & Work Experience"
-                subtitle="Gain practical experience through on-job training"
-              />
-            </ul>
 
-            <ul>
-              <li>
-                <Link
-                  to="/intership"
-                  className="font-medium flex gap-2 items-center text-slate-900  bg-red-600 text-white py-1 px-4 rounded-md"
-                >
-                  View All
-                  <FaLongArrowAltRight />
-                </Link>
-              </li>
-            </ul>
-          </div>
+           <div className="mb-5">
+            <SectionTitle
+                title="Internships"
+                subtitle="Gain Practical Industry Experience Before Diving into a Full-Time Career"
+                defination="A short-term professional learning experience that offers meaningful, practical work related to a student’s field of study or career interest. Internships bridge the gap between academic theory and real-world execution."
+              />
+           </div>
+          
           <div className="flex flex-wrap gap-3 mb-[40px]">
             {categories.map((cat, index) => (
               <button

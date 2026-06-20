@@ -57,18 +57,9 @@ const ExploreCareersSection = () => {
     <section className="pb-16">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[24px] font-semibold text-gray-900">
-            Explore careers
-          </h2>
-          <Link
-                  to="/global-program"
-                  className="font-medium flex gap-2 items-center text-slate-900 bg-red-600 text-white py-1 px-4 rounded-md"
-                >
-                  View All
-                  <FaLongArrowAltRight />
-                </Link>
-        </div>
+        <div className="mb-5">
+            <SectionTitle title="Global Programs" subtitle="Join international programs curated by top institutions and mentors"/>
+          </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">

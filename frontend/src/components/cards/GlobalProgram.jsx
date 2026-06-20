@@ -24,28 +24,9 @@ const GlobalProgram = ({ limit }) => {
     <>
       <div>
         <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-8 sm:mb-10">
-            <ul>
-
-              <SectionTitle title="Global Programs" subtitle="Join international programs curated by top institutions and mentors"/>
-
-              {/* <li className="text-2xl font-semibold">Global Programs</li>
-              <li className="text-xl font-medium">
-                Prestigious Global Programs
-              </li> */}
-            </ul>
-
-            <ul>
-              <li>
-                <Link
-                  to="/global-program"
-                  className="font-medium flex gap-2 items-center text-slate-900 bg-red-600 text-white py-1 px-4 rounded-md"
-                >
-                  View All
-                  <FaLongArrowAltRight />
-                </Link>
-              </li>
-            </ul>
+          <div className="mb-5">
+            <SectionTitle title="Global PG Programs" subtitle="Expand Your Horizons with International Degrees and Global Mobility
+" defination={"Prestigious international postgraduate qualifications offering cross-border learning, exposure to global market dynamics, and international work authorization potential."}/>
           </div>
 
           {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">

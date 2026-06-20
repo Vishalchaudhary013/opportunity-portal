@@ -960,7 +960,7 @@ const InternshipDetailsPage = () => {
                     href={internship.hiringManager} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="flex items-center gap-2 px-4 py-2 bg-[#0A66C2] text-white rounded-md text-sm font-semibold hover:bg-[#004182] transition-colors shadow-sm hover:shadow"
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-sm font-semibold  transition-colors hover:shadow-lg"
                   >
                     <FaLinkedinIn size={16} />
                     LinkedIn Profile
