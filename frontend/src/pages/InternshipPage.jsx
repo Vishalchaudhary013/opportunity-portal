@@ -268,7 +268,7 @@ const InternshipPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] py-6 sm:py-8">
-      <div className="w-full max-w-350 mx-auto px-4 sm:px-6 mt-15">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto mt-15">
         <h2 className="text-3xl sm:text-4xl font-medium mb-2">Explore Internships</h2>
         <p className="text-base sm:text-lg text-black/60 mb-8 sm:mb-10">
           Find the perfect internship to kickstart your career.

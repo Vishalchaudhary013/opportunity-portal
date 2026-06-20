@@ -282,7 +282,7 @@ const Signup = () => {
     <>
       <div className="bg-[#0F2A4D] min-h-dvh flex flex-col">
         <div className="bg-[#e0ebf8]">
-          <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-5">
+          <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6 py-5">
             <header>
                <Link to="/" className="text-[30px] text-[#0f2a4d] font-bold cursor-pointer select-none hover:opacity-90">
                             edeco<span className="text-[#0f2a4d]">®</span>
@@ -291,7 +291,7 @@ const Signup = () => {
           </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex-1 flex justify-center items-center min-h-[70dvh]">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6 py-6 sm:py-10 flex-1 flex justify-center items-center min-h-[70dvh]">
           <div className="w-full rounded-lg">
               {verificationEmail ? (
                 <div className="w-full max-w-xl mx-auto bg-white p-5 sm:p-8 rounded-lg">

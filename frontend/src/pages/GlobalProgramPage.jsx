@@ -122,7 +122,7 @@ const Global = () => {
   return (
     <>
       <div className="bg-[#F8FAFC]">
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <div className="w-full max-w-[1350px] mx-auto px-4 sm:px-6 py-8 sm:py-10">
           <h2 className="text-3xl sm:text-4xl font-medium mb-2">Explore Global Program</h2>
           <p className="text-base sm:text-lg text-black/60 mb-8 sm:mb-10">
             Find the perfect global program to kickstart your career.

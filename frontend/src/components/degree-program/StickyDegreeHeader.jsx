@@ -11,8 +11,8 @@ const StickyDegreeHeader = ({ visible }) => {
         ${visible ? "translate-y-0 shadow-md" : "-translate-y-full"}
       `}
     >
-      <div className="max-w-[1400px] mx-auto px-4 h-[64px] flex items-center justify-between">
-        
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 h-[64px] flex items-center justify-between">
+
         {/* LEFT */}
         <div className="flex items-center gap-[35px]">
           <h2 className="text-[34px] font-[700] text-[#0056d2]">edeco</h2>

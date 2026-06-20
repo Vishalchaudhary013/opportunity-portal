@@ -231,3 +231,15 @@ body {
 .animate-spin-slow {
   animation: spin-slow 3s linear infinite;
 }
+
+@media (min-width: 768px) {
+  .hero-slider-transform {
+    transform: var(--slider-transform);
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-slider-transform {
+    transform: none !important;
+  }
+}

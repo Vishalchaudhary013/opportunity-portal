@@ -67,29 +67,29 @@ const Card = ({ title, showCurve = false }) => {
 const BrowseDegreesSection = () => {
   return (
     <section className="bg-white py-16">
-      <div className="max-w-[1400px] mx-auto px-4">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
 
-       <h2 className="text-[22px] font-semibold text-[#1f1f1f] mb-6">
-  Browse by program level
-</h2>
+        <h2 className="text-[22px] font-semibold text-[#1f1f1f] mb-6">
+          Browse by program level
+        </h2>
 
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
-  {programLevels.map((level) => (
-    <Card key={level} title={level} showCurve />
-  ))}
-</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-14">
+          {programLevels.map((level) => (
+            <Card key={level} title={level} showCurve />
+          ))}
+        </div>
 
 
         {/* ===== BROWSE BY CATEGORY ===== */}
         <h2 className="text-[22px] font-semibold text-[#1f1f1f] mb-6">
-  Browse by category
-</h2>
+          Browse by category
+        </h2>
 
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-  {categories.map((category) => (
-    <Card key={category} title={category} />
-  ))}
-</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {categories.map((category) => (
+            <Card key={category} title={category} />
+          ))}
+        </div>
 
       </div>
     </section>

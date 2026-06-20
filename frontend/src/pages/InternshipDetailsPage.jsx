@@ -167,7 +167,7 @@ const InternshipDetailsPage = () => {
   return (
     // <>
     //   <div className="bg-[#F4F6FB] min-h-screen py-8 sm:py-10 ">
-    //     <div className="w-full max-w-350 mx-auto px-4 sm:px-6">
+    //     <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6">
     //       <div className="text-sm text-slate-500 mb-5">
     //         <Link to="/" className="hover:underline">
     //           Home

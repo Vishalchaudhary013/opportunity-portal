@@ -18,7 +18,7 @@ const SectionTitle = ({ title, subtitle , defination }) => (
       <div className="flex justify-between items-start relative z-10">
         <div className="">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-[25px] font-[700] text-black leading-snug">
+            <h2 className="text-[25px] font-[650] text-black leading-snug">
               {title}
             </h2>
           {defination && (
@@ -60,16 +60,15 @@ const SectionTitle = ({ title, subtitle , defination }) => (
 
         <Link
           to="/intership"
-          className="flex gap-0.5 items-center"
+          className="flex gap-0.5 items-center group"
         >
-          <div className="font-medium mt-1   text-slate-900  bg-red-600 text-white py-1 px-4 rounded-4xl">
+          <div className="font-medium mt-1 text-slate-900 bg-red-600 text-white py-1 px-4 rounded-4xl transition-colors duration-300 ">
             View All
-        </div>
+          </div>
           
-        
-
-        <span className="inline-flex items-center justify-center w-8 h-8 bg-red-600/70  rounded-full"> <GoArrowRight size={22} className="text-white"/> </span>
-
+          <span className="inline-flex items-center justify-center w-8 h-8 bg-red-600 rounded-full transition-all duration-300  group-hover:translate-x-1.5">
+            <GoArrowRight size={22} className="text-white" />
+          </span>
         </Link>
 
         

@@ -32,14 +32,14 @@ const DegreeCard = ({ program }) => {
     <div
       className={`bg-white rounded-xl border border-[#e6ebf2] p-6 transition`}
     >
-     <div className="flex justify-center items-center mb-2">
-       {/* Logo */}
-      <img
-        src={logo}
-        alt={program.university}
-        className="h-[120px] object-contain"
-      />
-     </div>
+      <div className="flex justify-center items-center mb-2">
+        {/* Logo */}
+        <img
+          src={logo}
+          alt={program.university}
+          className="h-[120px] object-contain"
+        />
+      </div>
 
       {/* University */}
       <p className="text-[13px] text-gray-600 mb-2">
@@ -67,8 +67,8 @@ const DegreeCard = ({ program }) => {
 const DegreeProgressSection = () => {
   return (
     <section className="py-20">
-      <div className="max-w-[1400px] mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
-        
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
+
         {/* LEFT CONTENT */}
         <div className="lg:col-span-1">
           <h2 className="text-[28px] font-bold text-[#1f1f1f] mb-4 mt-[64px]">

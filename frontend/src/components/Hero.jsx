@@ -83,7 +83,7 @@ const Hero = () => {
   ];
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] flex flex-col justify-center overflow-x-hidden  gap-16 pt-10">
+    <div className="w-full min-h-[calc(100vh-70px)]  flex flex-col justify-center overflow-x-hidden  gap-8 md:gap-8 pt-10 md:pt-16  pb-10 md:pb-">
       
       {/* SVG Clip Paths for perfectly rounded slants */}
       <svg width="0" height="0" className="absolute">
@@ -99,83 +99,63 @@ const Hero = () => {
 
       {/* Sliding Cards at Top */}
       <div 
-        className="w-full relative px-5 mx-auto group"
+        className="w-full relative px-4 md:px-5 mx-auto group"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Navigation Arrows */}
+        {/* Navigation Arrows (Hidden on mobile) */}
         <button 
           onClick={prevSlide}
-          className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg text-black opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 hover:bg-gray-50 hover:scale-105"
+          className="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full items-center justify-center shadow-lg text-black opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 hover:bg-gray-50 hover:scale-105"
         >
           <MdKeyboardArrowLeft size={30} />
         </button>
         <button 
           onClick={nextSlide}
-          className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg text-black opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 hover:bg-gray-50 hover:scale-105"
+          className="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 bg-white rounded-full items-center justify-center shadow-lg text-black opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 hover:bg-gray-50 hover:scale-105"
         >
           <MdKeyboardArrowRight size={30} />
         </button>
 
         <div 
-          className="flex gap-6  transition-transform duration-700 ease-in-out "
-          style={{ transform: `translateX(-${index * 424}px)` }}
+          className="flex gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory scrollbar-hide md:transition-transform md:duration-700 md:ease-in-out hero-slider-transform"
+          style={{ '--slider-transform': `translateX(-${index * 424}px)` }}
         >
           {[...cardsData, ...cardsData].map((card, i) => (
-            <div key={i} className={`relative p-5 w-[450px] h-[280px] rounded-[30px] ${card.bg} flex-shrink-0 shadow-sm`}>
+            <div key={i} className={`relative p-4 md:p-5 w-[85vw] sm:w-[400px] md:w-[450px] h-[260px] md:h-[280px] rounded-[24px] md:rounded-[30px] ${card.bg} flex-shrink-0 shadow-sm snap-center`}>
               <img
                 src="/hero_students.png"
                 alt=""
-                className={`absolute ${card.alignTop ? 'top-4' : 'bottom-4'} right-4 w-[190px] h-[235px] object-cover rounded-3xl`}
+                className={`absolute ${card.alignTop ? 'top-4' : 'bottom-4'} right-4 w-[160px] md:w-[190px] h-[200px] md:h-[235px] object-cover rounded-[20px] md:rounded-3xl`}
                 style={{ clipPath: card.clipPath }}
               />
-              <span className={`absolute ${card.alignTop ? 'top-6' : 'bottom-6'} left-8 w-10 h-10 bg-white rounded-full inline-flex justify-center items-center shadow-sm text-black hover:scale-105 transition-transform cursor-pointer`}>
-                <GoArrowUpRight size={24}/>
+              <span className={`absolute ${card.alignTop ? 'top-6' : 'bottom-6'} left-6 md:left-8 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full inline-flex justify-center items-center shadow-sm text-black hover:scale-105 transition-transform cursor-pointer`}>
+                <GoArrowUpRight size={20} className="md:w-6 md:h-6" />
               </span>
-              <div className={`absolute ${card.alignTop ? 'bottom-6' : 'top-6'} left-8 flex flex-col items-start gap-2`}>
-                <span className="border border-black/50 py-0.5 px-3 rounded-full text-sm font-medium">{card.level}</span>
-                <div className="leading-6.5">
-                   <h3 className="text-[28px] font-medium text-black leading-none">{card.title}</h3>
-                <span>{card.duration}</span>
+              <div className={`absolute ${card.alignTop ? 'bottom-6' : 'top-6'} left-6 md:left-8 flex flex-col items-start gap-2 pr-[150px] md:pr-[180px]`}>
+                <span className="border border-black/50 py-0.5 px-2 md:px-3 rounded-full text-xs md:text-sm font-medium">{card.level}</span>
+                <div className="leading-tight md:leading-6.5">
+                   <h3 className="text-[22px] sm:text-[24px] md:text-[28px] font-medium text-black leading-none mb-1 md:mb-0">{card.title}</h3>
+                   <span className="text-sm md:text-base">{card.duration}</span>
                 </div>
               </div>
             </div>
           ))}
         </div>
-
-        {/* Indicator slide bar */}
-        <div className="w-full mt-10 relative">
-          {/* <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden relative">
-            <div 
-              className="absolute top-0 left-0 h-full bg-[#34594c] rounded-full transition-transform duration-700 ease-in-out"
-              style={{ width: '25%', transform: `translateX(${index * 100}%)` }}
-            ></div>
-          </div> */}
-          {/* Clickable areas */}
-          <div className="absolute top-0 left-[51px] right-[51px] h-full flex">
-            {[0, 1, 2, 3].map((i) => (
-              <div 
-                key={i} 
-                className="flex-1 h-full cursor-pointer" 
-                onClick={() => setIndex(i)}
-              ></div>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Tabbed Search Bar Below Slider */}
-      <div className="w-full max-w-[1350px] mx-auto  mt-12">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto mt-6 md:mt-8">
         {/* Tabs */}
-        <div className="flex w-full overflow-x-auto  scrollbar-hide items-end gap-[2px]">
+        <div className="flex w-full overflow-x-auto scrollbar-hide items-end gap-[2px]">
           {["Internship",  "Apprenticeships", "Jobs", "Bootcamps", "Certificate Programs", "Site Search"].map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 whitespace-nowrap px-5 py-4.5 text-[18px] font-semibold rounded-t-xl border  border-b-0 transition-colors ${
+              className={`flex-1 whitespace-nowrap px-4 md:px-5 py-3 md:py-4.5 text-[15px] md:text-[18px] font-semibold rounded-t-xl border border-b-0 transition-colors ${
                 activeTab === tab
-                  ? "bg-white text-[#00A9E0]  border-[#00A9E0] relative z-10"
+                  ? "bg-white text-[#00A9E0] border-[#00A9E0] relative z-10"
                   : "bg-[#00A9E0] text-white border-transparent hover:bg-[#0096C7]"
               }`}
               style={activeTab === tab ? { marginBottom: "-1px" } : {}}
@@ -188,19 +168,19 @@ const Hero = () => {
         {/* Search Inputs Container */}
         <form 
           onSubmit={handleSearch}
-          className="bg-white px-5 py-7 rounded-b-[4px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex gap-5 flex-col md:flex-row w-full border-t border-[#00A9E0] relative z-0"
+          className="bg-white px-4 md:px-5 py-5 md:py-7 rounded-b-[4px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex gap-4 md:gap-5 flex-col lg:flex-row w-full border-t border-[#00A9E0] relative z-0"
         >
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="by Course Title or"
-            className="flex-1 px-4 py-3.5 border border-gray-200 rounded-md outline-none focus:border-[#00A9E0] text-gray-700 placeholder:text-gray-500 bg-[#F8FAFC]"
+            className="flex-1 px-4 py-3 md:py-3.5 border border-gray-200 rounded-md outline-none focus:border-[#00A9E0] text-gray-700 placeholder:text-gray-500 bg-[#F8FAFC]"
           />
           
           <div className="flex-1 relative">
             <select 
-              className="w-full px-4 py-3.5 border border-gray-200 rounded-md outline-none focus:border-[#00A9E0] appearance-none bg-[#F8FAFC] text-gray-700 relative z-10 cursor-pointer"
+              className="w-full px-4 py-3 md:py-3.5 border border-gray-200 rounded-md outline-none focus:border-[#00A9E0] appearance-none bg-[#F8FAFC] text-gray-700 relative z-10 cursor-pointer"
             >
               <option value="">by College here...</option>
               <option value="college1">College 1</option>
@@ -213,13 +193,12 @@ const Hero = () => {
 
           <button 
             type="submit"
-            className="bg-[#00A9E0] hover:bg-[#0096C7] transition-colors text-white px-8 py-3.5 rounded-md font-bold tracking-wide whitespace-nowrap"
+            className="bg-[#00A9E0] hover:bg-[#0096C7] transition-colors text-white px-8 py-3 md:py-3.5 rounded-md font-bold tracking-wide whitespace-nowrap"
           >
             SEARCH COURSES
           </button>
         </form>
       </div>
-
     </div>
   );
 };

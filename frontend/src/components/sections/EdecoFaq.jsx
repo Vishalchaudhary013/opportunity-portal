@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { IoIosArrowDown } from "react-icons/io";
 
 const faqs = [
   {
@@ -47,58 +48,51 @@ const EdecoFaq = () => {
   const [activeIndex, setActiveIndex] = useState(null);
 
   return (
-    <div className="bg-gray-50">
-      <section className="w-full max-w-[1350px] px-4 md:px-6 mx-auto pb-[70px]">
-        <h2 className="text-[19px] font-extrabold text-gray-900 mb-[14px]">
-          Frequently asked questions
-        </h2>
+    <section className="w-full max-w-[1350px] px-4 md:px-6 mx-auto pb-[70px]">
+      <span className="text-[14.5px] inline-block mb-1">MORE QUESTIONS?</span>
+      <h2 className="text-[25px]  font-semibold text-gray-900 mb-6">
+        Frequently asked questions
+      </h2>
 
-        <div className="border-t border-gray-200">
-          {faqs.map((faq, index) => (
-            <div key={index} className="border-b border-gray-200">
-              {/* Question */}
-              <button
-                onClick={() =>
-                  setActiveIndex(activeIndex === index ? null : index)
-                }
-                className="w-full flex items-center gap-[15px] py-[9px] text-left 
-                         text-[14px] font-[600] text-gray-900 
-                         hover:bg-blue-50 transition-colors duration-200"
-              >
-                {/* Bootstrap Chevron */}
-                <i
-                  className={`bi bi-chevron-down text-gray-600 transition-transform duration-300 ${activeIndex === index ? "rotate-180" : "rotate-0"
-                    }`}
-                  style={{ fontSize: "12px", WebkitTextStroke: "0.8px" }}
-                />
+      <div className=" ">
+        {faqs.map((faq, index) => (
+          <div key={index} className="border rounded-xl border-black/10 overflow-hidden px-5 py-2.5 mb-3">
+            {/* Question */}
+            <button
+              onClick={() =>
+                setActiveIndex(activeIndex === index ? null : index)
+              }
+              className="w-full flex items-center gap-[15px] py-[9px] text-left transition-colors duration-200"
+            >
+              {/* Question text */}
+              <span className={`flex-1 text-[15px] transition-colors duration-200 ${activeIndex === index ? "text-red-600 font-bold" : "text-gray-800 font-semibold"}`}>
+                {faq.question}
+              </span>
 
-                {/* Question text */}
-                <span className="flex-1">{faq.question}</span>
+              {/* Chevron Icon (replacing + icon) */}
+              <span className={`text-red-600 text-xl font-light transition-transform duration-300 ${activeIndex === index ? "rotate-180" : "rotate-0"}`}>
+                <IoIosArrowDown />
+              </span>
+            </button>
 
-                {/* Plus / Minus */}
-                <span className="text-red-600 text-xl font-light">
-                  {activeIndex === index ? "−" : "+"}
-                </span>
-              </button>
-
-              {/* Answer */}
-              <div
-                className={`grid transition-all duration-300 ease-in-out ${activeIndex === index
-                    ? "grid-rows-[1fr] opacity-100"
-                    : "grid-rows-[0fr] opacity-0"
-                  }`}
-              >
-                <div className="overflow-hidden">
-                  <p className="pb-[9px] ps-[12px] pr-10 text-[13px] leading-relaxed text-gray-600">
-                    {faq.answer}
-                  </p>
+            {/* Answer */}
+            <div
+              className={`grid transition-all duration-300 ease-in-out ${
+                activeIndex === index
+                  ? "grid-rows-[1fr] opacity-100"
+                  : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className={`mt-2 pt-3 text-[14px] leading-relaxed text-gray-600 border-t transition-colors duration-300 ${activeIndex === index ? "border-gray-100" : "border-transparent"}`}>
+                  {faq.answer}
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
-    </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

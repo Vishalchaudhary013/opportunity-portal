@@ -148,7 +148,7 @@ const Instagram = () => {
     <>
        <div>
                       <div className="bg-white">
-                          <div className="w-[1350px] mx-auto pt-40 pb-10">
+                          <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto pt-40 pb-10">
                               {/* Section Header */}
       
                               <div className="flex justify-center">
@@ -292,11 +292,11 @@ const Instagram = () => {
                               </div>
       
                               {/* Load More Button */}
-                              <div className="w-full flex justify-center mb-4">
+                              {/* <div className="w-full flex justify-center mb-4">
                                   <button className="px-6 py-3 font-medium rounded-lg bg-red-600 text-white ">
                                       View More Post
                                   </button>
-                              </div>
+                              </div> */}
       
       
                           </div>

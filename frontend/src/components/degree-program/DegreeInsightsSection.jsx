@@ -51,7 +51,7 @@ const ArticleCard = ({ article }) => {
 const DegreeInsightsSection = () => {
   return (
     <section className="py-14">
-      <div className="max-w-[1400px] mx-auto px-4">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-[26px] font-bold text-[#1f1f1f]">

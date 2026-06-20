@@ -31,6 +31,7 @@ import {
   Sigma,
 } from "lucide-react";
 import SectionTitle from "../SectionTitle";
+import FilterChips from "../FilterChips";
 import {
   Building2,
   BookOpen,
@@ -202,7 +203,7 @@ const Internship = ({ limit }) => {
     //   </>
     <>
       <div className="bg-gray-50">
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10 ">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-8 sm:py-10 ">
 
            <div className="mb-5">
             <SectionTitle
@@ -212,27 +213,11 @@ const Internship = ({ limit }) => {
               />
            </div>
           
-          <div className="flex flex-wrap gap-3 mb-[40px]">
-            {categories.map((cat, index) => (
-              <button
-                type="button"
-                key={index}
-                onClick={() =>
-                  setSelectedCategory(
-                    selectedCategory === cat.name ? null : cat.name,
-                  )
-                }
-                className={`flex items-center gap-2 px-[15px] py-[6px] border rounded-full text-[12px] transition-all duration-200 ${
-                  selectedCategory === cat.name
-                    ? "bg-red-600 text-white border-red-600 shadow-md transform scale-105"
-                    : "bg-[#F0F6FF] text-slate-700 border-[#D6E2FC] hover:bg-blue-50"
-                }`}
-              >
-                {cat.icon}
-                {cat.name}
-              </button>
-            ))}
-          </div>
+          <FilterChips 
+            categories={categories} 
+            selectedCategory={selectedCategory} 
+            onSelectCategory={setSelectedCategory} 
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {visibleInternships.map((data) => (

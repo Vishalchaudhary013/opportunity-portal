@@ -55,11 +55,11 @@ const careers = [
 const ExploreCareersSection = () => {
   return (
     <section className="pb-16">
-      <div className="max-w-[1400px] mx-auto">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto">
         {/* Header */}
         <div className="mb-5">
-            <SectionTitle title="Global Programs" subtitle="Join international programs curated by top institutions and mentors"/>
-          </div>
+          <SectionTitle title="Global Programs" subtitle="Join international programs curated by top institutions and mentors" />
+        </div>
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
@@ -73,19 +73,17 @@ const ExploreCareersSection = () => {
               {/* Image Area */}
               <div
                 className={`relative h-[160px] flex items-center justify-center m-[7px] rounded-[7px]
-                  ${
-                    career.accent === "blue"
-                      ? "bg-blue-50"
-                      : "bg-yellow-50"
+                  ${career.accent === "blue"
+                    ? "bg-blue-50"
+                    : "bg-yellow-50"
                   }`}
               >
                 {/* Abstract Shape */}
                 <div
                   className={`absolute w-[140px] h-[90px] rounded-lg -rotate-12 
-                    ${
-                      career.accent === "blue"
-                        ? "bg-red-600"
-                        : "bg-yellow-400"
+                    ${career.accent === "blue"
+                      ? "bg-red-600"
+                      : "bg-yellow-400"
                     }`}
                 />
 
@@ -111,7 +109,7 @@ const ExploreCareersSection = () => {
                   <div className="text-[13px] text-gray-900 space-y-1">
                     <div>
                       <span className="font-semibold">{career.salary}</span>{" "}
-                     <span className="text-gray-600"> median salary</span>
+                      <span className="text-gray-600"> median salary</span>
                     </div>
                     <div>
                       <span className="font-semibold">{career.jobs}</span> jobs

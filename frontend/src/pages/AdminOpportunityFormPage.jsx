@@ -137,17 +137,17 @@ const AdminOpportunityFormPage = () => {
       normalizedRequiredSkills.length >= 3
         ? normalizedRequiredSkills
         : [
-            ...normalizedRequiredSkills,
-            ...Array(3 - normalizedRequiredSkills.length).fill(""),
-          ],
+          ...normalizedRequiredSkills,
+          ...Array(3 - normalizedRequiredSkills.length).fill(""),
+        ],
     );
     setBenefitInputs(
       normalizedBenefits.length >= 4
         ? normalizedBenefits
         : [
-            ...normalizedBenefits,
-            ...Array(4 - normalizedBenefits.length).fill(""),
-          ],
+          ...normalizedBenefits,
+          ...Array(4 - normalizedBenefits.length).fill(""),
+        ],
     );
   }, [existingOpportunity, isEditMode, isGlobalProgram]);
 
@@ -248,11 +248,11 @@ const AdminOpportunityFormPage = () => {
       startDate: form.startDate ? new Date(form.startDate).toISOString() : null,
       ...(form.type === "Internship"
         ? {
-            workMode: form.workMode,
-            cardTags: form.cardTags,
-            requiredSkills: requiredSkillsValue,
-            benefits: benefitsValue,
-          }
+          workMode: form.workMode,
+          cardTags: form.cardTags,
+          requiredSkills: requiredSkillsValue,
+          benefits: benefitsValue,
+        }
         : {}),
     };
 
@@ -292,7 +292,7 @@ const AdminOpportunityFormPage = () => {
 
   return (
     <div className="min-h-screen bg-[#EEF3FF] py-8 px-4">
-      <div className="max-w-[1400px]  mx-auto bg-white border border-[#DCE5FA] rounded-xl p-6">
+      <div className="w-full max-w-[1350px] px-4 md:px-6  mx-auto bg-white border border-[#DCE5FA] rounded-xl p-6">
         <div className="flex items-start justify-between gap-3 mb-5">
           <div>
             <h1 className="text-3xl font-semibold text-slate-800">
@@ -482,7 +482,7 @@ const AdminOpportunityFormPage = () => {
             />
           </label>
 
-          
+
           <label className="flex flex-col gap-1 text-sm text-slate-700">
             <span>Company Logo (Image File)</span>
             <input
@@ -561,7 +561,7 @@ const AdminOpportunityFormPage = () => {
                 />
               </label>
 
-               <label className="flex flex-col gap-1 text-sm text-slate-700">
+              <label className="flex flex-col gap-1 text-sm text-slate-700">
                 <span>Internship Type</span>
                 <select
                   name="internshipType"
@@ -570,7 +570,7 @@ const AdminOpportunityFormPage = () => {
                   className="border border-[#D6E2FC] rounded-lg px-3 py-2"
                 >
                   <option value="">Select internship type</option>
-                  
+
                   <option value="Teaching (Internship)">Teaching (Internship)</option>
                   <option value="Summer (Courses)">Summer Internship</option>
                   <option value="Winter (Courses)">Winter Internship</option>
@@ -578,15 +578,15 @@ const AdminOpportunityFormPage = () => {
                   <option value="Campus Ambassador">Campus Ambassador</option>
                   <option value="Apprenticeships">Apprenticeships</option>
                   <option value="Externships">Externships</option>
-                  
+
                   <option value="Government Internship">Government Internship</option>
                   <option value="Research Internships">Research Internships</option>
                   <option value="Assessment Internships">Assessment Internships</option>
                 </select>
               </label>
 
-             
-             
+
+
               <label className="md:col-span-2 flex flex-col gap-1 text-sm text-slate-700">
                 <span>Who Can Apply (Eligibility)</span>
                 <textarea

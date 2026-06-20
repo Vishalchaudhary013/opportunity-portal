@@ -5,7 +5,7 @@ const StudentTestimonialSection = () => {
 
   return (
     <section className="bg-[#0a2d5f] py-16">
-      <div className="max-w-[1400px] mx-auto px-4">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
         {/* Heading */}
         <h2 className="text-white text-[28px] font-bold mb-8">
           Hear why students enjoy learning on Coursera
@@ -13,7 +13,7 @@ const StudentTestimonialSection = () => {
 
         {/* Card */}
         <div className="bg-white rounded-xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
-          
+
           {/* VIDEO SIDE */}
           <div className="relative bg-black">
             <img

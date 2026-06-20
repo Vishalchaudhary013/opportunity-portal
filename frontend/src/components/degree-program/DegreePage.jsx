@@ -35,14 +35,14 @@ const DegreePage = () => {
 
   return (
     <>
-      <MainHeader/>
+      <MainHeader />
 
       {/* HERO BANNER */}
       <section
         ref={bannerRef}
         className="bg-[#0b2d5b] text-white py-20"
       >
-        <div className="max-w-[1400px] mx-auto px-4">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
           <h1 className="text-[40px] font-semibold">
             Take your career to the next level with an online degree
           </h1>
@@ -53,18 +53,18 @@ const DegreePage = () => {
       <StickyDegreeHeader visible={showStickyHeader} />
 
       {/* DEGREE LIST */}
-      <DegreesFilterSection/>
-      <BrowseDegreesSection/>
-      <DegreeProgressSection/>
-      <AdmissionWithoutApplication/>
-      <AffordableTuitionSection/>
-      <QualityLearningSection/>
-      <DesignedForWorkingAdultsSection/>
-      <StudentTestimonialSection/>
-      <LearnFromFaculty/>
-      <DegreeInsightsSection/>
-      <EdecoFaq/>
-      <Footer/>
+      <DegreesFilterSection />
+      <BrowseDegreesSection />
+      <DegreeProgressSection />
+      <AdmissionWithoutApplication />
+      <AffordableTuitionSection />
+      <QualityLearningSection />
+      <DesignedForWorkingAdultsSection />
+      <StudentTestimonialSection />
+      <LearnFromFaculty />
+      <DegreeInsightsSection />
+      <EdecoFaq />
+      <Footer />
     </>
   );
 };

@@ -44,7 +44,7 @@ const FavoritesPage = () => {
 
   return (
     <div className="bg-[#F4F7FF] min-h-screen py-8 sm:py-10 px-4 sm:px-6">
-      <div className="w-full max-w-350 mx-auto">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto">
         <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>

@@ -52,7 +52,7 @@ const LogoCard = ({ src }) => {
 const UniversityMarquee = () => {
   return (
    <>
-   <div className="w-[1350px] mx-auto">
+   <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto">
      <section className="pb-16 overflow-hidden">
       <h3 className="text-xl font-semibold mb-6">
         Learn from leading universities and companies

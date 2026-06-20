@@ -10,6 +10,8 @@ import { HiOutlineShieldCheck } from "react-icons/hi2";
 import ApplicationFormModal from "../form/ApplicationFormModal";
 import { useOpportunities } from "../../context/OpportunitiesContext";
 import SectionTitle from "../SectionTitle";
+import FilterChips from "../FilterChips";
+import { Globe2, Award, FileCheck, Users } from "lucide-react";
 
 const GlobalProgram = ({ limit }) => {
   const navigate = useNavigate();
@@ -20,14 +22,23 @@ const GlobalProgram = ({ limit }) => {
   );
   const visibleGlobalPrograms =
     typeof limit === "number" ? globalData.slice(0, limit) : globalData;
+
+  const categories = [
+    { name: "Dual-Continent Exposure", icon: <Globe2 size={16} /> },
+    { name: "International Capstones", icon: <Award size={16} /> },
+    { name: "Global Work Permits", icon: <FileCheck size={16} /> },
+    { name: "Cross-Cultural Networks", icon: <Users size={16} /> },
+  ];
+
   return (
     <>
       <div>
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-8 sm:py-10">
           <div className="mb-5">
             <SectionTitle title="Global PG Programs" subtitle="Expand Your Horizons with International Degrees and Global Mobility
 " defination={"Prestigious international postgraduate qualifications offering cross-border learning, exposure to global market dynamics, and international work authorization potential."}/>
           </div>
+          <FilterChips categories={categories} />
 
           {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {visibleGlobalPrograms.map((data) => (

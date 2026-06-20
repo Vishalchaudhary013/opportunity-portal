@@ -3,9 +3,9 @@ import AdmissionPathwayCard from "./AdmissionPathwayCard";
 const AdmissionWithoutApplication = () => {
   return (
     <section className="bg-[#f5f7fa] py-16">
-      <div className="max-w-[1400px] mx-auto px-6">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 items-start">
-          
+
           {/* LEFT CONTENT */}
           <div className="lg:col-span-1">
             <h2 className="text-[22px] font-semibold text-[#1f1f1f] mb-4 mt-[38px]">
@@ -29,7 +29,7 @@ const AdmissionWithoutApplication = () => {
 
           {/* RIGHT CARDS */}
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            
+
             <AdmissionPathwayCard
               logo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/University_of_Colorado_logo.svg/2560px-University_of_Colorado_logo.svg.png"
               university="University of Colorado Boulder"

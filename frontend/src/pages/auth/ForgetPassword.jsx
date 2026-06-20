@@ -83,7 +83,7 @@ const ForgetPassword = () => {
   return (
     <div className="bg-[#F8FAFC] ">
       <div className="bg-[#e0ebf8]">
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-5">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6 py-5">
           <header>
             <Link to="/" className="text-3xl font-medium">
               edeco
@@ -92,7 +92,7 @@ const ForgetPassword = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-350 mx-auto px-4 sm:px-6">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-center min-h-[calc(100dvh-88px)] py-8 sm:py-10">
           <form
             onSubmit={step === 1 ? requestReset : submitNewPassword}

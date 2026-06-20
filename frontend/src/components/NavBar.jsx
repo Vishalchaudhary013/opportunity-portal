@@ -103,7 +103,7 @@ const NavBar = () => {
         {/*MAIN NAVBAR  */}
 
         <div className="border-b border-black/10 py-2">
-          <div className="max-w-[1400px] mx-auto px-6">
+          <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto ">
             <div className="flex justify-between items-center text-[15px]">
               <ul className="">
                 <li>
@@ -125,7 +125,7 @@ const NavBar = () => {
                   {/* Content */}
                   <div className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1">
                     <IoLocationSharp size={16} />
-                    <select 
+                    <select
                       className="outline-none pr-3 bg-transparent cursor-pointer"
                       value={new URLSearchParams(location.search).get("location") || ""}
                       onChange={(e) => {
@@ -238,7 +238,7 @@ const NavBar = () => {
           </div>
         </div>
 
-        <div className="max-w-[1400px] mx-auto px-6 ">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto ">
           <div className="flex items-center justify-between h-[70px]">
             {/* LEFT SECTION */}
             <div className="flex items-center gap-[50px]">
@@ -277,8 +277,8 @@ const NavBar = () => {
                 </div>
               </div>
 
-              {/*  EXPLORE DROPDOWN  */}
-              <div className="flex items-center mt-0.5">
+            {/*  EXPLORE DROPDOWN  */}
+              <div className="hidden lg:flex items-center mt-0.5">
                 <div
                   className="relative"
                   onMouseEnter={() => setShowExplore(true)}
@@ -468,7 +468,7 @@ const NavBar = () => {
             </div>
 
             {/* RIGHT ACTIONS */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <div
                 className="relative flex items-center h-[40px]"
                 onMouseEnter={() => setIsSearchOpen(true)}
@@ -487,7 +487,7 @@ const NavBar = () => {
                   px-4 pr-10 text-sm
                   transition-all duration-300 ease-in-out
                   focus:outline-none bg-white
-                  ${isSearchOpen ? "w-[350px] opacity-100" : "w-[40px] opacity-0 pointer-events-none"}
+                  ${isSearchOpen ? "w-[200px] sm:w-[350px] opacity-100" : "w-[40px] opacity-0 pointer-events-none"}
                 `}
                   onFocus={() => setIsSearchOpen(true)}
                 />
@@ -501,9 +501,29 @@ const NavBar = () => {
                 </button>
               </div>
 
+              {/* Hamburger Toggle */}
+              <button 
+                className="lg:hidden h-10 w-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none relative z-50"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                <span className={`block w-6 h-0.5 bg-gray-800 transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
+                <span className={`block w-6 h-0.5 bg-gray-800 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
+                <span className={`block w-6 h-0.5 bg-gray-800 transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
+              </button>
+
               {/* Google Translate Widget */}
               <div id="google_translate_element" className="opacity-0 absolute pointer-events-none w-0 h-0 overflow-hidden"></div>
             </div>
+            
+            {/* Mobile Menu Drawer */}
+            {mobileMenuOpen && (
+              <div className="lg:hidden absolute top-[110px] left-0 w-full bg-white shadow-xl border-t border-gray-100 flex flex-col px-6 py-4 gap-4 z-40">
+                <Link to="/degrees" className="text-gray-800 font-medium py-2 border-b border-gray-50" onClick={() => setMobileMenuOpen(false)}>Degree Programs</Link>
+                <Link to="/events" className="text-gray-800 font-medium py-2 border-b border-gray-50" onClick={() => setMobileMenuOpen(false)}>Events</Link>
+                <Link to="/resources" className="text-gray-800 font-medium py-2 border-b border-gray-50" onClick={() => setMobileMenuOpen(false)}>Resources</Link>
+                <Link to="/more" className="text-gray-800 font-medium py-2" onClick={() => setMobileMenuOpen(false)}>More</Link>
+              </div>
+            )}
           </div>
         </div>
       </header>

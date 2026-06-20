@@ -23,7 +23,7 @@ const Facebook = () => {
   return (
     <section>
       <div className="bg-[#ffffff] py-20">
-        <div className="w-[1350px] mx-auto">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto">
           {/* <h3 className="text-center font-semibold text-[50px] mb-5">
             You’ll Be In Good Company
           </h3>

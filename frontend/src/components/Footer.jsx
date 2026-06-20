@@ -4,7 +4,7 @@ const Footer = () => {
   return (
     <>
       <div className="">
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="w-full max-w-[1350px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-8 mb-8 sm:mb-10">
             <div>
               <Link to="/" className="flex items-center gap-1 mb-5">

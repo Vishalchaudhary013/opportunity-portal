@@ -94,12 +94,12 @@ function ApplyClear({ onApply, onClear }) {
 const ITEMS_PER_PAGE = 8;
 
 const PROGRAM_LEVELS = [
- "Masters",
- "Doctoral (PhD)",
- "Post Graduate Diploma",
- "Integrated (UG+PG)",
- "Bachelor's - NEP (4 years)", 
-"UG Degree (3 years)" 
+  "Masters",
+  "Doctoral (PhD)",
+  "Post Graduate Diploma",
+  "Integrated (UG+PG)",
+  "Bachelor's - NEP (4 years)",
+  "UG Degree (3 years)"
 ];
 
 const DEGREE_MAP = {
@@ -186,7 +186,7 @@ const DegreesFilterSection = () => {
 
   return (
     <section className="bg-white py-10">
-      <div className="max-w-[1400px] mx-auto px-4">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
         <h2 className="text-[24px] font-semibold mb-6">
           Find the right degree for you
         </h2>

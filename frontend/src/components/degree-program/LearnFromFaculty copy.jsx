@@ -95,7 +95,7 @@ const FacultyCard = ({ data }) => {
 const LearnFromFaculty = () => {
   return (
     <section className="py-14">
-      <div className="max-w-[1400px] mx-auto px-4">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
         <h2 className="text-[26px] font-bold text-[#1f1f1f] mb-8">
           Learn from expert faculty
         </h2>

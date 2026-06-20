@@ -6,7 +6,7 @@ const Testimonials = () => {
   return (
     <>
       <div className="bg-[#f4faff]">
-        <div className="w-[1350px] mx-auto py-10">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-10">
           <h2 className=" mb-10 text-4xl font-semibold">Testimonials</h2>
           <div className="grid grid-cols-12 gap-10 items-start">
             {/* left part */}

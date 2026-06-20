@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
-import Internship from "../components/cards/Internship";
-import GlobalProgram from "../components/cards/GlobalProgram";
+import Internship from "../components/sections/Internship";
+import GlobalProgram from "../components/sections/GlobalProgram";
 
 import Hero from "../components/Hero";
 import UniversityMarquee from "../components/cards/UniversityMarquee";
@@ -22,6 +22,7 @@ import CertificatePrograms from "../components/sections/CertificatePrograms";
 import PostGraduatePrograms from "../components/sections/PostGraduatePrograms";
 import MastersDegrees from "../components/sections/MastersDegrees";
 import IntegratedDegrees from "../components/sections/IntegratedDegrees";
+import EdecoFaq from "../components/sections/EdecoFaq";
 
 const Home = () => {
   return (
@@ -46,6 +47,7 @@ const Home = () => {
         {/* <Facebook /> */}
         <Linkedinn />
         <Instagram />
+        <EdecoFaq />
       </div>
     </>
   );

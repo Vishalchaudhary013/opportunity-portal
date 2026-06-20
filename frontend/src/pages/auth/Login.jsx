@@ -45,7 +45,7 @@ const Login = () => {
   return (
     <div className="bg-[#F8FAFC]">
       <div className="bg-[#e0ebf8]">
-        <div className="w-full max-w-350 mx-auto px-4 sm:px-6 py-5">
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6 py-5">
           <header>
             <Link to="/" className="text-[30px] text-[#0f2a4d] font-bold cursor-pointer select-none hover:opacity-90">
               edeco<span className="text-[#0f2a4d]">®</span>
@@ -54,7 +54,7 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="w-full max-w-350 mx-auto px-4 sm:px-6">
+      <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-center min-h-[calc(100dvh-88px)] py-8 sm:py-10">
           <form onSubmit={handleSubmit} className="bg-white rounded-xl p-5 w-full max-w-[410px] shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
             <p className="text-sm text-center mb-4">

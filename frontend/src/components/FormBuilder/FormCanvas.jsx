@@ -126,7 +126,7 @@ const FormCanvas = () => {
 
   return (
     <div className="flex-1  bg-[#F8FAFC] relative flex flex-col ">
-      <div className="p-3 max-w-7xl mx-auto flex-1 w-full flex flex-col ">
+      <div className="p-3 w-full max-w-[1350px] px-4 md:px-6 mx-auto flex-1 w-full flex flex-col ">
         {hasBannerComponent || hasPdfComponent || hasCarouselComponent ? (
           // Special component-enabled form layout (banner or PDF)
           <div className=" rounded-xl  mb-6 flex-1  flex flex-col">
