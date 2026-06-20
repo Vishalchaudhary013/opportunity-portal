@@ -16,9 +16,9 @@ const SectionTitle = ({ title, subtitle , defination }) => (
       <div className="absolute -bottom-3 left-1/4 w-2.5 h-2.5 border-[1.5px] border-red-400 rounded-full opacity-30 -z-10"></div> */}
 
       <div className="flex justify-between items-start relative z-10">
-        <div className="">
+        <div className="leading-10">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-[25px] font-[650] text-black leading-snug">
+            <h2 className="text-[28px] font-[650] text-black leading-snug ">
               {title}
             </h2>
           {defination && (

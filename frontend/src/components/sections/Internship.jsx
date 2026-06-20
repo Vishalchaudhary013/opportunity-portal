@@ -202,10 +202,10 @@ const Internship = ({ limit }) => {
     //   </div>
     //   </>
     <>
-      <div className="bg-gray-50">
+      <div className="">
         <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-8 sm:py-10 ">
 
-           <div className="mb-5">
+           <div className="mb-3">
             <SectionTitle
                 title="Internships"
                 subtitle="Gain Practical Industry Experience Before Diving into a Full-Time Career"

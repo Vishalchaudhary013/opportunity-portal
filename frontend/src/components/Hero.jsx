@@ -83,7 +83,7 @@ const Hero = () => {
   ];
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)]  flex flex-col justify-center overflow-x-hidden  gap-8 md:gap-8 pt-10 md:pt-16  pb-10 md:pb-">
+    <div className="w-full min-h-[calc(100vh-70px)] md:h-[calc(100vh-70px)] flex flex-col justify-center scrollbar-hide overflow-x-hidden gap-8 md:gap-12 pt-12 md:pt-18 pb-8 md:pb-4">
       
       {/* SVG Clip Paths for perfectly rounded slants */}
       <svg width="0" height="0" className="absolute">
