@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { fetchLinkedinPosts } from "../api/socialAPI";
 import { FaComment, FaLinkedin } from "react-icons/fa";
 import { BiSolidLike } from "react-icons/bi";
 import { FaLinkedinIn } from "react-icons/fa6";
@@ -10,119 +11,23 @@ const Linkedinn = () => {
         setExpandedPosts((prev) => ({ ...prev, [id]: !prev[id] }));
     };
 
-    const posts = [
-        {
-            id: 1,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
-                
-            ],
-            likes: 29,
-            comments:2
-        },
-        {
-            id: 10,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [],
-            likes: 29,
-            comments:2
-        },
-        {
-            id: 9,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [],
-            likes: 29,
-            comments:2
-        },
-        {
-            id: 2,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: null,
-            images: [
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
-                
-            ],
-            likes: 19,
-            comments:2
-        },
-        {
-            id: 3,
-            date: "Nov 2025",
-            text1: null,
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7381760986321473536-images-0.webp?nocache=1761741101247",
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
-            ],
-            likes: 29,
-            comments:2,
-            singleImage: true,
-        },
-        {
-            id: 4,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [],
-            likes: 29,
-            comments:2
-        },
-        {
-            id: 5,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7382135776010035200-images-0.webp?nocache=1761741100345",
-                "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/7399005651269763072-images-0.webp?nocache=1764062979",
-            ],
-            likes: 29,
-            comments:2,
-            singleImage: true,
-        },
-        {
-            id: 6,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [],
-            likes: 29,
-            comments:2
-        },
-        {
-            id: 7,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [],
-            likes: 29,
-            comments:2
-        },
-        {
-            id: 8,
-            date: "Nov 2025",
-            text1: "A vibrant and engaging day at Mahavir Senior Model School, where students delved into exciting career possibilities and strengthened their vision for the future!",
-            text2: "At Uniwizard Career Fairs, we are committed to creating impactful experiences by bringing universities, industry experts, and real opportunities directly to school campuses—empowering students to make informed, clear, and goal-oriented decisions about their future",
-            images: [],
-            likes: 29,
-            comments:2
-        },
-        
-        
-    ];
+    useEffect(() => {
+        const loadPosts = async () => {
+            try {
+                const data = await fetchLinkedinPosts();
+                setPosts(data);
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching LinkedIn posts:", error);
+                setLoading(false);
+            }
+        };
+
+        loadPosts();
+    }, []);
 
     const profileImg =
         "https://images.sociablekit.com/sources/linkedin-profile-posts/saurabh-dutta87/profile.webp?v=1761741103747";
@@ -182,15 +87,11 @@ const Linkedinn = () => {
                                                 />
                                             </li>
                                             <li className="leading-4.5">
-                                                <h5
-                                                    
-                                                    className="font-medium  text-[18px]"
-                                                >
-                                                    Saurabh Dutta
+                                                <h5 className="font-medium text-[18px]">
+                                                    {post.authorName || "Saurabh Dutta"}
                                                 </h5>
                                                 <span className="font-medium text-red-600">
-                                                    {/* {post.date} */}
-                                                    @username
+                                                    {post.authorUsername || "@username"}
                                                 </span>
                                             </li>
                                             <li className="mb-5">
@@ -243,9 +144,9 @@ const Linkedinn = () => {
                                     )}
 
                                     <div className="flex gap-4 items-center border-b pb-2 mb-2.5 border-black/10">
-                                        {/* <span className="font-semibold text-black/70">5:30AM</span>
-                                        <span className="text-xs font-medium">|</span> */}
-                                        <span className="font-semibold text-black/70">{post.date}</span>
+                                        <span className="font-semibold text-black/70">
+                                            {post.postedAt ? new Date(post.postedAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : "Nov 2025"}
+                                        </span>
                                     </div>
 
                                     {/* Post Footer */}

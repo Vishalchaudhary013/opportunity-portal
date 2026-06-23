@@ -9,6 +9,8 @@ import applicationRoutes from "./routers/applicationRoutes.js";
 import authRoutes from "./routers/authRoutes.js";
 import formRoutes from "./formBuilder/routes/formRoutes.js";
 import submissionRoutes from "./formBuilder/routes/submissionRoutes.js";
+import socialPostRoutes from "./routers/socialPostRoutes.js";
+import { startSocialSyncCron } from "./scripts/cronJobs.js";
 import { isMailConfigured } from "./utils/mailer.js";
 import {
   bootWhatsAppProvider,
@@ -36,6 +38,7 @@ app.use("/api/applications", applicationRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/forms", formRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/social", socialPostRoutes);
 
 
 
@@ -92,6 +95,7 @@ app.listen(port, () => {
 
   bootWhatsAppProvider();
   startDailySuperAdminRegistrationNotifier();
+  startSocialSyncCron();
 
   if (!isMailConfigured()) {
     console.warn(

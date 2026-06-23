@@ -83,7 +83,9 @@ const Hero = () => {
   ];
 
   return (
-    <div className="w-full min-h-[calc(100vh-70px)] md:h-[calc(100vh-70px)] flex flex-col justify-center scrollbar-hide overflow-x-hidden gap-8 md:gap-12 pt-12 md:pt-18 pb-8 md:pb-4">
+   <>
+   <div className="bg-[#EAF6FF]">
+     <div className="w-full min-h-[calc(100vh-70px)] md:h-[calc(100vh-70px)] flex flex-col justify-center scrollbar-hide overflow-x-hidden gap-8 md:gap-12 pt-12 md:pt-18 pb-8 md:pb-4">
       
       {/* SVG Clip Paths for perfectly rounded slants */}
       <svg width="0" height="0" className="absolute">
@@ -122,21 +124,21 @@ const Hero = () => {
           style={{ '--slider-transform': `translateX(-${index * 424}px)` }}
         >
           {[...cardsData, ...cardsData].map((card, i) => (
-            <div key={i} className={`relative p-4 md:p-5 w-[85vw] sm:w-[400px] md:w-[450px] h-[260px] md:h-[280px] rounded-[24px] md:rounded-[30px] ${card.bg} flex-shrink-0 shadow-sm snap-center`}>
+            <div key={i} className={`relative p-4 md:p-5 w-[85vw] sm:w-[400px] md:w-[450px] h-[260px] md:h-[280px] rounded-xl md:rounded-2xl ${card.bg} flex-shrink-0 shadow-sm snap-center`}>
               <img
                 src="/hero_students.png"
                 alt=""
-                className={`absolute ${card.alignTop ? 'top-4' : 'bottom-4'} right-4 w-[160px] md:w-[190px] h-[200px] md:h-[235px] object-cover rounded-[20px] md:rounded-3xl`}
+                className={`absolute ${card.alignTop ? 'top-4' : 'bottom-4'} right-4 w-[160px] md:w-[190px] h-[200px] md:h-[235px] object-cover rounded-[10px] md:rounded-2xl`}
                 style={{ clipPath: card.clipPath }}
               />
               <span className={`absolute ${card.alignTop ? 'top-6' : 'bottom-6'} left-6 md:left-8 w-8 h-8 md:w-10 md:h-10 bg-white rounded-full inline-flex justify-center items-center shadow-sm text-black hover:scale-105 transition-transform cursor-pointer`}>
                 <GoArrowUpRight size={20} className="md:w-6 md:h-6" />
               </span>
-              <div className={`absolute ${card.alignTop ? 'bottom-6' : 'top-6'} left-6 md:left-8 flex flex-col items-start gap-2 pr-[150px] md:pr-[180px]`}>
+              <div className={`absolute ${card.alignTop ? 'bottom-6' : 'top-6'} left-6 md:left-8 right-0 flex flex-col items-start gap-2 pr-[175px] md:pr-[215px]`}>
                 <span className="border border-black/50 py-0.5 px-2 md:px-3 rounded-full text-xs md:text-sm font-medium">{card.level}</span>
-                <div className="leading-tight md:leading-6.5">
-                   <h3 className="text-[22px] sm:text-[24px] md:text-[28px] font-medium text-black leading-none mb-1 md:mb-0">{card.title}</h3>
-                   <span className="text-sm md:text-base">{card.duration}</span>
+                <div className="leading-tight md:leading-6.5 w-full">
+                   <h3 className="text-[22px] sm:text-[24px] md:text-[28px] font-medium text-black leading-tight mb-1 md:mb-0 break-words">{card.title}</h3>
+                   <span className="text-sm md:text-base break-words inline-block">{card.duration}</span>
                 </div>
               </div>
             </div>
@@ -148,7 +150,7 @@ const Hero = () => {
       <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto mt-6 md:mt-8">
         {/* Tabs */}
         <div className="flex w-full overflow-x-auto scrollbar-hide items-end gap-[2px]">
-          {["Internship",  "Apprenticeships", "Jobs", "Bootcamps", "Certificate Programs", "Site Search"].map((tab) => (
+          {["Internship",  "Apprenticeships", "Jobs", "Bootcamps", "Master Degrees", "Site Search"].map((tab) => (
             <button
               key={tab}
               type="button"
@@ -168,17 +170,17 @@ const Hero = () => {
         {/* Search Inputs Container */}
         <form 
           onSubmit={handleSearch}
-          className="bg-white px-4 md:px-5 py-5 md:py-7 rounded-b-[4px] shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex gap-4 md:gap-5 flex-col lg:flex-row w-full border-t border-[#00A9E0] relative z-0"
+          className="bg-white px-4 md:px-5 py-5 md:py-7 rounded-b-[4px] shadow-sm flex gap-4 md:gap-5 flex-col lg:flex-row w-full border-t border-[#00A9E0] relative z-0"
         >
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="by Course Title or"
+            placeholder="search by title..."
             className="flex-1 px-4 py-3 md:py-3.5 border border-gray-200 rounded-md outline-none focus:border-[#00A9E0] text-gray-700 placeholder:text-gray-500 bg-[#F8FAFC]"
           />
           
-          <div className="flex-1 relative">
+          {/* <div className="flex-1 relative">
             <select 
               className="w-full px-4 py-3 md:py-3.5 border border-gray-200 rounded-md outline-none focus:border-[#00A9E0] appearance-none bg-[#F8FAFC] text-gray-700 relative z-10 cursor-pointer"
             >
@@ -189,7 +191,7 @@ const Hero = () => {
             <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[#00A9E0] z-20 pointer-events-none">
               <MdKeyboardArrowDown size={24} />
             </div>
-          </div>
+          </div> */}
 
           <button 
             type="submit"
@@ -200,6 +202,8 @@ const Hero = () => {
         </form>
       </div>
     </div>
+   </div>
+   </>
   );
 };
 

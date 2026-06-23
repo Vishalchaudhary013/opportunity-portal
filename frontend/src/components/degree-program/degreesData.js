@@ -10,6 +10,7 @@ export const degreesData = [
     fees: "INR 1.20 Lac per year",
     deadline: "January 31, 2026",
     logo: "https://upload.wikimedia.org/wikipedia/en/6/6e/BITS_Pilani-Logo.svg",
+    learningMode: "On-Campus"
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ export const degreesData = [
     fees: "INR 1.20 Lac per year",
     deadline: "January 30, 2026",
     logo: "https://upload.wikimedia.org/wikipedia/en/9/9a/IIT_Guwahati_Logo.svg",
+    learningMode: "Hybrid"
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ export const degreesData = [
     fees: "INR 1.20 Lac per year",
     deadline: "January 30, 2026",
     logo: "https://upload.wikimedia.org/wikipedia/en/2/2f/University_of_Huddersfield_logo.svg",
+    learningMode: "100% Online"
   },
   {
     id: 4,
@@ -40,6 +43,7 @@ export const degreesData = [
     fees: "INR 1.20 Lac per year",
     deadline: "January 10, 2026",
     logo: "https://upload.wikimedia.org/wikipedia/commons/5/57/SPJIMR_logo.svg",
+    learningMode: "Industry Integrated"
   },
   {
     id: 5,
@@ -121,4 +125,84 @@ export const degreesData = [
     deadline: "April 10, 2026",
     logo: "https://upload.wikimedia.org/wikipedia/en/3/3f/Amity_University_logo.svg",
   },
+  {
+    id: 13,
+    university: "Indian Institute of Science",
+    title: "PhD in Computer Science",
+    degreeType: "PhD",
+    duration: "3-5 Years",
+    fees: "INR 1.50 Lac per year",
+    deadline: "May 31, 2026",
+    logo: "https://upload.wikimedia.org/wikipedia/en/e/e9/Indian_Institute_of_Science_logo.png",
+  },
+  {
+    id: 14,
+    university: "Stanford University",
+    title: "PhD in Artificial Intelligence",
+    degreeType: "PhD",
+    duration: "4-6 Years",
+    fees: "$55,000 per year",
+    deadline: "December 15, 2025",
+    logo: "https://upload.wikimedia.org/wikipedia/en/b/b7/Stanford_University_seal_2003.svg",
+  },
+  {
+    id: 15,
+    university: "Massachusetts Institute of Technology",
+    title: "PhD in Data Science",
+    degreeType: "PhD",
+    duration: "4-5 Years",
+    fees: "$58,000 per year",
+    deadline: "January 5, 2026",
+    logo: "https://upload.wikimedia.org/wikipedia/en/4/44/MIT_Seal.svg",
+  },
+  {
+    id: 16,
+    university: "University of Oxford",
+    title: "DPhil in Computer Science",
+    degreeType: "PhD",
+    duration: "3-4 Years",
+    fees: "£28,000 per year",
+    deadline: "January 8, 2026",
+    logo: "https://upload.wikimedia.org/wikipedia/en/2/25/University_of_Oxford_logo.svg",
+  },
+  {
+    id: 17,
+    university: "Indian Institute of Technology Madras",
+    title: "Integrated M.Tech in Computer Science",
+    degreeType: "Integrated",
+    duration: "5 Years",
+    fees: "INR 2.00 Lac per year",
+    deadline: "March 15, 2026",
+    logo: "https://upload.wikimedia.org/wikipedia/en/6/69/IIT_Madras_Logo.svg",
+  },
+  {
+    id: 18,
+    university: "BITS Pilani",
+    title: "Integrated MSc in Economics",
+    degreeType: "Integrated",
+    duration: "5 Years",
+    fees: "INR 1.80 Lac per year",
+    deadline: "April 30, 2026",
+    logo: "https://upload.wikimedia.org/wikipedia/en/6/6e/BITS_Pilani-Logo.svg",
+  },
+  {
+    id: 19,
+    university: "Indian Institute of Technology Bombay",
+    title: "Dual Degree (BTech + MTech) in Electrical Eng.",
+    degreeType: "Integrated",
+    duration: "5 Years",
+    fees: "INR 2.20 Lac per year",
+    deadline: "March 20, 2026",
+    logo: "https://upload.wikimedia.org/wikipedia/en/1/1d/Indian_Institute_of_Technology_Bombay_Logo.svg",
+  },
+  {
+    id: 20,
+    university: "VIT University",
+    title: "Integrated MTech in Software Engineering",
+    degreeType: "Integrated",
+    duration: "5 Years",
+    fees: "INR 1.95 Lac per year",
+    deadline: "May 10, 2026",
+    logo: "https://upload.wikimedia.org/wikipedia/en/c/c5/Vellore_Institute_of_Technology_seal_2017.svg",
+  }
 ];

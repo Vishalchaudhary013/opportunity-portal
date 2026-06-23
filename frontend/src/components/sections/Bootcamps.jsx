@@ -20,7 +20,7 @@ const Bootcamps = () => {
             <div className="">
                 <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-10">
                    <div className="mb-5">
-            <SectionTitle title="Workshops & Bootcamps" subtitle="Master Specific, High-Income Skills in Intensive, Fast-Paced Formats" defination={"Short, high-intensity immersive training modules designed to rapidly upskill candidates in a specific tool, framework, or methodology through project-based learning."}/>
+            <SectionTitle title="Workshops & Bootcamps" subtitle="Master Specific, High-Income Skills in Intensive, Fast-Paced Formats" defination={"Short, high-intensity immersive training modules designed to rapidly upskill candidates in a specific tool, framework, or methodology through project-based learning."} viewAllLink="/workshops-and-bootcamps"/>
           </div>
           <FilterChips categories={categories} />
                 </div>

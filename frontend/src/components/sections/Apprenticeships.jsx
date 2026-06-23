@@ -15,10 +15,10 @@ const Apprenticeships = () => {
 
     return (
         <>
-            <div className="bg-[#F8F9FE]">
+            <div className=" bg-[]">
                 <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-10">
                    <div className="mb-5">
-            <SectionTitle title="Apprenticeships" subtitle="Earn While You Learn with Structured On-the-Job Training" defination="A formal, long-term training program combining paid employment with technical instruction. Apprenticeships focus on developing highly specific, mastery-level trade and corporate skills."/>
+            <SectionTitle title="Apprenticeships" subtitle="Earn While You Learn with Structured On-the-Job Training" defination="A formal, long-term training program combining paid employment with technical instruction. Apprenticeships focus on developing highly specific, mastery-level trade and corporate skills." viewAllLink="/apprenticeships"/>
           </div>
           <FilterChips categories={categories} />
                 </div>

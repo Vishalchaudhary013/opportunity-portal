@@ -16,7 +16,7 @@ const Mentorships = () => {
       <div className="bg-[#F8F9FE]">
                 <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-10">
                    <div className="mb-5">
-            <SectionTitle title="Industry Mentorships" subtitle="Accelerate Your Growth Under the Guidance of Industry Veterans" defination={"One-on-one or small-group advisory sessions led by established professionals. Mentorships provide personalized career steering, resume reviews, interview strategies, and insider industry insights."}/>
+            <SectionTitle title="Industry Mentorships" subtitle="Accelerate Your Growth Under the Guidance of Industry Veterans" defination={"One-on-one or small-group advisory sessions led by established professionals. Mentorships provide personalized career steering, resume reviews, interview strategies, and insider industry insights."} viewAllLink="/industry-mentorships"/>
           </div>
           <FilterChips categories={categories} />
                 </div>

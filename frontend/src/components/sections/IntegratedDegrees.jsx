@@ -16,7 +16,7 @@ const IntegratedDegrees = () => {
       <div className="bg-[#F8F9FE]">
                 <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-10">
                    <div className="mb-5">
-            <SectionTitle title="Integrated Degrees (UG - PG)" subtitle="Seamless Transition from Bachelor’s to Master’s with Unified Tracks" defination={"An accelerated dual-degree model combining both Undergraduate and Postgraduate studies into a single, cohesive curriculum, saving both time and application overhead."}/>
+            <SectionTitle title="Integrated Degrees - UG - PG" subtitle="Seamless Transition from Bachelor’s to Master’s with Unified Tracks" defination={"An accelerated dual-degree model combining both Undergraduate and Postgraduate studies into a single, cohesive curriculum, saving both time and application overhead."} viewAllLink="/integrated-degrees"/>
           </div>
           <FilterChips categories={categories} />
                 </div>

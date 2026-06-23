@@ -11,6 +11,7 @@ import {
   FiUsers,
 } from "react-icons/fi";
 import ApplicationFormModal from "../components/form/ApplicationFormModal";
+import ShareModal from "../components/ShareModal";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import {
   formatDeadlineLabel,
@@ -96,6 +97,7 @@ const InternshipDetailsPage = () => {
   const { opportunities, isInternshipSaved, toggleSavedInternship, user } =
     useOpportunities();
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const renderListOrHTML = (content) => {
@@ -688,7 +690,12 @@ const InternshipDetailsPage = () => {
                       className="text-white py-1 px-4 rounded-md bg-[#00A9E0] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
                       Apply
                     </button>
-                    <button className="flex items-center gap-1 border bg-white shadow border-black/5 py-1 px-4 rounded-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl">
+                    <button className="flex items-center gap-1 border bg-white shadow border-black/5 py-1 px-4 rounded-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
+                    onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setIsShareModalOpen(true);
+            }}>
                       <IoMdShare />
                       Share
                     </button>
@@ -1184,6 +1191,12 @@ const InternshipDetailsPage = () => {
         opportunityTitle={selectedOpportunity?.title}
         opportunity={selectedOpportunity}
         onClose={() => setSelectedOpportunity(null)}
+      />
+      <ShareModal
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        eventTitle={internship?.title || "Internship"}
+        shareUrl={window.location.href}
       />
     </>
   );

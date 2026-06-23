@@ -19,7 +19,7 @@ const Jobs = () => {
     <div className="">
         <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-10">
                    <div className="mb-5">
-            <SectionTitle title="Entry-Level Jobs" subtitle="Kickstart Your Professional Career with Roles Built for Freshers"  defination="Full-time corporate openings designed specifically for recent graduates. These positions expect limited professional experience and prioritize potential, adaptability, and fundamental skill sets."/>
+            <SectionTitle title="Entry-Level Jobs" subtitle="Kickstart Your Professional Career with Roles Built for Freshers"  defination="Full-time corporate openings designed specifically for recent graduates. These positions expect limited professional experience and prioritize potential, adaptability, and fundamental skill sets." viewAllLink="/entry-level-jobs"/>
           </div>
           <FilterChips categories={categories} />
                 </div>

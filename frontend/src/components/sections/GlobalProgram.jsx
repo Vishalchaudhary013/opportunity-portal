@@ -36,7 +36,7 @@ const GlobalProgram = ({ limit }) => {
         <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-8 sm:py-10">
           <div className="mb-5">
             <SectionTitle title="Global PG Programs" subtitle="Expand Your Horizons with International Degrees and Global Mobility
-" defination={"Prestigious international postgraduate qualifications offering cross-border learning, exposure to global market dynamics, and international work authorization potential."}/>
+" defination={"Prestigious international postgraduate qualifications offering cross-border learning, exposure to global market dynamics, and international work authorization potential."} viewAllLink="/global-pg-programs"/>
           </div>
           <FilterChips categories={categories} />
 

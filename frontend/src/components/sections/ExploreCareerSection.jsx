@@ -58,7 +58,7 @@ const ExploreCareersSection = () => {
       <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto">
         {/* Header */}
         <div className="mb-5">
-          <SectionTitle title="Global Programs" subtitle="Join international programs curated by top institutions and mentors" />
+          <SectionTitle title="Global Programs" subtitle="Join international programs curated by top institutions and mentors" viewAllLink="/global-programs"/>
         </div>
 
         {/* Cards */}

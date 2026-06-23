@@ -16,7 +16,7 @@ const MastersDegrees = () => {
       <div className="">
                 <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-10">
                    <div className="mb-5">
-            <SectionTitle title="Masters' Degrees (M.Tech / MBA / M.Sc)" subtitle="Deepen Your Academic Specialization and Leadership Potential" defination={"Formal postgraduate university education focusing on comprehensive academic research, advanced technical expertise, or organizational leadership frameworks."}/>
+            <SectionTitle title="Masters' Degrees - M.Tech / MBA / M.Sc" subtitle="Deepen Your Academic Specialization and Leadership Potential" defination={"Formal postgraduate university education focusing on comprehensive academic research, advanced technical expertise, or organizational leadership frameworks."} viewAllLink="/masters-degrees"/>
           </div>
           <FilterChips categories={categories} />
                 </div>

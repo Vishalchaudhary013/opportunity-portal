@@ -3,8 +3,9 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import { CiLocationOn, CiSearch } from "react-icons/ci";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { IoLanguageSharp, IoLocationSharp } from "react-icons/io5";
+import { IoHomeOutline, IoLanguageSharp, IoLocationSharp } from "react-icons/io5";
 import { FaLocationArrow } from "react-icons/fa6";
+import { Home } from "lucide-react";
 const NavBar = () => {
   const [showExplore, setShowExplore] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -102,12 +103,12 @@ const NavBar = () => {
 
         {/*MAIN NAVBAR  */}
 
-        <div className="border-b border-black/10 py-2">
+        <div className="border-b border-gray-50 py-2">
           <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto ">
             <div className="flex justify-between items-center text-[15px]">
               <ul className="">
                 <li>
-                  <Link to="/" className="text-[16px] font-semibold">Home</Link>
+                  <Link to="/" className="text-[16px] font-semibold"><IoHomeOutline size={21} className=" text-red-600"/></Link>
                 </li>
               </ul>
               <ul className="flex items-center gap-5">
@@ -239,7 +240,7 @@ const NavBar = () => {
         </div>
 
         <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto ">
-          <div className="flex items-center justify-between h-[70px]">
+          <div className="flex items-center justify-between h-[60px]">
             {/* LEFT SECTION */}
             <div className="flex items-center gap-[50px]">
               {/* LOGO */}
@@ -277,7 +278,7 @@ const NavBar = () => {
                 </div>
               </div>
 
-            {/*  EXPLORE DROPDOWN  */}
+              {/*  EXPLORE DROPDOWN  */}
               <div className="hidden lg:flex items-center mt-0.5">
                 <div
                   className="relative"
@@ -309,7 +310,7 @@ const NavBar = () => {
 
                   {/* MEGA DROPDOWN */}
                   {showExplore && (
-                    <div className="absolute left-[-350px] top-[58px] w-[1670px] bg-white shadow-xl border border-gray-200 z-50">
+                    <div className="absolute left-[-362.5px] top-[55px] w-[1675px] bg-white shadow-xl border border-gray-50 z-50">
                       {/* HOVER BRIDGE (IMPORTANT – invisible) */}
                       <div className="absolute -top-[20px] left-0 w-full h-[20px]"></div>
 
@@ -444,6 +445,21 @@ const NavBar = () => {
                   Events
                 </NavLink>
 
+                <a href="https://frontend-7vjp2wk8f-vishal-chaudharys-projects-57aced94.vercel.app/" className="text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 text-gray-700">Global Services</a>
+
+                {/* <NavLink
+                  to="/global-services"
+                  className={({ isActive }) =>
+                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
+                  }
+                >
+                  Global Services
+                </NavLink> */}
+
+
+
                 <NavLink
                   to="/resources"
                   className={({ isActive }) =>
@@ -502,7 +518,7 @@ const NavBar = () => {
               </div>
 
               {/* Hamburger Toggle */}
-              <button 
+              <button
                 className="lg:hidden h-10 w-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none relative z-50"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
@@ -514,7 +530,7 @@ const NavBar = () => {
               {/* Google Translate Widget */}
               <div id="google_translate_element" className="opacity-0 absolute pointer-events-none w-0 h-0 overflow-hidden"></div>
             </div>
-            
+
             {/* Mobile Menu Drawer */}
             {mobileMenuOpen && (
               <div className="lg:hidden absolute top-[110px] left-0 w-full bg-white shadow-xl border-t border-gray-100 flex flex-col px-6 py-4 gap-4 z-40">

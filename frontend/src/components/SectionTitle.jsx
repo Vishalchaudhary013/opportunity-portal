@@ -3,7 +3,7 @@ import { GoArrowRight } from "react-icons/go";
 import { TbQuestionMark } from "react-icons/tb";
 import { Link } from "react-router-dom";
 
-const SectionTitle = ({ title, subtitle , defination }) => (
+const SectionTitle = ({ title, subtitle , defination, viewAllLink = "/intership" }) => (
   <>
 
     {/* Title Section */}
@@ -59,7 +59,7 @@ const SectionTitle = ({ title, subtitle , defination }) => (
       <div>
 
         <Link
-          to="/intership"
+          to={viewAllLink}
           className="flex gap-0.5 items-center group"
         >
           <div className="font-medium mt-1 text-slate-900 bg-red-600 text-white py-1 px-4 rounded-4xl transition-colors duration-300 ">

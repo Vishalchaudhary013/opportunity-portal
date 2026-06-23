@@ -11,8 +11,13 @@ import AdmissionWithoutApplication from "../components/degree-program/AdmissionW
 import AffordableTuitionSection from "../components/degree-program/AffordableTuitionSection";
 import QualityLearningSection from "../components/degree-program/QualityLearningSection";
 import DesignedForWorkingAdultsSection from "../components/degree-program/DesignedForWorkingAdultsSection";
-import EdecoFaq from "../components/EdecoFaq";
+
 import LearnFromFaculty from "../components/degree-program/LearnFromFaculty";
+import EdecoFaq from "../components/sections/EdecoFaq";
+import Master from "../components/degree-program/section/Master";
+import Bachlor from "../components/degree-program/section/Bachlor";
+import Phd from "../components/degree-program/section/Phd";
+import IntegratedDegreesSection from "../components/degree-program/section/IntegratedDegreesSection";
 
 const DegreePage = () => {
   const bannerRef = useRef(null);
@@ -40,12 +45,15 @@ const DegreePage = () => {
       {/* HERO BANNER */}
       <section
         ref={bannerRef}
-        className="bg-[#0b2d5b] text-white py-20"
+        className="bg-[#0b2d5b] text-white py-20 mt-10"
       >
-        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
-          <h1 className="text-3xl md:text-[40px] font-semibold md:leading-tight">
-            Take your career to the next level with an online degree
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 text-center ">
+          <h1 className="text-3xl md:text-[40px] font-semibold md:leading-tight mb-4">
+            Find Your Future: Explore Our Degree Programs
           </h1>
+          <h3 className="text-2xl md:text-[30px] font-semibold md:leading-tight mb-4">Your Goals. Your Pace. Your Degree</h3>
+          {/* <h5 className="text-xl md:text-[20px] font-semibold md:leading-tight mb-4">Higher education, reinvented for your lifestyle</h5> */}
+          
         </div>
       </section>
 
@@ -54,15 +62,23 @@ const DegreePage = () => {
 
       {/* DEGREE LIST */}
       <DegreesFilterSection />
-      <BrowseDegreesSection />
-      <DegreeProgressSection />
+
+      <Master />
+      <Bachlor />
+
+      <Phd />
+
+      <IntegratedDegreesSection />
+
+      {/* <BrowseDegreesSection /> */}
+      {/* <DegreeProgressSection />
       <AdmissionWithoutApplication />
-      <AffordableTuitionSection />
-      <QualityLearningSection />
+      <AffordableTuitionSection /> */}
+      {/* <QualityLearningSection />
       <DesignedForWorkingAdultsSection />
       <StudentTestimonialSection />
       <LearnFromFaculty />
-      <DegreeInsightsSection />
+      <DegreeInsightsSection /> */}
       <EdecoFaq />
       {/* <Footer/> */}
     </>

@@ -202,7 +202,7 @@ const Internship = ({ limit }) => {
     //   </div>
     //   </>
     <>
-      <div className="">
+      <div className="bg-[#F7F9FC]">
         <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-8 sm:py-10 ">
 
            <div className="mb-3">
@@ -210,6 +210,7 @@ const Internship = ({ limit }) => {
                 title="Internships"
                 subtitle="Gain Practical Industry Experience Before Diving into a Full-Time Career"
                 defination="A short-term professional learning experience that offers meaningful, practical work related to a student’s field of study or career interest. Internships bridge the gap between academic theory and real-world execution."
+                viewAllLink="/internships"
               />
            </div>
           

@@ -2,10 +2,22 @@ import { useState, useEffect, useRef } from "react";
 import { degreesData } from "../../components/degree-program/degreesData";
 import DegreeCard from "./DegreeCard";
 import Pagination from "./Pagination";
-
+import { 
+  IoChevronDownOutline, 
+  IoChevronUpOutline, 
+  IoFilterOutline, 
+  IoLayersOutline, 
+  IoSchoolOutline, 
+  IoStarOutline,
+  IoMailOutline,
+  IoSearchOutline,
+  IoLaptopOutline
+} from "react-icons/io5";
+import { FiFilter } from "react-icons/fi";
 /* ================= UI HELPERS ================= */
 
 function FilterPill({
+  icon: Icon,
   label,
   open,
   onClick,
@@ -13,26 +25,50 @@ function FilterPill({
   children,
   width = "w-[260px]",
   scroll = false,
+  isLabel = false,
 }) {
+  if (isLabel) {
+    return (
+      <div className="flex items-center gap-2 text-slate-800 font-medium text-[15px] mr-2">
+        {Icon && <Icon className="text-xl" />}
+        <span>{label}:</span>
+        {badge > 0 && (
+          <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
+            {badge}
+          </span>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="relative">
       <button
         onClick={onClick}
-        className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 bg-white text-sm text-gray-700"
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[14px] transition-colors duration-200 ${
+          open 
+            ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm" 
+            : "border-gray-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-gray-300"
+        }`}
       >
-        {label}
+        {Icon && <Icon className={`text-[16px] ${open ? "text-blue-600" : "text-slate-500"}`} />}
+        <span className="font-medium">{label}</span>
         {badge > 0 && (
-          <span className="ml-1 bg-gray-700 text-white text-xs px-2 rounded-full">
+          <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1 min-w-[20px] text-center">
             {badge}
           </span>
         )}
-        <i className={`bi bi-chevron-${open ? "up" : "down"} text-xs`} />
+        {open ? (
+          <IoChevronUpOutline className="text-sm ml-1 text-blue-600" />
+        ) : (
+          <IoChevronDownOutline className="text-sm ml-1 text-slate-500" />
+        )}
       </button>
 
       {open && (
         <div
-          className={`absolute top-[46px] left-0 ${width}
-            bg-white border border-gray-300 rounded-xl shadow-lg p-4 z-50
+          className={`absolute top-[52px] left-0 ${width}
+            bg-white border border-gray-200 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-4 z-50
             ${scroll ? "max-h-[360px] overflow-y-auto" : ""}`}
         >
           {children}
@@ -70,22 +106,6 @@ function Checkbox({ label, checked, onChange }) {
       />
       <span className="text-sm text-gray-700">{label}</span>
     </label>
-  );
-}
-
-function ApplyClear({ onApply, onClear }) {
-  return (
-    <div className="flex justify-between items-center pt-4 mt-3 border-t border-gray-200">
-      <button onClick={onClear} className="text-sm text-gray-500">
-        Clear all
-      </button>
-      <button
-        onClick={onApply}
-        className="bg-gray-800 text-white px-4 py-1.5 rounded-md text-sm"
-      >
-        Apply
-      </button>
-    </div>
   );
 }
 
@@ -136,21 +156,25 @@ const SPECIALISATIONS = [
   "MBA – Marketing & Brand Management",
 ];
 
+const LEARNING_MODES = [
+  "On-Campus",
+  "100% Online",
+  "Hybrid",
+  "Industry Integrated"
+];
+
 /* ================= MAIN COMPONENT ================= */
 
 const DegreesFilterSection = () => {
   const ref = useRef(null);
   const [open, setOpen] = useState(null);
 
-  /* TEMP STATES */
-  const [tLevel, setTLevel] = useState("");
-  const [tDegree, setTDegree] = useState("");
-  const [tSpecs, setTSpecs] = useState([]);
-
   /* APPLIED STATES */
   const [level, setLevel] = useState("");
   const [degree, setDegree] = useState("");
+  const [mode, setMode] = useState("");
   const [specs, setSpecs] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [page, setPage] = useState(1);
 
@@ -166,13 +190,18 @@ const DegreesFilterSection = () => {
     setList(
       list.includes(s) ? list.filter((v) => v !== s) : [...list, s]
     );
+    setPage(1); // Reset to first page when filtering
   };
 
   const filteredData = degreesData.filter((d) => {
     const l = !level || d.level === level;
     const deg = !degree || d.degree === degree;
+    const md = !mode || d.learningMode === mode;
     const sp = specs.length === 0 || specs.includes(d.specialisation);
-    return l && deg && sp;
+    const sq = !searchQuery || 
+               d.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+               d.university.toLowerCase().includes(searchQuery.toLowerCase());
+    return l && deg && md && sp && sq;
   });
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
@@ -182,49 +211,31 @@ const DegreesFilterSection = () => {
   );
 
   const filterCount =
-    (level ? 1 : 0) + (degree ? 1 : 0) + specs.length;
+    (level ? 1 : 0) + (degree ? 1 : 0) + (mode ? 1 : 0) + specs.length;
 
   return (
     <section className="bg-white py-10">
       <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
-        <h2 className="text-[24px] font-semibold mb-6">
-          Find the right degree for you
+        <h2 className="text-[14.5px] text-gray-500 font-semibold mb-4">
+          Whether you are looking for the immersive energy of on-campus learning or the ultimate flexibility of a 100% online degree, discover the path that fits your life-not the other way around.
         </h2>
 
-        {/* FILTER BAR */}
-        <div ref={ref} className="flex flex-wrap items-center gap-3 mb-8">
-          {/* MASTER FILTER */}
+        {/* FILTER BAR CONTAINER */}
+        <div 
+          ref={ref} 
+          className="bg-white border border-gray-200 rounded-2xl shadow-sm px-6 py-4 flex flex-wrap items-center gap-3  w-full"
+        >
+          {/* MASTER FILTER LABEL */}
           <FilterPill
+            icon={FiFilter}
             label="Filters"
             badge={filterCount}
-            open={open === "all"}
-            onClick={() => setOpen(open === "all" ? null : "all")}
-          >
-            {filterCount === 0 ? (
-              <p className="text-sm text-gray-500">No filters applied</p>
-            ) : (
-              <>
-                {level && <p className="text-sm">• {level}</p>}
-                {degree && <p className="text-sm">• {degree}</p>}
-                {specs.map((s) => (
-                  <p key={s} className="text-sm">• {s}</p>
-                ))}
-                <button
-                  className="mt-4 text-sm text-red-600"
-                  onClick={() => {
-                    setTLevel(""); setTDegree(""); setTSpecs([]);
-                    setLevel(""); setDegree(""); setSpecs([]);
-                    setPage(1); setOpen(null);
-                  }}
-                >
-                  Clear all filters
-                </button>
-              </>
-            )}
-          </FilterPill>
+            isLabel={true}
+          />
 
           {/* PROGRAM LEVEL */}
           <FilterPill
+            icon={IoLayersOutline}
             label="Program Level"
             open={open === "level"}
             onClick={() => setOpen(open === "level" ? null : "level")}
@@ -233,38 +244,79 @@ const DegreesFilterSection = () => {
               <Radio
                 key={l}
                 label={l}
-                checked={tLevel === l}
-                onChange={() => { setTLevel(l); setTDegree(""); }}
+                checked={level === l}
+                onChange={() => { setLevel(l); setDegree(""); setPage(1); }}
               />
             ))}
-            <ApplyClear
-              onApply={() => { setLevel(tLevel); setDegree(""); setPage(1); setOpen(null); }}
-              onClear={() => { setTLevel(""); setLevel(""); setTDegree(""); setDegree(""); }}
-            />
+            {level && (
+              <div className="pt-3 mt-3 border-t border-gray-200">
+                <button 
+                  onClick={() => { setLevel(""); setDegree(""); setPage(1); }} 
+                  className="text-sm font-medium text-red-600 hover:text-red-700"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
           </FilterPill>
 
           {/* DEGREE */}
           <FilterPill
+            icon={IoSchoolOutline}
             label="Degree"
             open={open === "degree"}
             onClick={() => setOpen(open === "degree" ? null : "degree")}
           >
-            {(DEGREE_MAP[tLevel || level] || []).map((d) => (
+            {(DEGREE_MAP[level] || []).map((d) => (
               <Radio
                 key={d}
                 label={d}
-                checked={tDegree === d}
-                onChange={() => setTDegree(d)}
+                checked={degree === d}
+                onChange={() => { setDegree(d); setPage(1); }}
               />
             ))}
-            <ApplyClear
-              onApply={() => { setDegree(tDegree); setPage(1); setOpen(null); }}
-              onClear={() => { setTDegree(""); setDegree(""); }}
-            />
+            {degree && (
+              <div className="pt-3 mt-3 border-t border-gray-200">
+                <button 
+                  onClick={() => { setDegree(""); setPage(1); }} 
+                  className="text-sm font-medium text-red-600 hover:text-red-700"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
+          </FilterPill>
+
+          {/* LEARNING MODE */}
+          <FilterPill
+            icon={IoLaptopOutline}
+            label="Learning Mode"
+            open={open === "mode"}
+            onClick={() => setOpen(open === "mode" ? null : "mode")}
+          >
+            {LEARNING_MODES.map((m) => (
+              <Radio
+                key={m}
+                label={m}
+                checked={mode === m}
+                onChange={() => { setMode(m); setPage(1); }}
+              />
+            ))}
+            {mode && (
+              <div className="pt-3 mt-3 border-t border-gray-200">
+                <button 
+                  onClick={() => { setMode(""); setPage(1); }} 
+                  className="text-sm font-medium text-red-600 hover:text-red-700"
+                >
+                  Clear
+                </button>
+              </div>
+            )}
           </FilterPill>
 
           {/* SPECIALISATIONS */}
           <FilterPill
+            icon={IoStarOutline}
             label="Specialisations"
             width="w-[380px]"
             scroll
@@ -275,35 +327,64 @@ const DegreesFilterSection = () => {
               <Checkbox
                 key={s}
                 label={s}
-                checked={tSpecs.includes(s)}
-                onChange={() => toggleSpec(s, tSpecs, setTSpecs)}
+                checked={specs.includes(s)}
+                onChange={() => toggleSpec(s, specs, setSpecs)}
               />
             ))}
-            <ApplyClear
-              onApply={() => { setSpecs(tSpecs); setPage(1); setOpen(null); }}
-              onClear={() => { setTSpecs([]); setSpecs([]); }}
-            />
+            {specs.length > 0 && (
+              <div className="pt-3 mt-3 border-t border-gray-200">
+                <button 
+                  onClick={() => { setSpecs([]); setPage(1); }} 
+                  className="text-sm font-medium text-red-600 hover:text-red-700"
+                >
+                  Clear selections
+                </button>
+              </div>
+            )}
           </FilterPill>
 
-          <button className="ml-auto border border-gray-800 text-gray-800 px-4 py-2 rounded-lg text-sm font-medium">
-            Email me info
-          </button>
+          {/* CLEAR ALL BUTTON */}
+          {filterCount > 0 && (
+            <button
+              className="text-sm font-medium text-red-600 hover:text-red-700 px-2 transition-colors duration-200"
+              onClick={() => {
+                setLevel(""); setDegree(""); setMode(""); setSpecs([]);
+                setPage(1); setOpen(null);
+              }}
+            >
+              Clear filters
+            </button>
+          )}
+
+          {/* SEARCH BAR */}
+          <div className="ml-auto relative w-full sm:w-auto">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <IoSearchOutline className="text-gray-400 text-[18px]" />
+            </div>
+            <input
+              type="text"
+              className="w-full sm:w-[200px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-slate-50 text-[14px] text-slate-700 placeholder-slate-400 outline-none  transition-colors"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}
+            />
+          </div>
         </div>
 
         {/* GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 h-[718px]">
-          {currentItems.map((d) => (
-            <DegreeCard key={d.id} degree={d} />
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 h-[718px]">
+          {currentItems.map((d, idx) => (
+            <DegreeCard key={d.id} degree={d} index={idx} />
           ))}
-        </div>
+        </div> */}
 
-        {totalPages > 1 && (
+        {/* {totalPages > 1 && (
           <Pagination
             currentPage={page}
             totalPages={totalPages}
             onPageChange={setPage}
           />
-        )}
+        )} */}
       </div>
     </section>
   );
