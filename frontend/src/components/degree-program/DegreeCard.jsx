@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IoSchoolOutline, IoTimeOutline } from 'react-icons/io5';
 import universityLogo from "../../assets/logos/universityLogo.png";
 
@@ -33,14 +34,15 @@ const CARD_THEMES = [
   }
 ];
 
-export default function DegreeCard({ degree, index = 0, onCardClick = () => {} }) {
+export default function DegreeCard({ degree, index = 0 }) {
+  const navigate = useNavigate();
   if (!degree) return null;
 
   const theme = CARD_THEMES[index % 3];
 
-  // Handle click on card: call parent handler, prevent propagation if needed
+  // Handle click on card: navigate to detail page in the same tab
   const handleCardClick = () => {
-    onCardClick(degree);
+    navigate(`/degree/${degree.id}`);
   };
 
   return (
@@ -63,7 +65,7 @@ export default function DegreeCard({ degree, index = 0, onCardClick = () => {} }
             </div>
             {/* University Logo */}
             <img
-              src={degree.logo || universityLogo}
+              src={degree.image || degree.logo || universityLogo}
               alt={degree.university}
               className="w-[32px] h-[35px] object-contain flex-shrink-0"
               onError={(e) => {
@@ -77,7 +79,7 @@ export default function DegreeCard({ degree, index = 0, onCardClick = () => {} }
           <div className="space-y-2">
             {/* Subject Category */}
             <span className={`text-xs font-bold uppercase tracking-wider block ${theme.text}`}>
-              {degree.degreeType}
+              {degree.level || degree.degreeType}
             </span>
             {/* Course Title */}
             <h3 className="font-extrabold text-slate-800 text-lg leading-snug line-clamp-3">
@@ -90,7 +92,7 @@ export default function DegreeCard({ degree, index = 0, onCardClick = () => {} }
             {/* Level */}
             <div className="text-slate-900 text-base font-medium flex items-center gap-2">
               <IoSchoolOutline className="text-slate-700 text-[18px]" />
-              <span>{degree.degreeType}</span>
+              <span>{degree.level || degree.degreeType}</span>
             </div>
 
             {/* Duration */}
@@ -112,7 +114,7 @@ export default function DegreeCard({ degree, index = 0, onCardClick = () => {} }
         {/* Header: Category + Plus Circle Icon */}
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-white/95">
-            {degree.degreeType}
+            {degree.level || degree.degreeType}
           </span>
           <div className="w-7 h-7 rounded-full border border-white/40 flex items-center justify-center">
             <i className="bi bi-plus-lg text-xs"></i>
@@ -132,10 +134,10 @@ export default function DegreeCard({ degree, index = 0, onCardClick = () => {} }
             <div className="text-sm font-semibold">{degree.duration}</div>
           </div>
 
-          {/* Start Date / Deadline */}
+          {/* Pace / Deadline */}
           <div>
-            <div className="text-[10px] uppercase font-bold tracking-wider text-white/60">Deadline:</div>
-            <div className="text-sm font-semibold">{degree.deadline}</div>
+            <div className="text-[10px] uppercase font-bold tracking-wider text-white/60">{degree.pace ? "Pace:" : "Deadline:"}</div>
+            <div className="text-sm font-semibold">{degree.pace || degree.deadline}</div>
           </div>
         </div>
 

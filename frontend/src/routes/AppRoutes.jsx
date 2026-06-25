@@ -20,6 +20,8 @@ import SuperAdminDashboard from "../pages/SuperAdminDashboard";
 import NotFound from "../pages/NotFound";
 import ChooseSignup from "../components/signup/ChooseSignup";
 import DegreePage from "../pages/DegreePage";
+import DegreeDetailPage from "../pages/DegreeDetailPage";
+import FindUsPage from "../pages/FindUsPage";
 
 const AppRoutes = () => {
   return (
@@ -36,6 +38,8 @@ const AppRoutes = () => {
       <Route path='/choose-signup' element={<ChooseSignup />} />
       <Route path="/forget-password" element={<ForgetPassword />} />
       <Route path='/degrees' element={<DegreePage />}/>
+      <Route path='/degree/:id' element={<DegreeDetailPage />}/>
+      <Route path="/locate-us" element={<FindUsPage />} />
 
       {/* Protected Routes (Any logged in user) */}
       <Route element={<ProtectedRoute />}>

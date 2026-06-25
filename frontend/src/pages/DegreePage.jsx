@@ -22,6 +22,7 @@ import IntegratedDegreesSection from "../components/degree-program/section/Integ
 const DegreePage = () => {
   const bannerRef = useRef(null);
   const [showStickyHeader, setShowStickyHeader] = useState(false);
+  const [activeLevel, setActiveLevel] = useState("");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,15 +61,13 @@ const DegreePage = () => {
       {/* STICKY HEADER (appears on scroll) */}
       {/* <StickyDegreeHeader visible={showStickyHeader} /> */}
 
-      {/* DEGREE LIST */}
-      <DegreesFilterSection />
-
-      <Master />
-      <Bachlor />
-
-      <Phd />
-
-      <IntegratedDegreesSection />
+      
+      <DegreesFilterSection onLevelChange={setActiveLevel}>
+        {(!activeLevel || activeLevel === "Masters" || activeLevel === "MBA") && <Master />}
+        {(!activeLevel || activeLevel.includes("Bachelor") || activeLevel.includes("UG Degree")) && <Bachlor />}
+        {(!activeLevel || activeLevel === "Doctoral (PhD)") && <Phd />}
+        {(!activeLevel || activeLevel.includes("Integrated")) && <IntegratedDegreesSection />}
+      </DegreesFilterSection>
 
       {/* <BrowseDegreesSection /> */}
       {/* <DegreeProgressSection />

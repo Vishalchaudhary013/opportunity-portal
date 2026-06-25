@@ -165,7 +165,7 @@ const LEARNING_MODES = [
 
 /* ================= MAIN COMPONENT ================= */
 
-const DegreesFilterSection = () => {
+const DegreesFilterSection = ({ children, onLevelChange }) => {
   const ref = useRef(null);
   const [open, setOpen] = useState(null);
 
@@ -213,8 +213,13 @@ const DegreesFilterSection = () => {
   const filterCount =
     (level ? 1 : 0) + (degree ? 1 : 0) + (mode ? 1 : 0) + specs.length;
 
+  // Only show the generic grid if we are filtering by something other than just 'level',
+  // or if we have a search query. The 'level' alone is handled by showing the specific section.
+  const isFiltering = (degree ? 1 : 0) + (mode ? 1 : 0) + specs.length > 0 || searchQuery.trim() !== "";
+
   return (
-    <section className="bg-white py-10">
+    <>
+      <section className="bg-white py-10">
       <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4">
         <h2 className="text-[14.5px] text-gray-500 font-semibold mb-4">
           Whether you are looking for the immersive energy of on-campus learning or the ultimate flexibility of a 100% online degree, discover the path that fits your life-not the other way around.
@@ -245,13 +250,23 @@ const DegreesFilterSection = () => {
                 key={l}
                 label={l}
                 checked={level === l}
-                onChange={() => { setLevel(l); setDegree(""); setPage(1); }}
+                onChange={() => { 
+                  setLevel(l); 
+                  setDegree(""); 
+                  setPage(1); 
+                  if (onLevelChange) onLevelChange(l);
+                }}
               />
             ))}
             {level && (
               <div className="pt-3 mt-3 border-t border-gray-200">
                 <button 
-                  onClick={() => { setLevel(""); setDegree(""); setPage(1); }} 
+                  onClick={() => { 
+                    setLevel(""); 
+                    setDegree(""); 
+                    setPage(1); 
+                    if (onLevelChange) onLevelChange("");
+                  }} 
                   className="text-sm font-medium text-red-600 hover:text-red-700"
                 >
                   Clear
@@ -350,6 +365,7 @@ const DegreesFilterSection = () => {
               onClick={() => {
                 setLevel(""); setDegree(""); setMode(""); setSpecs([]);
                 setPage(1); setOpen(null);
+                if (onLevelChange) onLevelChange("");
               }}
             >
               Clear filters
@@ -371,22 +387,35 @@ const DegreesFilterSection = () => {
           </div>
         </div>
 
-        {/* GRID */}
-        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 h-[718px]">
-          {currentItems.map((d, idx) => (
-            <DegreeCard key={d.id} degree={d} index={idx} />
-          ))}
-        </div> */}
+        {isFiltering && (
+          <div className="mt-8">
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 overflow-y-auto pb-4">
+                {currentItems.length > 0 ? (
+                  currentItems.map((d, idx) => (
+                    <DegreeCard key={d.id} degree={d} index={idx} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-10 text-gray-500 text-lg">
+                    No degrees found matching your filters.
+                  </div>
+                )}
+              </div>
 
-        {/* {totalPages > 1 && (
-          <Pagination
-            currentPage={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-          />
-        )} */}
+              {totalPages > 1 && (
+                <Pagination
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={setPage}
+                />
+              )}
+            </>
+          </div>
+        )}
       </div>
     </section>
+    {!isFiltering && children}
+    </>
   );
 };
 

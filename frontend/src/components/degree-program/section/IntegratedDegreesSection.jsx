@@ -4,7 +4,7 @@ import DegreeCard from '../DegreeCard'
 import { degreesData } from '../degreesData'
 
 const IntegratedDegreesSection = () => {
-  const integratedDegrees = degreesData.filter(d => d.degreeType === 'Integrated').slice(0, 4);
+  const integratedDegrees = degreesData.filter(d => d.level === "Integrated").slice(0, 4);
 
   return (
    <div className='py-10 bg-gray-100'>

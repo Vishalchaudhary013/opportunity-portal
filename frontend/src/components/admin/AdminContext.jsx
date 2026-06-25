@@ -19,6 +19,10 @@ const initialForm = {
   durationUnit: "Months",
   internshipType: "",
   workingHours: "",
+  university: "",
+  degreeType: "",
+  fees: "",
+  learningMode: "",
 
   //  Program Timeline 
   applicationsOpenDate: "",
@@ -246,14 +250,14 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
 
   const sorted = useMemo(() => {
     const userId = String(user?.id || user?._id || "");
-    const opportunityTypes = ["Internship", "Global Program", "Jobs", "Bootcamps", "Masterclasses", "Degree Programs", "PG Programs"];
+    const opportunityTypes = ["Internship", "Apprenticeships", "Jobs", "Mentorships", "Bootcamps", "Certificate Programs", "Bachelors Degrees", "Post Graduate Programs", "Masters Degrees", "Doctorates & PhD", "Integrated Degrees", "Global Program"];
     return [...opportunities]
       .filter((item) => resolveOwnerId(item) === userId && opportunityTypes.includes(item.type))
       .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
   }, [opportunities, user?.id]);
 
   const allSystemOpportunities = useMemo(() => {
-    const opportunityTypes = ["Internship", "Global Program", "Jobs", "Bootcamps", "Masterclasses", "Degree Programs", "PG Programs"];
+    const opportunityTypes = ["Internship", "Apprenticeships", "Jobs", "Mentorships", "Bootcamps", "Certificate Programs", "Bachelors Degrees", "Post Graduate Programs", "Masters Degrees", "Doctorates & PhD", "Integrated Degrees", "Global Program"];
     return [...opportunities]
       .filter((item) => opportunityTypes.includes(item.type) && !isOpportunityClosed(item))
       .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || a.updatedAt || 0).getTime());
@@ -263,7 +267,7 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
     if (activeSection === "All Application") {
       return allSystemOpportunities;
     }
-    const opportunityTypes = ["Internship", "Global Program", "Jobs", "Bootcamps", "Masterclasses", "Degree Programs", "PG Programs"];
+    const opportunityTypes = ["Internship", "Apprenticeships", "Jobs", "Mentorships", "Bootcamps", "Certificate Programs", "Bachelors Degrees", "Post Graduate Programs", "Masters Degrees", "Doctorates & PhD", "Integrated Degrees", "Global Program"];
     if (opportunityTypes.includes(activeSection)) {
       return sorted.filter((item) => item.type === activeSection && !isOpportunityClosed(item));
     }
@@ -463,7 +467,19 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
   };
 
   const handleOpenCreateForm = () => {
-    const typeMap = { "Global Program": "Global Program", Jobs: "Jobs", Bootcamps: "Bootcamps", Masterclasses: "Masterclasses", "Degree Programs": "Degree Programs", "PG Programs": "PG Programs" };
+    const typeMap = {
+      "Global Program": "Global Program",
+      Jobs: "Jobs",
+      Apprenticeships: "Apprenticeships",
+      Mentorships: "Mentorships",
+      Bootcamps: "Bootcamps",
+      "Certificate Programs": "Certificate Programs",
+      "Bachelors Degrees": "Bachelors Degrees",
+      "Post Graduate Programs": "Post Graduate Programs",
+      "Masters Degrees": "Masters Degrees",
+      "Doctorates & PhD": "Doctorates & PhD",
+      "Integrated Degrees": "Integrated Degrees"
+    };
     const nextType = typeMap[activeSection] || "Internship";
     setForm({ ...initialForm, type: nextType });
     setEditingId(null);
@@ -622,7 +638,7 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
     setShowOpportunityForm(false);
     setRequiredSkillInputs(["", "", ""]);
     setBenefitInputs(["", "", "", ""]);
-    const opportunityTypes = ["Internship", "Global Program", "Jobs", "Bootcamps", "Masterclasses", "Degree Programs", "PG Programs"];
+    const opportunityTypes = ["Internship", "Apprenticeships", "Jobs", "Mentorships", "Bootcamps", "Certificate Programs", "Post Graduate Programs", "Masters Degrees", "Integrated Degrees", "Global Program"];
     if (opportunityTypes.includes(section)) { setForm((prev) => ({ ...prev, type: section })); }
     setFilterOpportunityId(null);
   };

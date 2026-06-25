@@ -216,7 +216,7 @@ const OpportunitiesTable = () => {
     </div>
   ) : null;
 
-  const showOpportunitiesTable = isInternshipPanel || isGlobalProgramPanel || isJobsPanel || isBootcampsPanel || isMasterclassesPanel || isDegreeProgramsPanel || isPGProgramsPanel || isClosedApplicationPanel || isAllApplicationPanel;
+  const showOpportunitiesTable = ["Internship", "Apprenticeships", "Jobs", "Mentorships", "Bootcamps", "Certificate Programs", "Bachelors Degrees", "Post Graduate Programs", "Masters Degrees", "Doctorates & PhD", "Integrated Degrees", "Global Program"].includes(activeSection) || isClosedApplicationPanel || isAllApplicationPanel;
 
   if (!showOpportunitiesTable) return null;
 
@@ -232,19 +232,29 @@ const OpportunitiesTable = () => {
                               ? "Global Program Opportunities"
                               : activeSection === "Jobs"
                                 ? "Job Opportunities"
-                                : activeSection === "Bootcamps"
-                                  ? "Bootcamp Opportunities"
-                                  : activeSection === "Masterclasses"
-                                    ? "Masterclass Opportunities"
-                                    : activeSection === "Degree Programs"
-                                      ? "Degree Program Opportunities"
-                                      : activeSection === "PG Programs"
-                                        ? "PG Program Opportunities"
-                                        : activeSection === "Closed Application"
-                                          ? "Closed Application"
-                                          : activeSection === "All Application"
-                                            ? "All Published Opportunities"
-                                            : "Application Forms"}
+                                : activeSection === "Apprenticeships"
+                                  ? "Apprenticeship Opportunities"
+                                  : activeSection === "Mentorships"
+                                    ? "Mentorship Opportunities"
+                                    : activeSection === "Bootcamps"
+                                      ? "Bootcamp Opportunities"
+                                      : activeSection === "Certificate Programs"
+                                        ? "Certificate Program Opportunities"
+                                        : activeSection === "Bachelors Degrees"
+                                          ? "Bachelor's Degree Opportunities"
+                                          : activeSection === "Post Graduate Programs"
+                                            ? "Post Graduate Program Opportunities"
+                                            : activeSection === "Masters Degrees"
+                                              ? "Masters' Degree Opportunities"
+                                              : activeSection === "Doctorates & PhD"
+                                                ? "Doctorate & PhD Opportunities"
+                                                : activeSection === "Integrated Degrees"
+                                                  ? "Integrated Degree Opportunities"
+                                              : activeSection === "Closed Application"
+                                                ? "Closed Application"
+                                                : activeSection === "All Application"
+                                                  ? "All Published Opportunities"
+                                                  : "Application Forms"}
                         </h2>
                         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
                           {!isClosedApplicationPanel && !isAllApplicationPanel && (
@@ -260,15 +270,25 @@ const OpportunitiesTable = () => {
                                     ? "Create Global Program"
                                     : activeSection === "Jobs"
                                       ? "Create Job"
-                                      : activeSection === "Bootcamps"
-                                        ? "Create Bootcamp"
-                                        : activeSection === "Masterclasses"
-                                          ? "Create Masterclass"
-                                          : activeSection === "Degree Programs"
-                                            ? "Create Degree Program"
-                                            : activeSection === "PG Programs"
-                                              ? "Create PG Program"
-                                              : "Create Opportunity"}
+                                      : activeSection === "Apprenticeships"
+                                        ? "Create Apprenticeship"
+                                        : activeSection === "Mentorships"
+                                          ? "Create Mentorship"
+                                          : activeSection === "Bootcamps"
+                                            ? "Create Bootcamp"
+                                            : activeSection === "Certificate Programs"
+                                              ? "Create Certificate Program"
+                                              : activeSection === "Bachelors Degrees"
+                                                ? "Create Bachelor's Degree"
+                                                : activeSection === "Post Graduate Programs"
+                                                  ? "Create PG Program"
+                                                  : activeSection === "Masters Degrees"
+                                                    ? "Create Masters' Degree"
+                                                    : activeSection === "Doctorates & PhD"
+                                                      ? "Create Doctorate/PhD"
+                                                      : activeSection === "Integrated Degrees"
+                                                        ? "Create Integrated Degree"
+                                                    : "Create Opportunity"}
                               </button>
                               {selectedIds.length > 0 && (
                                 <button

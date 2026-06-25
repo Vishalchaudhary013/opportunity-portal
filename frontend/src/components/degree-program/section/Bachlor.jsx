@@ -4,10 +4,10 @@ import DegreeCard from '../DegreeCard'
 import { degreesData } from '../degreesData'
 
 const Bachlor = () => {
-  const bachelorDegrees = degreesData.filter(d => d.degreeType === 'Bachelor').slice(0, 4);
+  const bachelorDegrees = degreesData.filter(d => d.level === "Bachelor's").slice(0, 4);
 
   return (
-    <section className="py-10 bg-slate-50">
+    <section className="py-10 bg-slate-100">
       <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto">
         <SectionTitle title={"Bachelor’s Degrees"} subtitle={"4-Year undergraduate programs"} viewAllLink="/bachelors-degrees"/>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">

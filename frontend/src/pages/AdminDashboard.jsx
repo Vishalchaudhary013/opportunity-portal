@@ -86,33 +86,40 @@ const AdminDashboardContent = () => {
 
   const menuItems = [
     { key: "Internship", label: "Internships" },
-    { key: "Global Program", label: "Global Programs" },
+    { key: "Apprenticeships", label: "Apprenticeships" },
     { key: "Jobs", label: "Jobs" },
-    { key: "Bootcamps", label: "Bootcamps" },
-    { key: "Masterclasses", label: "Masterclasses" },
-    { key: "Degree Programs", label: "Degree Programs" },
-    { key: "PG Programs", label: "PG Programs" },
+    { key: "Mentorships", label: "Industry Mentorships" },
+    { key: "Bootcamps", label: "Workshops & Bootcamps" },
+    { key: "Certificate Programs", label: "Certificate Programs" },
+    { key: "Bachelors Degrees", label: "Bachelor's Degrees" },
+    { key: "Post Graduate Programs", label: "Post Graduate Programs" },
+    { key: "Masters Degrees", label: "Masters' Degrees" },
+    { key: "Doctorates & PhD", label: "Doctorates & PhD" },
+    { key: "Integrated Degrees", label: "Integrated Degrees" },
+    { key: "Global Program", label: "Global Programs" },
     { key: "Closed Application", label: "Closed Application" },
   ];
-
-  
 
   if (isSuperDashboard && isSuperAdmin) {
     menuItems.splice(
       0,
       menuItems.length,
       { key: "Overview", label: "Overview" },
-      // { key: "Post Opportunity", label: "Post Opportunity" },
-
       { key: "Admins", label: "Admins" },
       { key: "Users", label: "Users" },
       { key: "Internship", label: "Internships" },
-      { key: "Global Program", label: "Global Programs" },
+      { key: "Apprenticeships", label: "Apprenticeships" },
       { key: "Jobs", label: "Jobs" },
-      { key: "Bootcamps", label: "Bootcamps" },
-      { key: "Masterclasses", label: "Masterclasses" },
-      { key: "Degree Programs", label: "Degree Programs" },
-      { key: "PG Programs", label: "PG Programs" },
+      { key: "Mentorships", label: "Industry Mentorships" },
+      { key: "Bootcamps", label: "Workshops & Bootcamps" },
+      { key: "Certificate Programs", label: "Certificate Programs" },
+      { key: "Bachelors Degrees", label: "Bachelor's Degrees" },
+      { key: "Post Graduate Programs", label: "Post Graduate Programs" },
+      { key: "Masters Degrees", label: "Masters' Degrees" },
+      { key: "Doctorates & PhD", label: "Doctorates & PhD" },
+      { key: "Integrated Degrees", label: "Integrated Degrees" },
+      { key: "Global Program", label: "Global Programs" },
+      { key: "All Application", label: "All Application" },
       { key: "Closed Application", label: "Closed Application" },
     );
   }
@@ -164,7 +171,7 @@ const AdminDashboardContent = () => {
         </header>
 
         <div className="w-full px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 flex-1 min-h-0">
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[220px_minmax(0,1fr)] xl:gap-5 h-full">
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-5 h-full">
             <AdminSidebar />
             <main className="min-w-0 space-y-4 sm:space-y-5 h-full overflow-y-auto custom-scrollbar pr-2">
               {!isSuperDashboard && isImpersonating && (

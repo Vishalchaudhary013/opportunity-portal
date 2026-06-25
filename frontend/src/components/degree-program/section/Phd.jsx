@@ -4,7 +4,7 @@ import DegreeCard from '../DegreeCard'
 import { degreesData } from '../degreesData'
 
 const Phd = () => {
-  const phdDegrees = degreesData.filter(d => d.degreeType === 'PhD').slice(0, 4);
+  const phdDegrees = degreesData.filter(d => d.level === "Doctorate").slice(0, 4);
 
   return (
     <div className='py-10 '>

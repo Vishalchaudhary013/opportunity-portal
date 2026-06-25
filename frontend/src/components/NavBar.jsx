@@ -6,6 +6,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 import { IoHomeOutline, IoLanguageSharp, IoLocationSharp } from "react-icons/io5";
 import { FaLocationArrow } from "react-icons/fa6";
 import { Home } from "lucide-react";
+
 const NavBar = () => {
   const [showExplore, setShowExplore] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -124,52 +125,13 @@ const NavBar = () => {
                   </div>
 
                   {/* Content */}
-                  <div className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1">
+                  <button 
+                    onClick={() => navigate("/locate-us")}
+                    className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 transition-colors outline-none"
+                  >
                     <IoLocationSharp size={16} />
-                    <select
-                      className="outline-none pr-3 bg-transparent cursor-pointer"
-                      value={new URLSearchParams(location.search).get("location") || ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        const currentPath = location.pathname;
-                        if (val) {
-                          navigate(`${currentPath}?location=${encodeURIComponent(val)}`);
-                        } else {
-                          navigate(currentPath);
-                        }
-                      }}
-                    >
-                      <option value="">Locate</option>
-                      {/* <option value="Andhra Pradesh">Andhra Pradesh</option>
-                      <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                      <option value="Assam">Assam</option>
-                      <option value="Bihar">Bihar</option>
-                      <option value="Chhattisgarh">Chhattisgarh</option>
-                      <option value="Goa">Goa</option>
-                      <option value="Gujarat">Gujarat</option>
-                      <option value="Haryana">Haryana</option>
-                      <option value="Himachal Pradesh">Himachal Pradesh</option>
-                      <option value="Jharkhand">Jharkhand</option>
-                      <option value="Karnataka">Karnataka</option>
-                      <option value="Kerala">Kerala</option>
-                      <option value="Madhya Pradesh">Madhya Pradesh</option>
-                      <option value="Maharashtra">Maharashtra</option>
-                      <option value="Manipur">Manipur</option>
-                      <option value="Meghalaya">Meghalaya</option>
-                      <option value="Mizoram">Mizoram</option>
-                      <option value="Nagaland">Nagaland</option>
-                      <option value="Odisha">Odisha</option>
-                      <option value="Punjab">Punjab</option>
-                      <option value="Rajasthan">Rajasthan</option>
-                      <option value="Sikkim">Sikkim</option>
-                      <option value="Tamil Nadu">Tamil Nadu</option>
-                      <option value="Telangana">Telangana</option>
-                      <option value="Tripura">Tripura</option>
-                      <option value="Uttar Pradesh">Uttar Pradesh</option>
-                      <option value="Uttarakhand">Uttarakhand</option>
-                      <option value="West Bengal">West Bengal</option> */}
-                    </select>
-                  </div>
+                    <span className="pr-1 text-[13px] font-medium text-gray-800">Find Us</span>
+                  </button>
                 </li>
                 <li className="flex gap-4 items-center">
                   {user ? (
@@ -318,96 +280,64 @@ const NavBar = () => {
                         {/* COLUMN 1 */}
                         <div>
                           <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Internships & Work
+                            Internships
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">
-                              Internships
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Work Experience
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Campus Ambassador
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Live Projects
-                            </li>
+                            <li className="hover:underline cursor-pointer">Summer Internships</li>
+                            <li className="hover:underline cursor-pointer">Remote Internships</li>
+                            <li className="hover:underline cursor-pointer">Global Internships</li>
+                            <li className="hover:underline cursor-pointer">Paid Internships</li>
                           </ul>
                         </div>
 
                         {/* COLUMN 2 */}
                         <div>
                           <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Master Classes
+                            Apprenticeships
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">
-                              Technology
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Management
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Design
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Marketing
-                            </li>
+                            <li className="hover:underline cursor-pointer">Tech Apprenticeships</li>
+                            <li className="hover:underline cursor-pointer">Management Apprenticeships</li>
+                            <li className="hover:underline cursor-pointer">Finance Apprenticeships</li>
                           </ul>
                         </div>
 
                         {/* COLUMN 3 */}
                         <div>
                           <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Postgraduate Programs
+                            Jobs
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">
-                              PG Diplomas
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Executive Programs
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Hybrid Programs
-                            </li>
+                            <li className="hover:underline cursor-pointer">Full-time Roles</li>
+                            <li className="hover:underline cursor-pointer">Part-time Roles</li>
+                            <li className="hover:underline cursor-pointer">Fresher Jobs</li>
+                            <li className="hover:underline cursor-pointer">Remote Jobs</li>
                           </ul>
                         </div>
 
                         {/* COLUMN 4 */}
                         <div>
                           <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Master Degree
+                            Bootcamps
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">
-                              MBA
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              M.Tech
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              M.Sc
-                            </li>
+                            <li className="hover:underline cursor-pointer">Coding Bootcamps</li>
+                            <li className="hover:underline cursor-pointer">Data Science Bootcamps</li>
+                            <li className="hover:underline cursor-pointer">Design Bootcamps</li>
+                            <li className="hover:underline cursor-pointer">Marketing Bootcamps</li>
                           </ul>
                         </div>
 
                         {/* COLUMN 5 */}
                         <div>
                           <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Global Programs
+                            PG Programs
                           </h4>
                           <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">
-                              Study Abroad
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Global Internships
-                            </li>
-                            <li className="hover:underline cursor-pointer">
-                              Exchange Programs
-                            </li>
+                            <li className="hover:underline cursor-pointer">PG Diplomas</li>
+                            <li className="hover:underline cursor-pointer">Executive Programs</li>
+                            <li className="hover:underline cursor-pointer">Hybrid Programs</li>
+                            <li className="hover:underline cursor-pointer">Online Masters</li>
                           </ul>
                         </div>
                       </div>

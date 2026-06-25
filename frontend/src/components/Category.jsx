@@ -15,16 +15,16 @@ import {
 import { Link } from 'react-router-dom';
 
 const categories = [
-  { id: 1, title: "Internships", count: "3,452", icon: <LuBriefcase size={28} />, colors: { bg: "#EEF2FF", mid: "#818CF8", dark: "#4F46E5" } },
-  { id: 2, title: "Apprenticeships", count: "1,252", icon: <LuWrench size={28} />, colors: { bg: "#FDF4FF", mid: "#E879F9", dark: "#C026D3" } },
-  { id: 3, title: "Jobs", count: "5,485", icon: <LuBuilding2 size={28} />, colors: { bg: "#FFF7ED", mid: "#FDBA74", dark: "#F97316" } },
-  { id: 4, title: "Industry Mentorships", count: "2,841", icon: <LuUserPlus size={28} />, colors: { bg: "#FEFCE8", mid: "#FDE047", dark: "#EAB308" } },
-  { id: 5, title: "Bootcamps", count: "1,052", icon: <LuPresentation size={28} />, colors: { bg: "#F0FDF4", mid: "#86EFAC", dark: "#22C55E" } },
-  { id: 6, title: "Certificate Programs", count: "8,532", icon: <LuAward size={28} />, colors: { bg: "#F0FDFA", mid: "#5EEAD4", dark: "#14B8A6" } },
-  { id: 7, title: "Post Graduate Programs", count: "4,120", icon: <LuGraduationCap size={28} />, colors: { bg: "#FFF1F2", mid: "#FDA4AF", dark: "#E11D48" } },
-  { id: 8, title: "Masters' Degrees", count: "2,305", icon: <LuBookOpen size={28} />, colors: { bg: "#F8FAFC", mid: "#94A3B8", dark: "#475569" } },
-  { id: 9, title: "Integrated Degrees", count: "1,840", icon: <LuLibrary size={28} />, colors: { bg: "#ECFEFF", mid: "#67E8F9", dark: "#06B6D4" } },
-  { id: 10, title: "Global PG Programs", count: "3,210", icon: <LuGlobe size={28} />, colors: { bg: "#F5F3FF", mid: "#A78BFA", dark: "#7C3AED" } },
+  { id: 1, path:"/interships", title: "Internships", count: "3,452", icon: <LuBriefcase size={28} />, colors: { bg: "#EEF2FF", mid: "#818CF8", dark: "#4F46E5" } },
+  { id: 2, title: "Apprenticeships", path:"/apprenticeships", count: "1,252", icon: <LuWrench size={28} />, colors: { bg: "#FDF4FF", mid: "#E879F9", dark: "#C026D3" } },
+  { id: 3, title: "Jobs", path:"/jobs",  count: "5,485", icon: <LuBuilding2 size={28} />, colors: { bg: "#FFF7ED", mid: "#FDBA74", dark: "#F97316" } },
+  { id: 4, title: "Industry Mentorships", path:"/industry-mentorships", count: "2,841", icon: <LuUserPlus size={28} />, colors: { bg: "#FEFCE8", mid: "#FDE047", dark: "#EAB308" } },
+  { id: 5, title: "Bootcamps", path:"/bootcamps", count: "1,052", icon: <LuPresentation size={28} />, colors: { bg: "#F0FDF4", mid: "#86EFAC", dark: "#22C55E" } },
+  { id: 6, title: "Certificate Programs", path:"/certificate-programs", count: "8,532", icon: <LuAward size={28} />, colors: { bg: "#F0FDFA", mid: "#5EEAD4", dark: "#14B8A6" } },
+  { id: 7, title: "Post Graduate Programs", path:"/post-graduate-programs", count: "4,120", icon: <LuGraduationCap size={28} />, colors: { bg: "#FFF1F2", mid: "#FDA4AF", dark: "#E11D48" } },
+  { id: 8, title: "Masters' Degrees", path:"/masters-degrees", count: "2,305", icon: <LuBookOpen size={28} />, colors: { bg: "#F8FAFC", mid: "#94A3B8", dark: "#475569" } },
+  { id: 9, title: "Integrated Degrees" , path:"/integrated-degrees", count: "1,840", icon: <LuLibrary size={28} />, colors: { bg: "#ECFEFF", mid: "#67E8F9", dark: "#06B6D4" } },
+  { id: 10, title: "Global PG Programs", path:"/global-programs", count: "3,210", icon: <LuGlobe size={28} />, colors: { bg: "#F5F3FF", mid: "#A78BFA", dark: "#7C3AED" } },
 ];
 
 const Category = () => {
@@ -43,8 +43,9 @@ const Category = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-10">
             {categories.map((category) => (
-              <div
+              <Link
                 key={category.id}
+                to={category.path}
                 className="group relative overflow-hidden flex flex-col justify-between py-4 px-5 rounded-[12px] transition-transform duration-300 cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-1 "
                 style={{ backgroundColor: category.colors.bg }}
               >
@@ -78,28 +79,28 @@ const Category = () => {
                 {/* <div className="relative z-10 text-white bg-black/10 p-2 rounded-full backdrop-blur-sm transition-transform duration-300 group-hover:scale-110 mr-1 shadow-sm">
               {category.icon}
             </div> */}
-              </div>
+              </Link>
             ))}
-            
+
           </div>
           <div className='flex justify-center '>
 
-              <Link
-                to="/category"
-                className="flex gap-0.5 items-center group"
-              >
-                <div className="font-medium mt-1 text-slate-900 bg-red-600 text-white py-1 px-4 rounded-4xl transition-colors duration-300 ">
-                  View All
-                </div>
+            <Link
+              to="/category"
+              className="flex gap-0.5 items-center group"
+            >
+              <div className="font-medium mt-1 text-slate-900 bg-red-600 text-white py-1 px-4 rounded-4xl transition-colors duration-300 ">
+                View All
+              </div>
 
-                <span className="inline-flex items-center justify-center w-8 h-8 bg-red-600 rounded-full transition-all duration-300  group-hover:translate-x-1.5">
-                  <GoArrowRight size={22} className="text-white" />
-                </span>
-              </Link>
+              <span className="inline-flex items-center justify-center w-8 h-8 bg-red-600 rounded-full transition-all duration-300  group-hover:translate-x-1.5">
+                <GoArrowRight size={22} className="text-white" />
+              </span>
+            </Link>
 
 
 
-            </div>
+          </div>
         </section>
       </div>
     </>

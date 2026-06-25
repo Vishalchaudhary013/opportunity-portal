@@ -247,6 +247,7 @@ const OpportunityForm = () => {
   today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
 
   const minDate = today.toISOString().split("T")[0];
+  const isDegreeType = ["Certificate Programs", "Bachelors Degrees", "Post Graduate Programs", "Masters Degrees", "Doctorates & PhD", "Integrated Degrees", "Degree Programs", "Global Program"].includes(form.type);
 
   return (
     <>
@@ -367,8 +368,8 @@ const OpportunityForm = () => {
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Program Specifics</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                    <span>Internship Title <span className="text-rose-600">*</span></span>
-                    <input name="title" value={form.title} onChange={handleChange} placeholder="e.g. Software Engineer Intern" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
+                    <span>{isDegreeType ? "Program Title" : "Internship Title"} <span className="text-rose-600">*</span></span>
+                    <input name="title" value={form.title} onChange={handleChange} placeholder={isDegreeType ? "e.g. Master of Science in Computer Science" : "e.g. Software Engineer Intern"} className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required />
                   </label>
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
                     <span>Department/Category <span className="text-rose-600">*</span></span>
@@ -398,6 +399,30 @@ const OpportunityForm = () => {
                     <span>Company Location Link</span>
                     <input type="url" name="googleLocationLink" value={form.googleLocationLink} onChange={handleChange} placeholder="https://maps.google.com/..." className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
                   </label>
+
+                  {isDegreeType && (
+                    <>
+                      <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                        <span>University / Institution <span className="text-rose-600">*</span></span>
+                        <input name="university" value={form.university || ''} onChange={handleChange} placeholder="e.g. University of Huddersfield" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" required={isDegreeType} />
+                      </label>
+                      <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                        <span>Degree Type</span>
+                        <input name="degreeType" value={form.degreeType || ''} onChange={handleChange} placeholder="e.g. Bachelor, Master" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
+                      </label>
+                      <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 md:col-span-2">
+                        <span>Learning Mode</span>
+                        <div className="flex flex-wrap gap-4 mt-2">
+                          {["On-Campus", "100% Online", "Hybrid", "Industry Integrated"].map(mode => (
+                            <label key={mode} className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name="learningMode" value={mode} checked={form.learningMode === mode} onChange={handleChange} className="accent-red-600" />
+                              <span>{mode}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                  
                   
 
@@ -519,29 +544,38 @@ const OpportunityForm = () => {
               <div id="section-financials" className="bg-white p-6 rounded-2xl border border-[#E2EAFC] shadow-sm">
                 <h4 className="text-md font-bold text-slate-800 mb-6 uppercase tracking-wider text-xs">Financials & Incentives</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 ">
-                    <span>Stipend Type <span className="text-rose-600">*</span></span>
-                    <div className="flex gap-4 mt-2">
-                      {["Fixed", "Performance-based", "Unpaid"].map(type => (
-                        <label key={type} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="stipendType" value={type} checked={form.stipendType === type} onChange={(e) => { handleChange(e); setForm(prev => ({...prev, isUnpaid: type === "Unpaid", stipend: type === "Unpaid" ? "" : prev.stipend})) }} className="accent-red-600" required />
-                          <span>{type}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  {!form.isUnpaid && (
+                  {isDegreeType ? (
                     <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                      <span>Amount (per month)</span>
-                      <div className="flex gap-2">
-                        <select name="stipendCurrency" value={form.stipendCurrency} onChange={handleChange} className="w-[100px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none">
-                          <option value="INR">INR</option>
-                          <option value="USD">USD</option>
-                        </select>
-                        <input name="stipend" value={form.stipend} onChange={handleChange} placeholder="e.g. 10000" className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
-                      </div>
+                      <span>Program Fees</span>
+                      <input name="fees" value={form.fees || ''} onChange={handleChange} placeholder="e.g. INR 1.20 Lac per year" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
                     </label>
+                  ) : (
+                    <>
+                      <div className="flex flex-col gap-2 text-sm font-semibold text-slate-700 ">
+                        <span>Stipend Type <span className="text-rose-600">*</span></span>
+                        <div className="flex gap-4 mt-2">
+                          {["Fixed", "Performance-based", "Unpaid"].map(type => (
+                            <label key={type} className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name="stipendType" value={type} checked={form.stipendType === type} onChange={(e) => { handleChange(e); setForm(prev => ({...prev, isUnpaid: type === "Unpaid", stipend: type === "Unpaid" ? "" : prev.stipend})) }} className="accent-red-600" required={!isDegreeType} />
+                              <span>{type}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {!form.isUnpaid && (
+                        <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
+                          <span>Amount (per month)</span>
+                          <div className="flex gap-2">
+                            <select name="stipendCurrency" value={form.stipendCurrency} onChange={handleChange} className="w-[100px] border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none">
+                              <option value="INR">INR</option>
+                              <option value="USD">USD</option>
+                            </select>
+                            <input name="stipend" value={form.stipend} onChange={handleChange} placeholder="e.g. 10000" className="flex-1 border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
+                          </div>
+                        </label>
+                      )}
+                    </>
                   )}
 
                   <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
