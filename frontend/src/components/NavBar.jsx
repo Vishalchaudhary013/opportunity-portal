@@ -249,7 +249,7 @@ const NavBar = () => {
                 >
                   {/* EXPLORE BUTTON */}
                   <button
-                    className={`flex items-center gap-1.5 text-sm text-gray-700 border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+                    className={`flex items-center gap-1 text-sm text-gray-700 border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
                   hover:text-red-600 hover:bg-blue-50
                   ${showExplore ? "text-red-600 bg-blue-50" : ""}
                 `}

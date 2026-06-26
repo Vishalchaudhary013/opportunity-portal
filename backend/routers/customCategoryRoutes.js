@@ -8,3 +8,4 @@ router.get('/:id',getCustomCategory)
 router.post("/update-category/:id",updateCustomCategory)
 router.delete('/:id',deleteCustomCategory)
 export default router
+

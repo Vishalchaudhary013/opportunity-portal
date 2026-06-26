@@ -45,7 +45,7 @@ function FilterPill({
     <div className="relative">
       <button
         onClick={onClick}
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-[14px] transition-colors duration-200 ${
+        className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl border text-[14px] transition-colors duration-200 ${
           open 
             ? "border-blue-600 bg-blue-50 text-blue-700 shadow-sm" 
             : "border-gray-200 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:border-gray-300"
@@ -69,7 +69,7 @@ function FilterPill({
         <div
           className={`absolute top-[52px] left-0 ${width}
             bg-white border border-gray-200 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-4 z-50
-            ${scroll ? "max-h-[360px] overflow-y-auto" : ""}`}
+            ${scroll ? "max-h-[360px] overflow-y-auto scrollbar-hide" : ""}`}
         >
           {children}
         </div>
@@ -379,7 +379,7 @@ const DegreesFilterSection = ({ children, onLevelChange }) => {
             </div>
             <input
               type="text"
-              className="w-full sm:w-[200px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-slate-50 text-[14px] text-slate-700 placeholder-slate-400 outline-none  transition-colors"
+              className="w-full sm:w-[250px] pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 bg-slate-50 text-[14px] text-slate-700 placeholder-slate-400 outline-none  transition-colors"
               placeholder="Search..."
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setPage(1); }}

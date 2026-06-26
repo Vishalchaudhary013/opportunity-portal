@@ -789,7 +789,7 @@ const InternshipDetailsPage = () => {
               Job description
             </span>
             <div
-              className={`text-slate-700 mt-3 text-[15px] whitespace-pre-wrap ${isDescriptionExpanded ? "" : "line-clamp-5 overflow-hidden"}`}
+              className={`text-slate-700 mt-3 text-[15px] whitespace-pre-wrap ${isDescriptionExpanded ? "" : "line-clamp-10 overflow-hidden"}`}
             >
               {internship?.aboutProgram && (
                 <div className="mb-6">
