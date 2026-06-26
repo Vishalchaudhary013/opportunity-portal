@@ -75,7 +75,6 @@ const resolveAdminRecipient = async (opportunityDoc) => {
     return null;
   }
 
-  // If populate returned full user details, use them directly.
   if (typeof owner === "object" && owner.email) {
     return owner;
   }
@@ -237,7 +236,7 @@ export const updateApplicationStatus = async (req, res, next) => {
       return;
     }
 
-    // Send notification emails based on status
+    // Send notification emails 
     if (status === "Approved") {
       await sendApplicationSelectionEmail(application);
     } else if (status === "Not Approved") {
@@ -293,13 +292,13 @@ export const exportApplications = async (req, res, next) => {
         const headers = Object.keys(rows[0]);
         const headerRow = worksheet.addRow(headers);
         
-        // Style headers: Bold and centered
+       
         headerRow.eachCell((cell) => {
           cell.font = { bold: true };
           cell.fill = {
             type: 'pattern',
             pattern: 'solid',
-            fgColor: { argb: 'FFE9ECEF' } // Light gray background
+            fgColor: { argb: 'FFE9ECEF' } 
           };
           cell.alignment = { vertical: 'middle', horizontal: 'center' };
           cell.border = {
@@ -338,7 +337,7 @@ export const exportApplications = async (req, res, next) => {
       return;
     }
 
-    // Fallback to xlsx for CSV
+    
     const worksheet = xlsx.utils.json_to_sheet(rows);
     const workbook = xlsx.utils.book_new();
     xlsx.utils.book_append_sheet(workbook, worksheet, "Applications");

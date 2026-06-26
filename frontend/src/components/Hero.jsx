@@ -157,8 +157,8 @@ const Hero = () => {
               onClick={() => setActiveTab(tab)}
               className={`flex-1 whitespace-nowrap px-4 md:px-5 py-3 md:py-4.5 text-[15px] md:text-[18px] font-semibold rounded-t-xl border border-b-0 transition-colors ${
                 activeTab === tab
-                  ? "bg-white text-[#00A9E0] border-[#00A9E0] relative z-10"
-                  : "bg-[#00A9E0] text-white border-transparent hover:bg-[#0096C7]"
+                  ? "bg-red-600 text-white border-[#00A9E0] relative z-10"
+                  : "bg-[#1F2853] text-white border-transparent hover:bg-[]"
               }`}
               style={activeTab === tab ? { marginBottom: "-1px" } : {}}
             >
@@ -195,9 +195,9 @@ const Hero = () => {
 
           <button 
             type="submit"
-            className="bg-[#00A9E0] hover:bg-[#0096C7] transition-colors text-white px-8 py-3 md:py-3.5 rounded-md font-bold tracking-wide whitespace-nowrap"
+            className="bg-[#1F2853] transition-colors text-white px-8 py-3 md:py-3.5 rounded-md font-bold tracking-wide whitespace-nowrap"
           >
-            SEARCH COURSES
+            SEARCH 
           </button>
         </form>
       </div>

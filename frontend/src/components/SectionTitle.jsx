@@ -18,7 +18,7 @@ const SectionTitle = ({ title, subtitle , defination, viewAllLink = "/intership"
       <div className="flex justify-between items-start relative z-10">
         <div className="leading-10">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-[28px] font-[650] text-black leading-snug ">
+            <h2 className="text-[28px] font-[650] text-[#1F2853] leading-snug ">
               {title}
             </h2>
           {defination && (
@@ -50,7 +50,7 @@ const SectionTitle = ({ title, subtitle , defination, viewAllLink = "/intership"
 
         {/* Subtitle */}
         {subtitle && (
-          <p className="text-[16px] md:text-[18px] text-gray-500 font-light">
+          <p className="text-[16px] md:text-[18px] text-gray-600 font-normal">
             {subtitle}
           </p>
         )}

@@ -13,7 +13,7 @@ import {
   LuGlobe
 } from "react-icons/lu";
 import { Link } from 'react-router-dom';
-
+import { RiArrowRightLongLine } from "react-icons/ri";
 const categories = [
   { id: 1, path:"/interships", title: "Internships", count: "3,452", icon: <LuBriefcase size={28} />, colors: { bg: "#EEF2FF", mid: "#818CF8", dark: "#4F46E5" } },
   { id: 2, title: "Apprenticeships", path:"/apprenticeships", count: "1,252", icon: <LuWrench size={28} />, colors: { bg: "#FDF4FF", mid: "#E879F9", dark: "#C026D3" } },
@@ -27,13 +27,14 @@ const categories = [
   { id: 10, title: "Global PG Programs", path:"/global-programs", count: "3,210", icon: <LuGlobe size={28} />, colors: { bg: "#F5F3FF", mid: "#A78BFA", dark: "#7C3AED" } },
 ];
 
+
 const Category = () => {
   return (
     <>
       <div className=''>
         <section className="py-15 w-full max-w-[1350px] px-4 md:px-6 mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3.5">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#1F2853] mb-3.5">
               Your Career Launchpad Starts Here
               {/* Explore <span className="font-light italic text-gray-600">Categories</span> */}
             </h2>
@@ -50,7 +51,7 @@ const Category = () => {
                 style={{ backgroundColor: category.colors.bg }}
               >
                 {/* SVG for cloude*/}
-                <div className="absolute right-0 bottom-0 top-0 w-full pointer-events-none overflow-hidden rounded-r-[12px]">
+                {/* <div className="absolute right-0 bottom-0 top-0 w-full pointer-events-none overflow-hidden rounded-r-[12px]">
                   <svg
                     width="320"
                     height="180"
@@ -63,16 +64,22 @@ const Category = () => {
                       fill={category.colors.dark}
                     />
                   </svg>
-                </div>
+                </div> */}
 
                 {/* Text Content */}
-                <div className="relative z-10 flex flex-col gap-8 justify-between w-full h-full">
+                <div className="relative z-10 flex items-center gap-8 justify-between w-full h-full">
                   <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-900 leading-snug text-left">
                     {category.title}
                   </h3>
-                  <p className="text-[12px] self-end text-gray-700  font-semibold opacity-80 flex items-center gap-3">
-                    {category.count} Programs <GoArrowUpRight size={18} className='mt-0.5' />
-                  </p>
+
+                  <span>
+                    {category.icon}
+                  </span>
+
+
+                  {/* <p className="text-[12px] self-end text-gray-700  font-semibold opacity-80 flex items-center gap-3">
+                    {category.count} Programs <RiArrowRightLongLine size={18} className='mt-0.5' />
+                  </p> */}
                 </div>
 
                 {/* Icon */}
@@ -83,7 +90,7 @@ const Category = () => {
             ))}
 
           </div>
-          <div className='flex justify-center '>
+          {/* <div className='flex justify-center '>
 
             <Link
               to="/category"
@@ -100,7 +107,7 @@ const Category = () => {
 
 
 
-          </div>
+          </div> */}
         </section>
       </div>
     </>

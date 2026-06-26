@@ -3,7 +3,11 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import { CiLocationOn, CiSearch } from "react-icons/ci";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { IoHomeOutline, IoLanguageSharp, IoLocationSharp } from "react-icons/io5";
+import {
+  IoHomeOutline,
+  IoLanguageSharp,
+  IoLocationSharp,
+} from "react-icons/io5";
 import { FaLocationArrow } from "react-icons/fa6";
 import { Home } from "lucide-react";
 
@@ -66,8 +70,12 @@ const NavBar = () => {
     } else {
       // Fallback
       if (langCode === "en") {
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" + window.location.hostname + "; path=/;";
+        document.cookie =
+          "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=" +
+          window.location.hostname +
+          "; path=/;";
       } else {
         document.cookie = `googtrans=/en/${langCode}; path=/;`;
         document.cookie = `googtrans=/en/${langCode}; domain=${window.location.hostname}; path=/;`;
@@ -109,14 +117,26 @@ const NavBar = () => {
             <div className="flex justify-between items-center text-[15px]">
               <ul className="">
                 <li>
-                  <Link to="/" className="text-[16px] font-semibold"><IoHomeOutline size={21} className=" text-red-600"/></Link>
+                  <Link to="/" className="text-[14px] font-semibold">
+                    Home
+                  </Link>
                 </li>
               </ul>
               <ul className="flex items-center gap-5">
                 <li className="text-[13px] font-medium flex items-center gap-2">
-                  <button onClick={() => changeLanguage('en')} className="hover:text-red-600 transition-colors">ENG</button>
+                  <button
+                    onClick={() => changeLanguage("en")}
+                    className="hover:text-red-600 transition-colors"
+                  >
+                    ENG
+                  </button>
                   <span className="text-[12px]">|</span>
-                  <button onClick={() => changeLanguage('hi')} className="hover:text-red-600 transition-colors">HINDI</button>
+                  <button
+                    onClick={() => changeLanguage("hi")}
+                    className="hover:text-red-600 transition-colors"
+                  >
+                    HINDI
+                  </button>
                 </li>
                 <li className="group relative overflow-hidden rounded-lg p-[1.5px]">
                   {/* Rotating border */}
@@ -125,15 +145,271 @@ const NavBar = () => {
                   </div>
 
                   {/* Content */}
-                  <button 
+                  <button
                     onClick={() => navigate("/locate-us")}
                     className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 transition-colors outline-none"
                   >
                     <IoLocationSharp size={16} />
-                    <span className="pr-1 text-[13px] font-medium text-gray-800">Find Us</span>
+                    <span className="pr-1 text-[13px] font-medium text-gray-800">
+                      Find Us
+                    </span>
                   </button>
                 </li>
-                <li className="flex gap-4 items-center">
+               
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto ">
+          <div className="flex items-center justify-between h-[60px]">
+            {/* LEFT SECTION */}
+            <div className="flex items-center ">
+              {/* LOGO */}
+              <div
+                className="flex items-center cursor-pointer"
+                onClick={() => {
+                  if (window.location.pathname === "/") {
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  } else {
+                    navigate("/");
+                  }
+                }}
+              >
+                <span className="font-display font-extrabold text-3xl tracking-tight leading-none transition-colors duration-300 text-[#1F2853]">
+                  edeco
+                </span>
+              </div>
+
+              {/*  EXPLORE DROPDOWN  */}
+            </div>
+
+            <div className="hidden lg:flex items-center mt-0.5">
+              <div
+                className="relative"
+                onMouseEnter={() => setShowExplore(true)}
+                onMouseLeave={() => setShowExplore(false)}
+              >
+                {/* EXPLORE BUTTON */}
+                <button
+                  className={`flex items-center gap-1 text-[16px] text-gray-700 border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+                  hover:text-red-600 hover:bg-blue-50
+                  ${showExplore ? "text-red-600 bg-blue-50" : ""}
+                `}
+                >
+                  Career Services
+                  <MdKeyboardArrowDown
+                    size={25}
+                    className=""
+                    style={{
+                      transform: showExplore
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                      transition: "transform 0.2s",
+                    }}
+                  />
+                  {/* <i
+                      className="bi bi-chevron-down"
+                      
+                    ></i> */}
+                </button>
+
+                {/* MEGA DROPDOWN */}
+                {showExplore && (
+                  <div className="absolute left-[-362.5px] top-[55px] w-[1675px] bg-white shadow-xl border border-gray-50 z-50">
+                    {/* HOVER BRIDGE (IMPORTANT – invisible) */}
+                    <div className="absolute -top-[20px] left-0 w-full h-[20px]"></div>
+
+                    <div className="grid grid-cols-5 gap-8 p-8 w-[1000px] mx-auto">
+                      {/* COLUMN 1 */}
+                      <div>
+                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                          Internships
+                        </h4>
+                        <ul className="space-y-2 text-[13px] text-gray-600">
+                          <li className="hover:underline cursor-pointer">
+                            Summer Internships
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Remote Internships
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Global Internships
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Paid Internships
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* COLUMN 2 */}
+                      <div>
+                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                          Apprenticeships
+                        </h4>
+                        <ul className="space-y-2 text-[13px] text-gray-600">
+                          <li className="hover:underline cursor-pointer">
+                            Tech Apprenticeships
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Management Apprenticeships
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Finance Apprenticeships
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* COLUMN 3 */}
+                      <div>
+                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                          Jobs
+                        </h4>
+                        <ul className="space-y-2 text-[13px] text-gray-600">
+                          <li className="hover:underline cursor-pointer">
+                            Full-time Roles
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Part-time Roles
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Fresher Jobs
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Remote Jobs
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* COLUMN 4 */}
+                      <div>
+                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                          Bootcamps
+                        </h4>
+                        <ul className="space-y-2 text-[13px] text-gray-600">
+                          <li className="hover:underline cursor-pointer">
+                            Coding Bootcamps
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Data Science Bootcamps
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Design Bootcamps
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Marketing Bootcamps
+                          </li>
+                        </ul>
+                      </div>
+
+                      {/* COLUMN 5 */}
+                      <div>
+                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                          PG Programs
+                        </h4>
+                        <ul className="space-y-2 text-[13px] text-gray-600">
+                          <li className="hover:underline cursor-pointer">
+                            PG Diplomas
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Executive Programs
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Hybrid Programs
+                          </li>
+                          <li className="hover:underline cursor-pointer">
+                            Online Masters
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* BOTTOM STRIP */}
+                    <div className="border-t-2 border-[#e6e0e0d6] px-8 py-4 text-sm text-gray-600 w-[1000px] mx-auto">
+                      Not sure where to begin?
+                      <span className="text-red-600 ml-2 hover:underline cursor-pointer">
+                        Browse all programs →
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* DEGREES */}
+              <NavLink
+                to="/degrees"
+                className={({ isActive }) =>
+                  `text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
+                }
+              >
+                Degree Programs
+              </NavLink>
+              {/* <NavLink
+                  to="/events"
+                  className={({ isActive }) =>
+                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
+                  }
+                >
+                  Events
+                </NavLink> */}
+
+              <a
+                href="https://frontend-jfhdav2px-vishal-chaudharys-projects-57aced94.vercel.app/"
+                className="text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 text-gray-700"
+              >
+                Global Services
+              </a>
+
+              <a
+                href="https://frontend-c9kuk4dfn-vishal-chaudharys-projects-57aced94.vercel.app/"
+                className="text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 text-gray-700"
+              >
+                After K12
+              </a>
+              <a
+                href="https://event-r6amjwiws-vishal-chaudharys-projects-57aced94.vercel.app/"
+                className="text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 text-gray-700"
+              >
+                Events
+              </a>
+
+              {/* <NavLink
+                  to="/global-services"
+                  className={({ isActive }) =>
+                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
+                  }
+                >
+                  Global Services
+                </NavLink> */}
+
+              <NavLink
+                to="/resources"
+                className={({ isActive }) =>
+                  `text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
+                }
+              >
+                Resources
+              </NavLink>
+              {/* <NavLink
+                  to="/more"
+                  className={({ isActive }) =>
+                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
+     hover:bg-blue-50 hover:text-red-600
+     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
+                  }
+                >
+                  More
+                </NavLink> */}
+            </div>
+            {/* RIGHT ACTIONS */}
+           <ul>
+             <li className="flex gap-4 items-center">
                   {user ? (
                     <div className="relative group">
                       <button className="h-9 w-9 rounded-full bg-red-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
@@ -196,278 +472,39 @@ const NavBar = () => {
                     </>
                   )}
                 </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto ">
-          <div className="flex items-center justify-between h-[60px]">
-            {/* LEFT SECTION */}
-            <div className="flex items-center gap-[50px]">
-              {/* LOGO */}
-              <div
-                className="flex items-center cursor-pointer select-none"
-                onClick={() => {
-                  setShowExplore(false);
-
-                  if (location.pathname !== "/") {
-                    navigate("/");
-                  } else {
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }
-                }}
-              >
-                {/* STATIC BRAND */}
-                <span className="text-[22px] font-extrabold text-black tracking-tight text-red-600">
-                  edeco
-                </span>
-
-                <span className="mx-[2px] text-[22px] font-extrabold text-black text-red-600">
-                  .
-                </span>
-
-                {/* ROTATING WORDS */}
-                <div className="edeco-rotator text-red-600">
-                  <div className="edeco-rotator-inner ">
-                    <div className="text-red-600">Internships</div>
-                    <div className="text-red-600">Jobs</div>
-                    <div className="text-red-600">Eduversity</div>
-                    <div className="text-red-600">Global</div>
-                    <div className="text-red-600">Innovations</div>
-                    <div className="text-red-600">Events</div>
-                  </div>
-                </div>
-              </div>
-
-              {/*  EXPLORE DROPDOWN  */}
-              <div className="hidden lg:flex items-center mt-0.5">
-                <div
-                  className="relative"
-                  onMouseEnter={() => setShowExplore(true)}
-                  onMouseLeave={() => setShowExplore(false)}
-                >
-                  {/* EXPLORE BUTTON */}
-                  <button
-                    className={`flex items-center gap-1 text-sm text-gray-700 border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-                  hover:text-red-600 hover:bg-blue-50
-                  ${showExplore ? "text-red-600 bg-blue-50" : ""}
-                `}
-                  >
-                    Career Services
-
-                    <MdKeyboardArrowDown size={25} className="" style={{
-
-
-                      transform: showExplore
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-                      transition: "transform 0.2s",
-                    }} />
-                    {/* <i
-                      className="bi bi-chevron-down"
-                      
-                    ></i> */}
-                  </button>
-
-                  {/* MEGA DROPDOWN */}
-                  {showExplore && (
-                    <div className="absolute left-[-362.5px] top-[55px] w-[1675px] bg-white shadow-xl border border-gray-50 z-50">
-                      {/* HOVER BRIDGE (IMPORTANT – invisible) */}
-                      <div className="absolute -top-[20px] left-0 w-full h-[20px]"></div>
-
-                      <div className="grid grid-cols-5 gap-8 p-8 w-[1000px] mx-auto">
-                        {/* COLUMN 1 */}
-                        <div>
-                          <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Internships
-                          </h4>
-                          <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">Summer Internships</li>
-                            <li className="hover:underline cursor-pointer">Remote Internships</li>
-                            <li className="hover:underline cursor-pointer">Global Internships</li>
-                            <li className="hover:underline cursor-pointer">Paid Internships</li>
-                          </ul>
-                        </div>
-
-                        {/* COLUMN 2 */}
-                        <div>
-                          <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Apprenticeships
-                          </h4>
-                          <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">Tech Apprenticeships</li>
-                            <li className="hover:underline cursor-pointer">Management Apprenticeships</li>
-                            <li className="hover:underline cursor-pointer">Finance Apprenticeships</li>
-                          </ul>
-                        </div>
-
-                        {/* COLUMN 3 */}
-                        <div>
-                          <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Jobs
-                          </h4>
-                          <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">Full-time Roles</li>
-                            <li className="hover:underline cursor-pointer">Part-time Roles</li>
-                            <li className="hover:underline cursor-pointer">Fresher Jobs</li>
-                            <li className="hover:underline cursor-pointer">Remote Jobs</li>
-                          </ul>
-                        </div>
-
-                        {/* COLUMN 4 */}
-                        <div>
-                          <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            Bootcamps
-                          </h4>
-                          <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">Coding Bootcamps</li>
-                            <li className="hover:underline cursor-pointer">Data Science Bootcamps</li>
-                            <li className="hover:underline cursor-pointer">Design Bootcamps</li>
-                            <li className="hover:underline cursor-pointer">Marketing Bootcamps</li>
-                          </ul>
-                        </div>
-
-                        {/* COLUMN 5 */}
-                        <div>
-                          <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                            PG Programs
-                          </h4>
-                          <ul className="space-y-2 text-[13px] text-gray-600">
-                            <li className="hover:underline cursor-pointer">PG Diplomas</li>
-                            <li className="hover:underline cursor-pointer">Executive Programs</li>
-                            <li className="hover:underline cursor-pointer">Hybrid Programs</li>
-                            <li className="hover:underline cursor-pointer">Online Masters</li>
-                          </ul>
-                        </div>
-                      </div>
-
-                      {/* BOTTOM STRIP */}
-                      <div className="border-t-2 border-[#e6e0e0d6] px-8 py-4 text-sm text-gray-600 w-[1000px] mx-auto">
-                        Not sure where to begin?
-                        <span className="text-red-600 ml-2 hover:underline cursor-pointer">
-                          Browse all programs →
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* DEGREES */}
-                <NavLink
-                  to="/degrees"
-                  className={({ isActive }) =>
-                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-red-600
-     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
-                  }
-                >
-                  Degree Programs
-                </NavLink>
-                <NavLink
-                  to="/events"
-                  className={({ isActive }) =>
-                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-red-600
-     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
-                  }
-                >
-                  Events
-                </NavLink>
-
-                <a href="https://frontend-7vjp2wk8f-vishal-chaudharys-projects-57aced94.vercel.app/" className="text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 text-gray-700">Global Services</a>
-
-                {/* <NavLink
-                  to="/global-services"
-                  className={({ isActive }) =>
-                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-red-600
-     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
-                  }
-                >
-                  Global Services
-                </NavLink> */}
-
-
-
-                <NavLink
-                  to="/resources"
-                  className={({ isActive }) =>
-                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-red-600
-     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
-                  }
-                >
-                  Resources
-                </NavLink>
-                <NavLink
-                  to="/more"
-                  className={({ isActive }) =>
-                    `text-sm border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-red-600
-     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
-                  }
-                >
-                  More
-                </NavLink>
-              </div>
-            </div>
-
-            {/* RIGHT ACTIONS */}
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div
-                className="relative flex items-center h-[40px]"
-                onMouseEnter={() => setIsSearchOpen(true)}
-                onMouseLeave={() => {
-                  if (!searchValue) setIsSearchOpen(false);
-                }}
-              >
-                <input
-                  type="text"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  placeholder="Search..."
-                  className={`
-                  absolute -right-1 h-[40px]
-                  rounded-full border border-gray-300
-                  px-4 pr-10 text-sm
-                  transition-all duration-300 ease-in-out
-                  focus:outline-none bg-white
-                  ${isSearchOpen ? "w-[200px] sm:w-[350px] opacity-100" : "w-[40px] opacity-0 pointer-events-none"}
-                `}
-                  onFocus={() => setIsSearchOpen(true)}
-                />
-                <button
-                  className="relative z-10 h-[36px] w-[36px] rounded-full bg-red-600 text-white flex items-center justify-center shadow-md transition-colors"
-                  onClick={() => {
-                    if (!searchValue) setIsSearchOpen(true);
-                  }}
-                >
-                  <CiSearch size={25} />
-                </button>
-              </div>
-
-              {/* Hamburger Toggle */}
-              <button
-                className="lg:hidden h-10 w-10 flex flex-col justify-center items-center gap-1.5 focus:outline-none relative z-50"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              >
-                <span className={`block w-6 h-0.5 bg-gray-800 transition-transform duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`}></span>
-                <span className={`block w-6 h-0.5 bg-gray-800 transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-0' : 'opacity-100'}`}></span>
-                <span className={`block w-6 h-0.5 bg-gray-800 transition-transform duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`}></span>
-              </button>
-
-              {/* Google Translate Widget */}
-              <div id="google_translate_element" className="opacity-0 absolute pointer-events-none w-0 h-0 overflow-hidden"></div>
-            </div>
+           </ul>
 
             {/* Mobile Menu Drawer */}
             {mobileMenuOpen && (
               <div className="lg:hidden absolute top-[110px] left-0 w-full bg-white shadow-xl border-t border-gray-100 flex flex-col px-6 py-4 gap-4 z-40">
-                <Link to="/degrees" className="text-gray-800 font-medium py-2 border-b border-gray-50" onClick={() => setMobileMenuOpen(false)}>Degree Programs</Link>
-                <Link to="/events" className="text-gray-800 font-medium py-2 border-b border-gray-50" onClick={() => setMobileMenuOpen(false)}>Events</Link>
-                <Link to="/resources" className="text-gray-800 font-medium py-2 border-b border-gray-50" onClick={() => setMobileMenuOpen(false)}>Resources</Link>
-                <Link to="/more" className="text-gray-800 font-medium py-2" onClick={() => setMobileMenuOpen(false)}>More</Link>
+                <Link
+                  to="/degrees"
+                  className="text-gray-800 font-medium py-2 border-b border-gray-50"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Degree Programs
+                </Link>
+                <Link
+                  to="/events"
+                  className="text-gray-800 font-medium py-2 border-b border-gray-50"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Events
+                </Link>
+                <Link
+                  to="/resources"
+                  className="text-gray-800 font-medium py-2 border-b border-gray-50"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Resources
+                </Link>
+                <Link
+                  to="/more"
+                  className="text-gray-800 font-medium py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  More
+                </Link>
               </div>
             )}
           </div>
@@ -480,4 +517,3 @@ const NavBar = () => {
 };
 
 export default NavBar;
-

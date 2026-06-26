@@ -54,7 +54,7 @@ const UniversityMarquee = () => {
    <>
    <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto">
      <section className="pb-16 overflow-hidden">
-      <h3 className="text-xl font-semibold mb-6">
+      <h3 className="text-xl font-semibold text-[#1F2853] mb-6">
         Learn from leading universities and companies
       </h3>
 
