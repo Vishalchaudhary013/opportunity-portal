@@ -18,13 +18,13 @@ const categories = [
   { id: 1, path:"/interships", title: "Internships", count: "3,452", icon: <LuBriefcase size={28} />, colors: { bg: "#EEF2FF", mid: "#818CF8", dark: "#4F46E5" } },
   { id: 2, title: "Apprenticeships", path:"/apprenticeships", count: "1,252", icon: <LuWrench size={28} />, colors: { bg: "#FDF4FF", mid: "#E879F9", dark: "#C026D3" } },
   { id: 3, title: "Jobs", path:"/jobs",  count: "5,485", icon: <LuBuilding2 size={28} />, colors: { bg: "#FFF7ED", mid: "#FDBA74", dark: "#F97316" } },
-  { id: 4, title: "Industry Mentorships", path:"/industry-mentorships", count: "2,841", icon: <LuUserPlus size={28} />, colors: { bg: "#FEFCE8", mid: "#FDE047", dark: "#EAB308" } },
-  { id: 5, title: "Bootcamps", path:"/bootcamps", count: "1,052", icon: <LuPresentation size={28} />, colors: { bg: "#F0FDF4", mid: "#86EFAC", dark: "#22C55E" } },
-  { id: 6, title: "Certificate Programs", path:"/certificate-programs", count: "8,532", icon: <LuAward size={28} />, colors: { bg: "#F0FDFA", mid: "#5EEAD4", dark: "#14B8A6" } },
-  { id: 7, title: "Post Graduate Programs", path:"/post-graduate-programs", count: "4,120", icon: <LuGraduationCap size={28} />, colors: { bg: "#FFF1F2", mid: "#FDA4AF", dark: "#E11D48" } },
+  { id: 4, title: "Masterclasses", path:"/industry-mentorships", count: "2,841", icon: <LuUserPlus size={28} />, colors: { bg: "#FEFCE8", mid: "#FDE047", dark: "#EAB308" } },
+  { id: 5, title: "Workshops", path:"/bootcamps", count: "1,052", icon: <LuPresentation size={28} />, colors: { bg: "#F0FDF4", mid: "#86EFAC", dark: "#22C55E" } },
+  { id: 6, title: "Skill Growth", path:"/certificate-programs", count: "8,532", icon: <LuAward size={28} />, colors: { bg: "#F0FDFA", mid: "#5EEAD4", dark: "#14B8A6" } },
+  { id: 7, title: "PGP CERT", path:"/post-graduate-programs", count: "4,120", icon: <LuGraduationCap size={28} />, colors: { bg: "#FFF1F2", mid: "#FDA4AF", dark: "#E11D48" } },
   { id: 8, title: "Masters' Degrees", path:"/masters-degrees", count: "2,305", icon: <LuBookOpen size={28} />, colors: { bg: "#F8FAFC", mid: "#94A3B8", dark: "#475569" } },
-  { id: 9, title: "Integrated Degrees" , path:"/integrated-degrees", count: "1,840", icon: <LuLibrary size={28} />, colors: { bg: "#ECFEFF", mid: "#67E8F9", dark: "#06B6D4" } },
-  { id: 10, title: "Global PG Programs", path:"/global-programs", count: "3,210", icon: <LuGlobe size={28} />, colors: { bg: "#F5F3FF", mid: "#A78BFA", dark: "#7C3AED" } },
+  { id: 9, title: "UG-PG Degrees" , path:"/integrated-degrees", count: "1,840", icon: <LuLibrary size={28} />, colors: { bg: "#ECFEFF", mid: "#67E8F9", dark: "#06B6D4" } },
+  { id: 10, title: "Global Programs", path:"/global-programs", count: "3,210", icon: <LuGlobe size={28} />, colors: { bg: "#F5F3FF", mid: "#A78BFA", dark: "#7C3AED" } },
 ];
 
 
@@ -38,7 +38,7 @@ const Category = () => {
               Your Career Launchpad Starts Here
               {/* Explore <span className="font-light italic text-gray-600">Categories</span> */}
             </h2>
-            <p className='w-[900px] mx-auto text-gray-600 font-medium mb-2'>Finding the right path after graduation shouldn't be a challenge. We’ve structured our career solutions into distinct pillars to help you build competitive skills, connect with industry leaders, and secure your future.</p>
+            {/* <p className='w-[900px] mx-auto text-gray-600 font-medium mb-2'>Finding the right path after graduation shouldn't be a challenge. We’ve structured our career solutions into distinct pillars to help you build competitive skills, connect with industry leaders, and secure your future.</p> */}
             <p className='font-semibold'>Choose a category below to take your next big step:</p>
           </div>
 
@@ -67,15 +67,12 @@ const Category = () => {
                 </div> */}
 
                 {/* Text Content */}
-                <div className="relative z-10 flex items-center gap-8 justify-between w-full h-full">
-                  <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-900 leading-snug text-left">
-                    {category.title}
+                <div className="relative z-10  w-full h-full">
+                  <h3 className="text-[15px] sm:text-[16px] font-bold text-gray-700 leading-snug flex items-center gap-4">
+                    {category.icon} {category.title}
                   </h3>
 
-                  <span>
-                    {category.icon}
-                  </span>
-
+                  
 
                   {/* <p className="text-[12px] self-end text-gray-700  font-semibold opacity-80 flex items-center gap-3">
                     {category.count} Programs <RiArrowRightLongLine size={18} className='mt-0.5' />

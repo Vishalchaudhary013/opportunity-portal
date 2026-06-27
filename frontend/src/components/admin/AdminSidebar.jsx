@@ -80,7 +80,7 @@ const AdminSidebar = () => {
   const menuItems = isSuperDashboard && isSuperAdmin ? SUPER_MENU_ITEMS : ADMIN_MENU_ITEMS;
 
   return (
-    <aside className="bg-[#E4EBFB] border border-[#D8E2F7] rounded-2xl p-4 xl:sticky xl:top-0 h-full flex flex-col overflow-hidden">
+    <aside className="bg-[#E4EBFB] border border-[#D8E2F7]  p-4 xl:sticky xl:top-0 h-full flex flex-col overflow-hidden">
       <div className="mb-7">
         <p className="text-slate-900 text-xl font-semibold">Admin Control</p>
         <p className="text-[11px] tracking-[0.16em] text-slate-500 mt-1 font-semibold"></p>

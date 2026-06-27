@@ -60,14 +60,14 @@ const SectionTitle = ({ title, subtitle , defination, viewAllLink = "/intership"
 
         <Link
           to={viewAllLink}
-          className="flex gap-0.5 items-center group"
+          className="flex border-2 items-center py-0.5 px-4 gap-2 rounded-lg border-[#1F2853] "
         >
-          <div className="font-medium mt-1 text-slate-900 bg-red-600 text-white py-1 px-4 rounded-4xl transition-colors duration-300 ">
+          <div className="font-medium  text-[#1F2853]     ">
             View All
           </div>
           
-          <span className="inline-flex items-center justify-center w-8 h-8 bg-red-600 rounded-full transition-all duration-300  group-hover:translate-x-1.5">
-            <GoArrowRight size={22} className="text-white" />
+          <span>
+            <GoArrowRight size={18} className="text-[#1F2853]" />
           </span>
         </Link>
 

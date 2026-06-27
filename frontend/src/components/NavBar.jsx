@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useOpportunities } from "../context/OpportunitiesContext";
 import { CiLocationOn, CiSearch } from "react-icons/ci";
@@ -7,8 +7,9 @@ import {
   IoHomeOutline,
   IoLanguageSharp,
   IoLocationSharp,
+  IoPlayCircleSharp,
 } from "react-icons/io5";
-import { FaLocationArrow } from "react-icons/fa6";
+import { FaLocationArrow, FaWhatsapp } from "react-icons/fa6";
 import { Home } from "lucide-react";
 
 const NavBar = () => {
@@ -16,6 +17,26 @@ const NavBar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [exploreLeftOffset, setExploreLeftOffset] = useState(0);
+  const exploreButtonRef = useRef(null);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      if (exploreButtonRef.current) {
+        const rect = exploreButtonRef.current.getBoundingClientRect();
+        setExploreLeftOffset(rect.left);
+      }
+    };
+
+    if (showExplore) {
+      updateOffset();
+      window.addEventListener("resize", updateOffset);
+    }
+
+    return () => {
+      window.removeEventListener("resize", updateOffset);
+    };
+  }, [showExplore]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,12 +138,42 @@ const NavBar = () => {
             <div className="flex justify-between items-center text-[15px]">
               <ul className="">
                 <li>
-                  <Link to="/" className="text-[14px] font-semibold">
+                  {/* <Link to="/" className="text-[14px] font-semibold">
                     Home
-                  </Link>
+                  </Link> */}
                 </li>
               </ul>
               <ul className="flex items-center gap-5">
+                
+                <li className="group relative overflow-hidden rounded-lg p-[1.5px]">
+                  {/* Rotating border */}
+                  <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="absolute inset-[-150%] bg-red-600 group-hover:animate-spin"></div>
+                  </div>
+
+                  {/* Content */}
+                  <button
+                    onClick={() => navigate("/locate-us")}
+                    className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 transition-colors outline-none"
+                  >
+                    <IoLocationSharp size={16} />
+                    <span className="pr-1 text-[13px] font-medium text-gray-800">
+                      Find Us
+                    </span>
+                  </button>
+                </li>
+
+                <li>
+                  <a 
+                    href="https://wa.me/+918219263983?text=Hello!%20I%20am%20exploring%20the%20edeco%20platform%20and%20I%20have%20a%20query." 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center text-[13px] text-green-800 gap-1.5 font-medium border border-green-400 rounded-lg px-3 py-1 bg-green-200 hover:bg-green-300 transition-colors shadow-sm cursor-pointer"
+                  >
+                     <FaWhatsapp size={16}/> Whatsapp
+                  </a>
+                </li>
+
                 <li className="text-[13px] font-medium flex items-center gap-2">
                   <button
                     onClick={() => changeLanguage("en")}
@@ -138,22 +189,69 @@ const NavBar = () => {
                     HINDI
                   </button>
                 </li>
-                <li className="group relative overflow-hidden rounded-lg p-[1.5px]">
-                  {/* Rotating border */}
-                  <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div className="absolute inset-[-150%] bg-[conic-gradient(transparent,#00A9E0,transparent)] group-hover:animate-spin"></div>
-                  </div>
 
-                  {/* Content */}
-                  <button
-                    onClick={() => navigate("/locate-us")}
-                    className="relative z-10 bg-white shadow-sm rounded-lg py-1.5 px-3 flex items-center gap-1 cursor-pointer hover:bg-slate-50 transition-colors outline-none"
-                  >
-                    <IoLocationSharp size={16} />
-                    <span className="pr-1 text-[13px] font-medium text-gray-800">
-                      Find Us
-                    </span>
-                  </button>
+                 <li className="flex gap-4 items-center">
+                  {user ? (
+                    <div className="relative group">
+                      <button className="h-9 w-9 rounded-full bg-red-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
+                        {userInitial}
+                      </button>
+                      <div className="absolute right-0 mt-2 w-56 bg-white shadow-2xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 py-2">
+                        <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                          <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                            Signed in as
+                          </p>
+                          <p className="text-sm font-bold text-gray-900 truncate">
+                            {user.fullName || user.email}
+                          </p>
+                        </div>
+                        {isAdmin ? (
+                          <Link
+                            to={dashboardPath}
+                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
+                          >
+                            <i className="bi bi-grid-1x2"></i> Admin Dashboard
+                          </Link>
+                        ) : (
+                          <>
+                            <Link
+                              to="/profile"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
+                            >
+                              <i className="bi bi-person"></i> Profile
+                            </Link>
+                            <Link
+                              to="/favorites"
+                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
+                            >
+                              <i className="bi bi-heart"></i> Favorites
+                            </Link>
+                          </>
+                        )}
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors mt-1 border-t border-gray-50"
+                        >
+                          <i className="bi bi-box-arrow-right"></i> Sign Out
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Link
+                        to="/login"
+                        className="text-[16px] font-semibold hover:underline"
+                      >
+                        Log In
+                      </Link>
+                      <Link
+                        to="/choose-signup"
+                        className=" text-white px-4 py-1 rounded-4xl text-[17px] font-semibold bg-red-600  transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                      >
+                        Sign up
+                      </Link>
+                    </>
+                  )}
                 </li>
                
               </ul>
@@ -186,7 +284,8 @@ const NavBar = () => {
 
             <div className="hidden lg:flex items-center mt-0.5">
               <div
-                className="relative"
+                className="group"
+                ref={exploreButtonRef}
                 onMouseEnter={() => setShowExplore(true)}
                 onMouseLeave={() => setShowExplore(false)}
               >
@@ -216,11 +315,16 @@ const NavBar = () => {
 
                 {/* MEGA DROPDOWN */}
                 {showExplore && (
-                  <div className="absolute left-[-362.5px] top-[55px] w-[1675px] bg-white shadow-xl border border-gray-50 z-50">
+                  <div className="absolute left-0 top-full w-full bg-white shadow-xl border-t border-gray-100 z-50">
                     {/* HOVER BRIDGE (IMPORTANT – invisible) */}
                     <div className="absolute -top-[20px] left-0 w-full h-[20px]"></div>
 
-                    <div className="grid grid-cols-5 gap-8 p-8 w-[1000px] mx-auto">
+                    <div 
+                      className="w-full flex flex-col" 
+                      style={{ paddingLeft: `${exploreLeftOffset}px` }}
+                    >
+                      <div className="w-[880px]">
+                        <div className="grid grid-cols-5 gap-5 p-7">
                       {/* COLUMN 1 */}
                       <div>
                         <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
@@ -323,16 +427,17 @@ const NavBar = () => {
                         </ul>
                       </div>
                     </div>
-
                     {/* BOTTOM STRIP */}
-                    <div className="border-t-2 border-[#e6e0e0d6] px-8 py-4 text-sm text-gray-600 w-[1000px] mx-auto">
+                    <div className="border-t border-gray-100 px-8 py-4 text-sm text-gray-600 bg-gray-50/50 w-[880px]">
                       Not sure where to begin?
                       <span className="text-red-600 ml-2 hover:underline cursor-pointer">
                         Browse all programs →
                       </span>
                     </div>
                   </div>
-                )}
+                </div>
+              </div>
+            )}
               </div>
 
               {/* DEGREES */}
@@ -408,71 +513,13 @@ const NavBar = () => {
                 </NavLink> */}
             </div>
             {/* RIGHT ACTIONS */}
-           <ul>
-             <li className="flex gap-4 items-center">
-                  {user ? (
-                    <div className="relative group">
-                      <button className="h-9 w-9 rounded-full bg-red-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
-                        {userInitial}
-                      </button>
-                      <div className="absolute right-0 mt-2 w-56 bg-white shadow-2xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 py-2">
-                        <div className="px-4 py-2 border-b border-gray-50 mb-1">
-                          <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
-                            Signed in as
-                          </p>
-                          <p className="text-sm font-bold text-gray-900 truncate">
-                            {user.fullName || user.email}
-                          </p>
-                        </div>
-                        {isAdmin ? (
-                          <Link
-                            to={dashboardPath}
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
-                          >
-                            <i className="bi bi-grid-1x2"></i> Admin Dashboard
-                          </Link>
-                        ) : (
-                          <>
-                            <Link
-                              to="/profile"
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
-                            >
-                              <i className="bi bi-person"></i> Profile
-                            </Link>
-                            <Link
-                              to="/favorites"
-                              className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
-                            >
-                              <i className="bi bi-heart"></i> Favorites
-                            </Link>
-                          </>
-                        )}
-                        <button
-                          onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors mt-1 border-t border-gray-50"
-                        >
-                          <i className="bi bi-box-arrow-right"></i> Sign Out
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <Link
-                        to="/login"
-                        className="text-[16px] font-semibold hover:underline"
-                      >
-                        Log In
-                      </Link>
-                      <Link
-                        to="/choose-signup"
-                        className=" text-white px-4 py-1 rounded-4xl text-[17px] font-semibold bg-red-600  transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
-                      >
-                        Sign up
-                      </Link>
-                    </>
-                  )}
-                </li>
-           </ul>
+           <div className="border border-black/10 bg-[#1F2853] text-white rounded-lg py-1.5 px-5 flex items-center gap-1.5">
+
+            <IoPlayCircleSharp size={20}/> Expert
+
+
+
+           </div>
 
             {/* Mobile Menu Drawer */}
             {mobileMenuOpen && (

@@ -764,22 +764,37 @@ const OpportunityForm = () => {
                       <span>Featured Listing (Push to top of the board)</span>
                     </label> */}
 
-                    <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                      <span>Hiring Manager/POC LinkedIn</span>
-                      <input type="url" name="hiringManager" value={form.hiringManager} onChange={handleChange} placeholder="LinkedIn URL" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
-                    </label>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-slate-700">Hiring Manager/POC LinkedIn <span className="text-rose-600">*</span></span>
+                        <label className="flex items-center cursor-pointer">
+                          <div className="relative">
+                            <input 
+                              type="checkbox" 
+                              className="sr-only" 
+                              checked={form.showHiringManager !== false} 
+                              onChange={(e) => setForm(prev => ({ ...prev, showHiringManager: e.target.checked }))} 
+                            />
+                            <div className={`block w-10 h-6 rounded-full transition-colors ${form.showHiringManager !== false ? 'bg-red-600' : 'bg-slate-300'}`}></div>
+                            <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${form.showHiringManager !== false ? 'transform translate-x-4' : ''}`}></div>
+                          </div>
+                          <span className="ml-3 text-xs font-medium text-slate-600">Show</span>
+                        </label>
+                      </div>
+                      <input required type="url" name="hiringManager" value={form.hiringManager} onChange={handleChange} placeholder="LinkedIn URL" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
+                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                       <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                        <span>LinkedIn</span>
+                        <span>Company LinkedIn</span>
                         <input name="linkedin" value={form.socialProofLinks?.linkedin || ""} onChange={handleSocialProofChange} className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
                       </label>
                       <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                        <span>Twitter</span>
+                        <span>Company Twitter</span>
                         <input name="twitter" value={form.socialProofLinks?.twitter || ""} onChange={handleSocialProofChange} className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
                       </label>
                       <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">
-                        <span>Instagram</span>
+                        <span>Company Instagram</span>
                         <input name="instagram" value={form.socialProofLinks?.instagram || ""} onChange={handleSocialProofChange} className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-white focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
                       </label>
                     </div>
@@ -803,8 +818,8 @@ const OpportunityForm = () => {
               </div>
 
               <div className="flex justify-end pt-8 border-t border-[#E2EAFC]">
-                <button type="submit" disabled={busy} className="px-12 py-4 rounded-2xl bg-red-600 text-white font-bold  shadow-blue-200 transition-all active:scale-95 disabled:opacity-50">
-                  {busy ? "Saving..." : editingId ? "Update Opportunity" : "Create Opportunity"}
+                <button type="submit" disabled={busy} className="px-6 py-2 rounded-lg bg-red-600 text-white font-bold  shadow-blue-200 transition-all active:scale-95 disabled:opacity-50">
+                  {busy ? "Saving..." : editingId ? "Update & Next" : "Create & Next"}
                 </button>
               </div>
             </form>

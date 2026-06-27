@@ -170,12 +170,12 @@ const AdminDashboardContent = () => {
           </div>
         </header>
 
-        <div className="w-full px-3 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6 flex-1 min-h-0">
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[260px_minmax(0,1fr)] xl:gap-5 h-full">
+        <div className="w-full flex-1 min-h-0">
+          <div className="grid grid-cols-1  xl:grid-cols-[260px_minmax(0,1fr)]  h-full">
             <AdminSidebar />
-            <main className="min-w-0 space-y-4 sm:space-y-5 h-full overflow-y-auto custom-scrollbar pr-2">
+            <main className="min-w-0 space-y-4 sm:space-y-5 h-full overflow-y-auto custom-scrollbar ">
               {!isSuperDashboard && isImpersonating && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="bg-amber-50 border border-amber-200  px-4 py-3 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-sm text-amber-900 font-medium">
                     You are viewing this as a selected admin account.
                   </p>
@@ -191,7 +191,7 @@ const AdminDashboardContent = () => {
 
               {/* PREMIUM HEADER */}
               {activeSection === "Overview" && (
-                <div className="bg-white border border-[#DCE5FA] rounded-2xl px-6 py-4 flex items-center justify-between shadow-sm mb-5">
+                <div className="bg-white border border-[#DCE5FA]  px-6 py-4 flex items-center justify-between shadow-sm mb-5">
                   <div className="flex items-center gap-8">
                     {/* LOGO */}
 
@@ -201,9 +201,7 @@ const AdminDashboardContent = () => {
                           ? "Super Admin Control"
                           : "Admin Dashboard"}
                       </h1>
-                      <p className="text-[10px] tracking-[0.1em] text-slate-400 font-bold uppercase">
-                        Operational Excellence
-                      </p>
+                      
                     </div>
                   </div>
 

@@ -42,3 +42,6 @@ backend/.wwebjs_cache/
 # Keep upload folders tracked
 !backend/uploads/resumes/.gitkeep
 !backend/uploads/logos/.gitkeep
+
+
+backend/controllerDetails.txt

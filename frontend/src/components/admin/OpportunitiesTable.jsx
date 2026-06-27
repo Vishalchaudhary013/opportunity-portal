@@ -223,7 +223,7 @@ const OpportunitiesTable = () => {
   return (
     <>
                   {!showOpportunityForm && (
-                    <div className="bg-white rounded-2xl border border-[#DCE5FA] p-4 sm:p-5">
+                    <div className="bg-white  border border-[#DCE5FA] p-4 sm:p-5">
                       <div className="flex flex-col items-start gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                         <h2 className="text-2xl font-semibold text-slate-800">
                           {activeSection === "Internship"

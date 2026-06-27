@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search,
   Filter,
@@ -6,10 +6,17 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronRight,
+  Globe,
+  Map,
+  Building2,
+  Navigation,
+  ArrowDownUp
 } from "lucide-react";
 import BranchCard from "../components/find-us/BranchCard";
 import BookingModal from "../components/find-us/BookingModal";
 import VisitModal from "../components/find-us/VisitModal";
+import { getStates, getDistricts } from 'india-location-kit';
+import { City } from 'country-state-city';
 
 // Expanded Mock data based on screenshots
 const branches = [
@@ -181,16 +188,37 @@ const branches = [
   },
 ];
 
-const REGIONS = ["All regions", "North", "South", "East", "West", "Central"];
+const STATE_REGION_MAP = {
+  // North
+  "DL": "North", "HR": "North", "PB": "North", "CH": "North", "HP": "North", "JK": "North", "LA": "North", "UP": "North", "UT": "North", "RJ": "North",
+  // South
+  "AP": "South", "KA": "South", "KL": "South", "TN": "South", "TG": "South", "AN": "South", "LD": "South", "PY": "South",
+  // East 
+  "BR": "East", "JH": "East", "OR": "East", "WB": "East", "AR": "East", "AS": "East", "MN": "East", "ML": "East", "MZ": "East", "NL": "East", "SK": "East", "TR": "East",
+  // West
+  "GJ": "West", "MH": "West", "GA": "West", "DN": "West", "DD": "West",
+  // Central
+  "MP": "Central", "CG": "Central"
+};
+
+const REGIONS = ["Regions", "North", "South", "East", "West", "Central"];
 const SORT_OPTIONS = ["Newest", "Most Visited", "A-Z"];
 
 export default function FindUsPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [regionFilter, setRegionFilter] = useState("All regions");
-  const [cityFilter, setCityFilter] = useState("All cities");
+  
+  const [regionFilter, setRegionFilter] = useState("Regions");
+  const [stateFilterCode, setStateFilterCode] = useState("");
+  const [districtFilterCode, setDistrictFilterCode] = useState("");
+  const [cityFilterCode, setCityFilterCode] = useState("");
+
+  const [stateSearch, setStateSearch] = useState("");
+  const [districtSearch, setDistrictSearch] = useState("");
+  const [citySearch, setCitySearch] = useState("");
+  
   const [sortBy, setSortBy] = useState("Newest");
 
-  const [openDropdown, setOpenDropdown] = useState(null); // 'region', 'city', 'sort' or null
+  const [openDropdown, setOpenDropdown] = useState(null); // 'state', 'district', 'city', 'sort' or null
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -206,36 +234,33 @@ export default function FindUsPage() {
   const [bookingBranch, setBookingBranch] = useState(null);
   const [visitBranch, setVisitBranch] = useState(null);
 
-  // Compute cities based on selected region
-  const availableCities = [
-    "All cities",
-    ...new Set(
-      branches
-        .filter(
-          (b) => regionFilter === "All regions" || b.region === regionFilter,
-        )
-        .map((b) => b.city),
-    ),
-  ];
+  // Derived location lists
+  const states = useMemo(() => getStates(), []);
+  const districts = useMemo(() => stateFilterCode ? getDistricts(stateFilterCode) : [], [stateFilterCode]);
+  const cities = useMemo(() => stateFilterCode ? City.getCitiesOfState('IN', stateFilterCode) : [], [stateFilterCode]);
 
-  // Reset city if region changes and city is not in new region
-  useEffect(() => {
-    if (cityFilter !== "All cities" && !availableCities.includes(cityFilter)) {
-      setCityFilter("All cities");
-    }
-  }, [regionFilter, availableCities, cityFilter]);
+  const filteredStates = states.filter(s => {
+    const matchesSearch = s.name.toLowerCase().includes(stateSearch.toLowerCase());
+    const matchesRegion = regionFilter === "Regions" || STATE_REGION_MAP[s.code] === regionFilter;
+    return matchesSearch && matchesRegion;
+  });
+  const filteredDistricts = districts.filter(d => d.name.toLowerCase().includes(districtSearch.toLowerCase()));
+  const filteredCities = cities.filter(c => c.name.toLowerCase().includes(citySearch.toLowerCase()));
+
+  const selectedStateName = states.find(s => s.code === stateFilterCode)?.name || "States";
+  const selectedDistrictName = districts.find(d => d.code === districtFilterCode)?.name || "Districts";
+  const selectedCityName = cityFilterCode || "Cities";
 
   let filteredBranches = branches.filter((branch) => {
     const matchesSearch =
       branch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       branch.address.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesRegion =
-      regionFilter === "All regions" || branch.region === regionFilter;
-    const matchesCity =
-      cityFilter === "All cities" || branch.city === cityFilter;
+    const matchesRegion = regionFilter === "Regions" || branch.region === regionFilter;
+    const matchesState = !stateFilterCode || branch.state.toLowerCase().includes(selectedStateName.toLowerCase()) || selectedStateName.toLowerCase().includes(branch.state.toLowerCase());
+    const matchesCity = !cityFilterCode || branch.city.toLowerCase() === selectedCityName.toLowerCase();
 
-    return matchesSearch && matchesRegion && matchesCity;
+    return matchesSearch && matchesRegion && matchesState && matchesCity;
   });
 
   if (sortBy === "A-Z") {
@@ -264,11 +289,10 @@ export default function FindUsPage() {
           </p>
         </div>
 
-        <div className="flex items-center justify-between w-[920px] mx-auto  px-3 py-4">
+        <div className="flex items-center justify-between  mx-auto  px-3 py-4" ref={dropdownRef}>
           {/* Filters */}
           <div
             className=" flex flex-wrap items-center px-3 gap-2 w-full mx-auto "
-            ref={dropdownRef}
           >
             <div className="flex pr-2 items-center gap-1.5 text-slate-700 text-[14px] font-bold shrink-0">
               <Filter size={18} />
@@ -282,14 +306,15 @@ export default function FindUsPage() {
                   onClick={() =>
                     setOpenDropdown(openDropdown === "region" ? null : "region")
                   }
-                  className={`flex items-center whitespace-nowrap gap-1 px-3 py-2 rounded-full text-xs font-bold transition-all ${
-                    regionFilter !== "All regions" || openDropdown === "region"
+                  className={`flex items-center whitespace-nowrap gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                    regionFilter !== "Regions" || openDropdown === "region"
                       ? "bg-red-600 text-white shadow-md"
                       : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  {regionFilter === "All regions"
-                    ? "All regions"
+                  <Globe size={16} className={regionFilter !== "Regions" || openDropdown === "region" ? "text-white" : "text-slate-600"} />
+                  {regionFilter === "Regions"
+                    ? "Regions"
                     : regionFilter}
                   <ChevronDown size={14} className="ml-0.5 opacity-70" />
                 </button>
@@ -311,51 +336,223 @@ export default function FindUsPage() {
                 )}
               </div>
 
-              {/* City Dropdown */}
+              {/* State Dropdown */}
               <div className="relative">
                 <button
                   onClick={() =>
-                    setOpenDropdown(openDropdown === "city" ? null : "city")
+                    setOpenDropdown(openDropdown === "state" ? null : "state")
                   }
-                  className={`flex items-center whitespace-nowrap gap-1 px-3 py-2 rounded-full text-xs font-bold transition-all ${
-                    cityFilter !== "All cities" || openDropdown === "city"
+                  className={`flex items-center whitespace-nowrap gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                    stateFilterCode !== "" || openDropdown === "state"
                       ? "bg-red-600 text-white shadow-md"
                       : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  {cityFilter === "All cities" ? "All cities" : cityFilter}
+                  <MapPin size={16} className={stateFilterCode !== "" || openDropdown === "state" ? "text-white" : "text-slate-600"} />
+                  {stateFilterCode === "" ? "States" : selectedStateName}
                   <ChevronDown size={14} className="ml-0.5 opacity-70" />
                 </button>
-                {openDropdown === "city" && (
-                  <div className="absolute left-0 top-full mt-2 w-48 max-h-60 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1">
-                    {availableCities.map((c) => (
-                      <button
-                        key={c}
+                {openDropdown === "state" && (
+                  <div className="absolute left-0 top-full mt-2 w-56 max-h-72 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1">
+                    <div className="px-2 pb-2 sticky top-0 bg-white border-b border-gray-50 pt-1 z-10">
+                      <div className="flex items-center px-2 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                        <Search size={14} className="text-gray-400 mr-2" />
+                        <input 
+                          type="text" 
+                          placeholder="Search state..." 
+                          value={stateSearch}
+                          onChange={(e) => setStateSearch(e.target.value)}
+                          className="bg-transparent text-xs outline-none w-full text-gray-700"
+                        />
+                      </div>
+                    </div>
+                    <button
                         onClick={() => {
-                          setCityFilter(c);
+                          setStateFilterCode("");
+                          setDistrictFilterCode("");
+                          setCityFilterCode("");
                           setOpenDropdown(null);
                         }}
-                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${cityFilter === c ? "text-red-600 bg-red-50" : "text-slate-600"}`}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${stateFilterCode === "" ? "text-red-600 bg-red-50" : "text-slate-600"}`}
                       >
-                        {c}
+                        All States
                       </button>
-                    ))}
+                    {filteredStates.length > 0 ? filteredStates.map((s) => (
+                      <button
+                        key={s.code}
+                        onClick={() => {
+                          setStateFilterCode(s.code);
+                          setDistrictFilterCode("");
+                          setCityFilterCode("");
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${stateFilterCode === s.code ? "text-red-600 bg-red-50" : "text-slate-600"}`}
+                      >
+                        {s.name}
+                      </button>
+                    )) : (
+                      <div className="px-4 py-3 text-xs text-center text-gray-400">No states found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* District Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    if (stateFilterCode !== "") {
+                      setOpenDropdown(openDropdown === "district" ? null : "district")
+                    }
+                  }}
+                  disabled={stateFilterCode === ""}
+                  className={`flex items-center whitespace-nowrap gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                    districtFilterCode !== "" || openDropdown === "district"
+                      ? "bg-red-600 text-white shadow-md"
+                      : stateFilterCode === "" 
+                        ? "bg-slate-50 border border-slate-200 text-slate-400 opacity-70 cursor-not-allowed" 
+                        : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <Map size={16} className={districtFilterCode !== "" || openDropdown === "district" ? "text-white" : stateFilterCode === "" ? "text-slate-400" : "text-slate-600"} />
+                  {districtFilterCode === "" ? "Districts" : selectedDistrictName}
+                  <ChevronDown size={14} className="ml-0.5 opacity-70" />
+                </button>
+                {openDropdown === "district" && stateFilterCode !== "" && (
+                  <div className="absolute left-0 top-full mt-2 w-56 max-h-72 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1">
+                    <div className="px-2 pb-2 sticky top-0 bg-white border-b border-gray-50 pt-1 z-10">
+                      <div className="flex items-center px-2 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                        <Search size={14} className="text-gray-400 mr-2" />
+                        <input 
+                          type="text" 
+                          placeholder="Search district..." 
+                          value={districtSearch}
+                          onChange={(e) => setDistrictSearch(e.target.value)}
+                          className="bg-transparent text-xs outline-none w-full text-gray-700"
+                        />
+                      </div>
+                    </div>
+                     <button
+                        onClick={() => {
+                          setDistrictFilterCode("");
+                          setCityFilterCode("");
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${districtFilterCode === "" ? "text-red-600 bg-red-50" : "text-slate-600"}`}
+                      >
+                        All Districts
+                      </button>
+                    {filteredDistricts.length > 0 ? filteredDistricts.map((d) => (
+                      <button
+                        key={d.code}
+                        onClick={() => {
+                          setDistrictFilterCode(d.code);
+                          setCityFilterCode("");
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${districtFilterCode === d.code ? "text-red-600 bg-red-50" : "text-slate-600"}`}
+                      >
+                        {d.name}
+                      </button>
+                    )) : (
+                      <div className="px-4 py-3 text-xs text-center text-gray-400">No districts found</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* City Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    if (stateFilterCode !== "") {
+                      setOpenDropdown(openDropdown === "city" ? null : "city")
+                    }
+                  }}
+                  disabled={stateFilterCode === ""}
+                  className={`flex items-center whitespace-nowrap gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                    cityFilterCode !== "" || openDropdown === "city"
+                      ? "bg-red-600 text-white shadow-md"
+                      : stateFilterCode === "" 
+                        ? "bg-slate-50 border border-slate-200 text-slate-400 opacity-70 cursor-not-allowed" 
+                        : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <Building2 size={16} className={cityFilterCode !== "" || openDropdown === "city" ? "text-white" : stateFilterCode === "" ? "text-slate-400" : "text-slate-600"} />
+                  {cityFilterCode === "" ? "Cities" : selectedCityName}
+                  <ChevronDown size={14} className="ml-0.5 opacity-70" />
+                </button>
+                {openDropdown === "city" && stateFilterCode !== "" && (
+                  <div className="absolute left-0 top-full mt-2 w-56 max-h-72 overflow-y-auto bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1">
+                    <div className="px-2 pb-2 sticky top-0 bg-white border-b border-gray-50 pt-1 z-10">
+                      <div className="flex items-center px-2 py-1.5 bg-gray-50 rounded-lg border border-gray-100">
+                        <Search size={14} className="text-gray-400 mr-2" />
+                        <input 
+                          type="text" 
+                          placeholder="Search city..." 
+                          value={citySearch}
+                          onChange={(e) => setCitySearch(e.target.value)}
+                          className="bg-transparent text-xs outline-none w-full text-gray-700"
+                        />
+                      </div>
+                    </div>
+                     <button
+                        onClick={() => {
+                          setCityFilterCode("");
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${cityFilterCode === "" ? "text-red-600 bg-red-50" : "text-slate-600"}`}
+                      >
+                        All Cities
+                      </button>
+                    {filteredCities.length > 0 ? filteredCities.map((c) => (
+                      <button
+                        key={c.name}
+                        onClick={() => {
+                          setCityFilterCode(c.name);
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${cityFilterCode === c.name ? "text-red-600 bg-red-50" : "text-slate-600"}`}
+                      >
+                        {c.name}
+                      </button>
+                    )) : (
+                      <div className="px-4 py-3 text-xs text-center text-gray-400">No cities found</div>
+                    )}
                   </div>
                 )}
               </div>
 
               {/* Sort Dropdown */}
-              <div className="relative">
+             
+            </div>
+          </div>
+          {/* Search Bar */}
+          {/* <div className=" mx-auto">
+            <div className="relative  border rounded-4xl border-black/5 shadow flex items-center">
+              <Search className="text-slate-400 ml-3 shrink-0" size={20} />
+              <input
+                type="text"
+                placeholder="Search branches, cities..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-[250px] pl-3 pr-4 py-1.5 bg-transparent outline-none text-slate-700 placeholder-slate-400 "
+              />
+            </div>
+          </div> */}
+
+           <div className="relative">
                 <button
                   onClick={() =>
                     setOpenDropdown(openDropdown === "sort" ? null : "sort")
                   }
-                  className={`flex items-center whitespace-nowrap gap-1 px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                  className={`flex items-center whitespace-nowrap gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
                     openDropdown === "sort" || sortBy !== "Newest"
                       ? "bg-red-600 text-white shadow-md"
                       : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
+                  <ArrowDownUp size={14} className={openDropdown === "sort" || sortBy !== "Newest" ? "text-white" : "text-slate-600"} />
                   Sort: {sortBy}
                   <ChevronDown size={14} className="ml-0.5 opacity-70" />
                 </button>
@@ -376,21 +573,6 @@ export default function FindUsPage() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
-          {/* Search Bar */}
-          <div className=" mx-auto">
-            <div className="relative  border rounded-4xl border-black/5 shadow flex items-center">
-              <Search className="text-slate-400 ml-3 shrink-0" size={20} />
-              <input
-                type="text"
-                placeholder="Search branches, cities..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-[250px] pl-3 pr-4 py-1.5 bg-transparent outline-none text-slate-700 placeholder-slate-400 "
-              />
-            </div>
-          </div>
         </div>
       </div>
 

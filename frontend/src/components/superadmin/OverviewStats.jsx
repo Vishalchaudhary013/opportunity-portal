@@ -9,7 +9,7 @@ const OverviewStats = () => {
   }
 
   return (
-    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 px-2 xl:grid-cols-4">
       <div className="rounded-lg border border-[#E2EAFC] p-4 bg-white">
         <p className="text-xs text-slate-500 tracking-widest font-semibold">
           TOTAL USERS

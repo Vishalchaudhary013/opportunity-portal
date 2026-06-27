@@ -14,6 +14,7 @@ const Hero = () => {
     "https://edeco-master-page.vercel.app/assets/banner2-C4NiUsvV.png",
     "https://edeco-master-page.vercel.app/assets/banner2-C4NiUsvV.png",
     "https://edeco-master-page.vercel.app/assets/banner3-fGYyopAL.png",
+    
   ];
 
   const [index, setIndex] = useState(0);
@@ -80,6 +81,7 @@ const Hero = () => {
       title: "Web Development",
       duration: "8 months of project building"
     },
+    
   ];
 
   return (
@@ -124,7 +126,7 @@ const Hero = () => {
           style={{ '--slider-transform': `translateX(-${index * 424}px)` }}
         >
           {[...cardsData, ...cardsData].map((card, i) => (
-            <div key={i} className={`relative p-4 md:p-5 w-[85vw] sm:w-[400px] md:w-[450px] h-[260px] md:h-[280px] rounded-xl md:rounded-2xl ${card.bg} flex-shrink-0 shadow-sm snap-center`}>
+            <div key={i} className={`relative p-4 md:p-5 w-[85vw] sm:w-[400px] md:w-[520px] h-[260px] md:h-[280px] rounded-xl md:rounded-2xl ${card.bg} flex-shrink-0 shadow-sm snap-center`}>
               <img
                 src="/hero_students.png"
                 alt=""
