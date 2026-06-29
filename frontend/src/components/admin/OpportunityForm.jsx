@@ -400,6 +400,11 @@ const OpportunityForm = () => {
                     <input type="url" name="googleLocationLink" value={form.googleLocationLink} onChange={handleChange} placeholder="https://maps.google.com/..." className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
                   </label>
 
+                  <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700 ">
+                    <span>Tags for Cards (Comma separated)</span>
+                    <input type="text" name="frontendTags" value={Array.isArray(form.frontendTags) ? form.frontendTags.join(', ') : form.frontendTags || ''} onChange={(e) => handleArrayChange(e, 'frontendTags')} placeholder="e.g. Remote, Urgent" className="border border-[#D6E2FC] rounded-xl px-4 py-3 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 transition-all outline-none" />
+                  </label>
+
                   {isDegreeType && (
                     <>
                       <label className="flex flex-col gap-2 text-sm font-semibold text-slate-700">

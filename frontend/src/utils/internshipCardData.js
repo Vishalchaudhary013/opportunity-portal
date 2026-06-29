@@ -1,6 +1,9 @@
 const normalizeArray = (value) => {
   if (Array.isArray(value)) {
-    return value.map((item) => String(item).trim()).filter(Boolean);
+    return value
+      .flatMap((item) => String(item).split(","))
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
 
   if (typeof value === "string") {
@@ -119,7 +122,7 @@ export const resolveWorkMode = (item) => {
 };
 
 export const getInternshipTags = (item) => {
-  const explicitTags = normalizeArray(item?.cardTags);
+  const explicitTags = normalizeArray(item?.frontendTags?.length ? item?.frontendTags : item?.cardTags);
 
   if (explicitTags.length) {
     return explicitTags;

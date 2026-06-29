@@ -85,6 +85,7 @@ const initialForm = {
   type: "Internship",
   skills: "",
   cardTags: "",
+  frontendTags: "",
   department: "",
   functionalRole: "",
   companyType: "",
@@ -92,6 +93,7 @@ const initialForm = {
   benefits: "",
   programType: "",
   eligibility: "",
+  showHiringManager: true,
   formId: null,
 };
 
@@ -520,7 +522,7 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
       applicationsOpenDate: form.applicationsOpenDate ? new Date(form.applicationsOpenDate).toISOString() : null,
       selectionAnnouncementDate: form.selectionAnnouncementDate ? new Date(form.selectionAnnouncementDate).toISOString() : null,
       stipend: form.stipend ? `${stipendCurrencySymbol}${String(form.stipend).trim()}` : "",
-      ...(shouldIncludeInternshipCardFields ? { workMode: form.workMode, cardTags: form.cardTags } : {}),
+      ...(shouldIncludeInternshipCardFields ? { workMode: form.workMode, cardTags: form.cardTags, frontendTags: form.frontendTags } : {}),
       location: form.cityState || form.location || "Remote",
     };
     try {
@@ -570,6 +572,8 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
       experienceUnit: item.experienceLevel && String(item.experienceLevel).split(" ").length > 1 ? String(item.experienceLevel).split(" ").slice(1).join(" ") : "Years",
       hasOpenings: item.openings != null && String(item.openings).trim() !== "",
       requiredSkills: Array.isArray(item.requiredSkills) ? item.requiredSkills.join(", ") : item.requiredSkills || "",
+      frontendTags: Array.isArray(item.frontendTags) ? item.frontendTags.join(", ") : item.frontendTags || "",
+      showHiringManager: item.showHiringManager !== false,
     };
     const skillsArray = Array.isArray(item.requiredSkills) ? item.requiredSkills : String(item.requiredSkills || "").split(/,|\n/).map((s) => s.trim()).filter(Boolean);
     setRequiredSkillInputs(skillsArray.length > 0 ? skillsArray : ["", "", ""]);

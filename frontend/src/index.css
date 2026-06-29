@@ -27,7 +27,7 @@ body {
 
 @theme {
   --color-red-600:		#FF4E45 ;  /* #00A9F8  #282B8F  #0021f3 	#0013de #1944f1  #00A9E0  #00A9E0 	#ff0000  #FF1F39*/
-  --color-blue-700: #091a30;
+  --color-blue-700:  #1F2853;
 }
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {

@@ -4,9 +4,10 @@ import { CiLocationOn } from "react-icons/ci";
 import { CiCalendar } from "react-icons/ci";
 import { FaLongArrowAltRight } from "react-icons/fa";
 import { useOpportunities } from "../../context/OpportunitiesContext";
-import { BsBookmark, BsBookmarkFill } from "react-icons/bs";
+import { BsBookmark, BsBookmarkFill, BsMicrosoft, BsSave2 } from "react-icons/bs";
 import { LuDot } from "react-icons/lu";
 import { IoBagOutline } from "react-icons/io5";
+import CommonCard from "../cards/CommonCard";
 import {
   formatDeadlineLabel,
   formatDeadlineStatus,
@@ -29,6 +30,7 @@ import {
   Palette,
   FlaskConical,
   Sigma,
+  Save,
 } from "lucide-react";
 import SectionTitle from "../SectionTitle";
 import FilterChips from "../FilterChips";
@@ -46,6 +48,9 @@ import {
   Clock,
   Network
 } from "lucide-react";
+import { MdOutlineSaveAlt } from "react-icons/md";
+import { LiaRupeeSignSolid } from "react-icons/lia";
+
 const Internship = ({ limit }) => {
   const [selectedCategory, setSelectedCategory] = React.useState(null);
   const location = useLocation();
@@ -106,6 +111,8 @@ const Internship = ({ limit }) => {
     }
     return typeof limit === "number" ? data.slice(0, limit) : data;
   }, [intershipData, selectedCategory, limit, locationFilter]);
+
+
 
   return (
     //   <>
@@ -205,22 +212,22 @@ const Internship = ({ limit }) => {
       <div className="bg-[#F7F9FC]">
         <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto py-8 sm:py-10 ">
 
-           <div className="mb-3">
+          <div className="mb-3">
             <SectionTitle
-                title="Internships"
-                subtitle="Gain Practical Industry Experience Before Diving into a Full-Time Career"
-                defination="A short-term professional learning experience that offers meaningful, practical work related to a student’s field of study or career interest. Internships bridge the gap between academic theory and real-world execution."
-                viewAllLink="/internships"
-              />
-           </div>
-          
-          <FilterChips 
-            categories={categories} 
-            selectedCategory={selectedCategory} 
-            onSelectCategory={setSelectedCategory} 
+              title="Internships"
+              subtitle="Gain Practical Industry Experience Before Diving into a Full-Time Career"
+              defination="A short-term professional learning experience that offers meaningful, practical work related to a student’s field of study or career interest. Internships bridge the gap between academic theory and real-world execution."
+              viewAllLink="/internships"
+            />
+          </div>
+
+          <FilterChips
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
           />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+          {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
             {visibleInternships.map((data) => (
               <Link
                 to={`/internship/${data.id}`}
@@ -345,6 +352,14 @@ const Internship = ({ limit }) => {
                 </div>
               </Link>
             ))}
+          </div> */}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            {
+              visibleInternships.map((item) => (
+                <CommonCard key={item.id} item={item} />
+              ))
+            }
           </div>
         </div>
       </div>

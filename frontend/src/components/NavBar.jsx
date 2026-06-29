@@ -11,6 +11,8 @@ import {
 } from "react-icons/io5";
 import { FaLocationArrow, FaWhatsapp } from "react-icons/fa6";
 import { Home } from "lucide-react";
+import { IoMdPlay } from "react-icons/io";
+import logo from "../assets/logo.jpeg";
 
 const NavBar = () => {
   const [showExplore, setShowExplore] = useState(false);
@@ -144,7 +146,6 @@ const NavBar = () => {
                 </li>
               </ul>
               <ul className="flex items-center gap-5">
-                
                 <li className="group relative overflow-hidden rounded-lg p-[1.5px]">
                   {/* Rotating border */}
                   <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -158,19 +159,19 @@ const NavBar = () => {
                   >
                     <IoLocationSharp size={16} />
                     <span className="pr-1 text-[13px] font-medium text-gray-800">
-                      Find Us
+                      Our Location
                     </span>
                   </button>
                 </li>
 
                 <li>
-                  <a 
-                    href="https://wa.me/+918219263983?text=Hello!%20I%20am%20exploring%20the%20edeco%20platform%20and%20I%20have%20a%20query." 
-                    target="_blank" 
+                  <a
+                    href="https://wa.me/+918219263983?text=Hello!%20I%20am%20exploring%20the%20edeco%20platform%20and%20I%20have%20a%20query."
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center text-[13px] text-green-800 gap-1.5 font-medium border border-green-400 rounded-lg px-3 py-1 bg-green-200 hover:bg-green-300 transition-colors shadow-sm cursor-pointer"
                   >
-                     <FaWhatsapp size={16}/> Whatsapp
+                    <FaWhatsapp size={16} /> Whatsapp
                   </a>
                 </li>
 
@@ -190,7 +191,7 @@ const NavBar = () => {
                   </button>
                 </li>
 
-                 <li className="flex gap-4 items-center">
+                <li className="flex gap-4 items-center">
                   {user ? (
                     <div className="relative group">
                       <button className="h-9 w-9 rounded-full bg-red-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
@@ -253,7 +254,6 @@ const NavBar = () => {
                     </>
                   )}
                 </li>
-               
               </ul>
             </div>
           </div>
@@ -268,15 +268,16 @@ const NavBar = () => {
                 className="flex items-center cursor-pointer"
                 onClick={() => {
                   if (window.location.pathname === "/") {
-                    window.scrollTo({ top: 0, behavior: "smooth" });
+                    
                   } else {
                     navigate("/");
                   }
                 }}
               >
-                <span className="font-display font-extrabold text-3xl tracking-tight leading-none transition-colors duration-300 text-[#1F2853]">
-                  edeco
-                </span>
+                <div className="font-display font-extrabold  tracking-tight leading-none transition-colors duration-300 text-[#1F2853] flex items-center">
+                  <img src={logo} alt="edeco logo" className="h-15  rounded-full" />
+                  <span className="text-3xl">edeco</span>
+                </div>
               </div>
 
               {/*  EXPLORE DROPDOWN  */}
@@ -286,8 +287,8 @@ const NavBar = () => {
               <div
                 className="group"
                 ref={exploreButtonRef}
-                onMouseEnter={() => setShowExplore(true)}
-                onMouseLeave={() => setShowExplore(false)}
+                // onMouseEnter={() => setShowExplore(true)}
+                // onMouseLeave={() => setShowExplore(false)}
               >
                 {/* EXPLORE BUTTON */}
                 <button
@@ -297,7 +298,7 @@ const NavBar = () => {
                 `}
                 >
                   Career Services
-                  <MdKeyboardArrowDown
+                  {/* <MdKeyboardArrowDown
                     size={25}
                     className=""
                     style={{
@@ -306,7 +307,7 @@ const NavBar = () => {
                         : "rotate(0deg)",
                       transition: "transform 0.2s",
                     }}
-                  />
+                  /> */}
                   {/* <i
                       className="bi bi-chevron-down"
                       
@@ -314,130 +315,132 @@ const NavBar = () => {
                 </button>
 
                 {/* MEGA DROPDOWN */}
-                {showExplore && (
-                  <div className="absolute left-0 top-full w-full bg-white shadow-xl border-t border-gray-100 z-50">
-                    {/* HOVER BRIDGE (IMPORTANT – invisible) */}
-                    <div className="absolute -top-[20px] left-0 w-full h-[20px]"></div>
+                
+                  {/* {showExplore && (
+                    <div className="absolute left-0 top-full w-full bg-white shadow-xl border-t border-gray-100 z-50">
+                      {/* HOVER BRIDGE (IMPORTANT – invisible) 
+                      <div className="absolute -top-[20px] left-0 w-full h-[20px]"></div>
 
-                    <div 
-                      className="w-full flex flex-col" 
-                      style={{ paddingLeft: `${exploreLeftOffset}px` }}
-                    >
-                      <div className="w-[880px]">
-                        <div className="grid grid-cols-5 gap-5 p-7">
-                      {/* COLUMN 1 */}
-                      <div>
-                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                          Internships
-                        </h4>
-                        <ul className="space-y-2 text-[13px] text-gray-600">
-                          <li className="hover:underline cursor-pointer">
-                            Summer Internships
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Remote Internships
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Global Internships
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Paid Internships
-                          </li>
-                        </ul>
-                      </div>
+                      <div
+                        className="w-full flex flex-col"
+                        style={{ paddingLeft: `${exploreLeftOffset}px` }}
+                      >
+                        <div className="w-[880px]">
+                          <div className="grid grid-cols-5 gap-5 p-7">
+                            {/* COLUMN 1
+                            <div>
+                              <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                                Internships
+                              </h4>
+                              <ul className="space-y-2 text-[13px] text-gray-600">
+                                <li className="hover:underline cursor-pointer">
+                                  Summer Internships
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Remote Internships
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Global Internships
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Paid Internships
+                                </li>
+                              </ul>
+                            </div>
 
-                      {/* COLUMN 2 */}
-                      <div>
-                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                          Apprenticeships
-                        </h4>
-                        <ul className="space-y-2 text-[13px] text-gray-600">
-                          <li className="hover:underline cursor-pointer">
-                            Tech Apprenticeships
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Management Apprenticeships
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Finance Apprenticeships
-                          </li>
-                        </ul>
-                      </div>
+                            {/* COLUMN 2 
+                            <div>
+                              <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                                Apprenticeships
+                              </h4>
+                              <ul className="space-y-2 text-[13px] text-gray-600">
+                                <li className="hover:underline cursor-pointer">
+                                  Tech Apprenticeships
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Management Apprenticeships
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Finance Apprenticeships
+                                </li>
+                              </ul>
+                            </div>
 
-                      {/* COLUMN 3 */}
-                      <div>
-                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                          Jobs
-                        </h4>
-                        <ul className="space-y-2 text-[13px] text-gray-600">
-                          <li className="hover:underline cursor-pointer">
-                            Full-time Roles
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Part-time Roles
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Fresher Jobs
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Remote Jobs
-                          </li>
-                        </ul>
-                      </div>
+                            {/* COLUMN 3 
+                            <div>
+                              <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                                Jobs
+                              </h4>
+                              <ul className="space-y-2 text-[13px] text-gray-600">
+                                <li className="hover:underline cursor-pointer">
+                                  Full-time Roles
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Part-time Roles
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Fresher Jobs
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Remote Jobs
+                                </li>
+                              </ul>
+                            </div>
 
-                      {/* COLUMN 4 */}
-                      <div>
-                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                          Bootcamps
-                        </h4>
-                        <ul className="space-y-2 text-[13px] text-gray-600">
-                          <li className="hover:underline cursor-pointer">
-                            Coding Bootcamps
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Data Science Bootcamps
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Design Bootcamps
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Marketing Bootcamps
-                          </li>
-                        </ul>
-                      </div>
+                            {/* COLUMN 4 
+                            <div>
+                              <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                                Bootcamps
+                              </h4>
+                              <ul className="space-y-2 text-[13px] text-gray-600">
+                                <li className="hover:underline cursor-pointer">
+                                  Coding Bootcamps
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Data Science Bootcamps
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Design Bootcamps
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Marketing Bootcamps
+                                </li>
+                              </ul>
+                            </div>
 
-                      {/* COLUMN 5 */}
-                      <div>
-                        <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
-                          PG Programs
-                        </h4>
-                        <ul className="space-y-2 text-[13px] text-gray-600">
-                          <li className="hover:underline cursor-pointer">
-                            PG Diplomas
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Executive Programs
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Hybrid Programs
-                          </li>
-                          <li className="hover:underline cursor-pointer">
-                            Online Masters
-                          </li>
-                        </ul>
+                            {/* COLUMN 5 
+                            <div>
+                              <h4 className="font-semibold text-[14px] mb-3 text-gray-900">
+                                PG Programs
+                              </h4>
+                              <ul className="space-y-2 text-[13px] text-gray-600">
+                                <li className="hover:underline cursor-pointer">
+                                  PG Diplomas
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Executive Programs
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Hybrid Programs
+                                </li>
+                                <li className="hover:underline cursor-pointer">
+                                  Online Masters
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                          {/* BOTTOM STRIP 
+                          <div className="border-t border-gray-100 px-8 py-4 text-sm text-gray-600 bg-gray-50/50 w-[880px]">
+                            Not sure where to begin?
+                            <span className="text-red-600 ml-2 hover:underline cursor-pointer">
+                              Browse all programs →
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    {/* BOTTOM STRIP */}
-                    <div className="border-t border-gray-100 px-8 py-4 text-sm text-gray-600 bg-gray-50/50 w-[880px]">
-                      Not sure where to begin?
-                      <span className="text-red-600 ml-2 hover:underline cursor-pointer">
-                        Browse all programs →
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+                  )} */}
+                
               </div>
 
               {/* DEGREES */}
@@ -474,7 +477,7 @@ const NavBar = () => {
                 After K12
               </a>
               <a
-                href="https://event-r6amjwiws-vishal-chaudharys-projects-57aced94.vercel.app/"
+                href="https://event-lfawf6ih5-vishal-chaudharys-projects-57aced94.vercel.app/"
                 className="text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 text-gray-700"
               >
                 Events
@@ -513,13 +516,9 @@ const NavBar = () => {
                 </NavLink> */}
             </div>
             {/* RIGHT ACTIONS */}
-           <div className="border border-black/10 bg-[#1F2853] text-white rounded-lg py-1.5 px-5 flex items-center gap-1.5">
-
-            <IoPlayCircleSharp size={20}/> Expert
-
-
-
-           </div>
+            <div className="border border-black/10 bg-[#1F2853] text-white rounded-lg py-1.5 px-5 flex items-center gap-1.5">
+              <IoMdPlay size={20} /> Expert Consulting
+            </div>
 
             {/* Mobile Menu Drawer */}
             {mobileMenuOpen && (

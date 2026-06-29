@@ -23,31 +23,6 @@ const Hero = () => {
   const [activeTab, setActiveTab] = useState("Courses");
   const navigate = useNavigate();
 
-  const prevSlide = () => {
-    setIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const nextSlide = () => {
-    setIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  useEffect(() => {
-    if (isHovered) return;
-    const interval = setInterval(() => {
-      setIndex((prev) => (prev === 3 ? 0 : prev + 1));
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [isHovered]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/internship?search=${encodeURIComponent(searchQuery)}`);
-    } else {
-      navigate('/internship');
-    }
-  };
-
   const cardsData = [
     { 
       bg: "bg-[#C9F29B]", 
@@ -81,8 +56,51 @@ const Hero = () => {
       title: "Web Development",
       duration: "8 months of project building"
     },
-    
+    { 
+      bg: "bg-[#C9F29B]", 
+      alignTop: true, 
+      clipPath: "url(#top-clip)",
+      level: "Intermediate",
+      title: "Graphic Design",
+      duration: "5 months of creative study"
+    },
+    { 
+      bg: "bg-[#FF985E]", 
+      alignTop: false, 
+      clipPath: "url(#bottom-clip)",
+      level: "Advanced",
+      title: "Machine Learning",
+      duration: "1.5 years of deep learning"
+    },
   ];
+
+  const CARDS_SLIDE = 3;
+
+  const prevSlide = () => {
+    setIndex((prev) => (prev === 0 ? cardsData.length - CARDS_SLIDE : prev - CARDS_SLIDE));
+  };
+
+  const nextSlide = () => {
+    setIndex((prev) => (prev + CARDS_SLIDE >= cardsData.length ? 0 : prev + CARDS_SLIDE));
+  };
+
+  useEffect(() => {
+    if (isHovered) return;
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + CARDS_SLIDE >= cardsData.length ? 0 : prev + CARDS_SLIDE));
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isHovered]);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/internship?search=${encodeURIComponent(searchQuery)}`);
+    } else {
+      navigate('/internship');
+    }
+  };
+
 
   return (
    <>
@@ -123,7 +141,7 @@ const Hero = () => {
 
         <div 
           className="flex gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory scrollbar-hide md:transition-transform md:duration-700 md:ease-in-out hero-slider-transform"
-          style={{ '--slider-transform': `translateX(-${index * 424}px)` }}
+          style={{ '--slider-transform': `translateX(-${index * 544}px)` }}
         >
           {[...cardsData, ...cardsData].map((card, i) => (
             <div key={i} className={`relative p-4 md:p-5 w-[85vw] sm:w-[400px] md:w-[520px] h-[260px] md:h-[280px] rounded-xl md:rounded-2xl ${card.bg} flex-shrink-0 shadow-sm snap-center`}>

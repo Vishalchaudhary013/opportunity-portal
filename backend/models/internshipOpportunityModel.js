@@ -58,6 +58,7 @@ const internshipOpportunitySchema = new mongoose.Schema(
     logo: { type: String, default: "", trim: true },
     featuredListing: { type: Boolean, default: false },
     hiringManager: { type: String, default: "", trim: true },
+    showHiringManager: { type: Boolean, default: true },
     socialProofLinks: {
       linkedin: { type: String, default: "", trim: true },
       twitter: { type: String, default: "", trim: true },
@@ -69,10 +70,11 @@ const internshipOpportunitySchema = new mongoose.Schema(
     specialties: { type: String, default: "", trim: true },
 
     
-    location: { type: String, default: "Remote", trim: true }, 
-    type: { type: String, default: "Internship", enum: ["Internship", "Global Program", "Jobs", "Bootcamps", "Masterclasses", "Degree Programs", "PG Programs"], required: true },
+    location: { type: String, trim: true }, 
+    type: { type: String, enum: ["Internship", "Global Program", "Jobs", "Bootcamps", "Masterclasses", "Degree Programs", "PG Programs"], required: true },
     skills: { type: [String], default: [] }, 
     cardTags: { type: [String], default: [] },
+    frontendTags: { type: [String], default: [] },
     department: { type: String, default: "", trim: true }, 
     functionalRole: { type: String, default: "", trim: true }, 
     companyType: { type: String, default: "", trim: true }, 

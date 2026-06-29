@@ -9,30 +9,27 @@ import {
   FiShield,
   FiCheckCircle,
   FiUsers,
+  FiChevronDown,
+  FiCheck,
 } from "react-icons/fi";
 import { useAdminContext } from "./AdminContext";
-import { LayoutPanelLeft } from "lucide-react";
+import { LayoutPanelLeft, LocateIcon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 
-const ADMIN_MENU_ITEMS = [
-  { key: "Internship", label: "Internships" },
-  { key: "Apprenticeships", label: "Apprenticeships" },
-  { key: "Jobs", label: "Jobs" },
-  { key: "Mentorships", label: "Industry Mentorships" },
-  { key: "Bootcamps", label: "Workshops & Bootcamps" },
-  { key: "Certificate Programs", label: "Certificate Programs" },
-  { key: "Bachelors Degrees", label: "Bachelor's Degrees" },
-  { key: "Post Graduate Programs", label: "Post Graduate Programs" },
-  { key: "Masters Degrees", label: "Masters' Degrees" },
-  { key: "Doctorates & PhD", label: "Doctorates & PhD" },
-  { key: "Integrated Degrees", label: "Integrated Degrees" },
-  { key: "Global Program", label: "Global Programs" },
+const CORE_ADMIN_ITEMS = [
   { key: "Closed Application", label: "Closed Application" },
 ];
 
-const SUPER_MENU_ITEMS = [
+const CORE_SUPER_ITEMS = [
   { key: "Overview", label: "Overview" },
   { key: "Admins", label: "Admins" },
   { key: "Users", label: "Users" },
+  { key: "Location", label: "Location" },
+  { key: "All Application", label: "All Application" },
+  { key: "Closed Application", label: "Closed Application" },
+];
+
+const PROGRAM_ITEMS = [
   { key: "Internship", label: "Internships" },
   { key: "Apprenticeships", label: "Apprenticeships" },
   { key: "Jobs", label: "Jobs" },
@@ -45,8 +42,6 @@ const SUPER_MENU_ITEMS = [
   { key: "Doctorates & PhD", label: "Doctorates & PhD" },
   { key: "Integrated Degrees", label: "Integrated Degrees" },
   { key: "Global Program", label: "Global Programs" },
-  { key: "All Application", label: "All Application" },
-  { key: "Closed Application", label: "Closed Application" },
 ];
 
 const getMenuIcon = (key) => {
@@ -70,6 +65,7 @@ const getMenuIcon = (key) => {
     "Post Opportunity": <FiBriefcase size={16} />,
     Admins: <FiShield size={16} />,
     Users: <FiUsers size={16} />,
+    Location:<LocateIcon size={16} />
   };
   return icons[key] || null;
 };
@@ -77,17 +73,103 @@ const getMenuIcon = (key) => {
 const AdminSidebar = () => {
   const { isSuperDashboard, isSuperAdmin, activeSection, handleSectionChange, handleLogout } = useAdminContext();
 
-  const menuItems = isSuperDashboard && isSuperAdmin ? SUPER_MENU_ITEMS : ADMIN_MENU_ITEMS;
+  const [selectedPrograms, setSelectedPrograms] = useState(() => {
+    const saved = localStorage.getItem("admin_sidebar_preferences");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return [];
+      }
+    }
+    return ["Internship", "Jobs"];
+  });
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    localStorage.setItem("admin_sidebar_preferences", JSON.stringify(selectedPrograms));
+  }, [selectedPrograms]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const toggleProgram = (key) => {
+    setSelectedPrograms(prev => 
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  };
+
+  const coreItems = isSuperDashboard && isSuperAdmin ? CORE_SUPER_ITEMS : CORE_ADMIN_ITEMS;
+  const activeProgramItems = (isSuperDashboard && isSuperAdmin) 
+    ? PROGRAM_ITEMS 
+    : PROGRAM_ITEMS.filter(item => selectedPrograms.includes(item.key));
+  
+  let finalMenuItems = [];
+  if (isSuperDashboard && isSuperAdmin) {
+     finalMenuItems = [
+       ...CORE_SUPER_ITEMS.slice(0, 4),
+       ...activeProgramItems,
+       ...CORE_SUPER_ITEMS.slice(4)
+     ];
+  } else {
+     finalMenuItems = [
+       ...activeProgramItems,
+       ...CORE_ADMIN_ITEMS
+     ];
+  }
 
   return (
     <aside className="bg-[#E4EBFB] border border-[#D8E2F7]  p-4 xl:sticky xl:top-0 h-full flex flex-col overflow-hidden">
-      <div className="mb-7">
-        <p className="text-slate-900 text-xl font-semibold">Admin Control</p>
-        <p className="text-[11px] tracking-[0.16em] text-slate-500 mt-1 font-semibold"></p>
+      <div className="mb-7 relative" ref={dropdownRef}>
+        <div className="flex items-center justify-between">
+          <p className="text-slate-900 text-xl font-semibold">Admin Control</p>
+        </div>
+        
+        {!(isSuperDashboard && isSuperAdmin) && (
+          <>
+            <button 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="mt-3 w-full flex items-center justify-between px-3 py-2 bg-white border border-[#DCE5FA] rounded-lg text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 transition"
+            >
+              Choose
+              <FiChevronDown size={14} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#DCE5FA] rounded-lg shadow-xl z-50 max-h-[300px] overflow-y-auto custom-scrollbar p-2">
+                <p className="text-[10px] uppercase font-bold text-slate-400 mb-2 px-2 tracking-wider">Select Programs</p>
+                {PROGRAM_ITEMS.map(item => {
+                  const isSelected = selectedPrograms.includes(item.key);
+                  return (
+                    <button
+                      key={item.key}
+                      onClick={() => toggleProgram(item.key)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 text-xs font-medium text-slate-700 hover:bg-blue-50 rounded transition-colors text-left"
+                    >
+                      <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${isSelected ? 'bg-blue-600 border-blue-600' : 'border-slate-300'}`}>
+                        {isSelected && <FiCheck size={10} className="text-white" />}
+                      </div>
+                      {item.label}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-7 sm:grid-cols-3 xl:grid-cols-1 xl:space-y-2 xl:gap-0 overflow-y-auto custom-scrollbar pr-1">
-        {menuItems.map((item) => (
+        {finalMenuItems.map((item) => (
           <button
             key={item.key}
             type="button"

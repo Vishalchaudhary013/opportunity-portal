@@ -17,176 +17,8 @@ import BookingModal from "../components/find-us/BookingModal";
 import VisitModal from "../components/find-us/VisitModal";
 import { getStates, getDistricts } from 'india-location-kit';
 import { City } from 'country-state-city';
-
-// Expanded Mock data based on screenshots
-const branches = [
-  {
-    id: "amd-cg-road",
-    region: "West",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    name: "Ahmedabad CG Road",
-    address:
-      "102-104, 323 Corporate Park, Besides- Samudra Complex, Girish Cold Drink Cross Roads, Off C. G. Road, Navrangpura, Ahmedabad, Gujarat - 380009",
-    phones: ["079 4014 1919", "+91 78740 03199"],
-    email: "info.amd@edeco.in",
-    whatsapp: "918278713791",
-  },
-  {
-    id: "amd-iskcon",
-    region: "West",
-    city: "Ahmedabad",
-    state: "Gujarat",
-    name: "Ahmedabad Iskcon",
-    address:
-      "106, Palak Prime, Opp. Double Tree by Hilton, Iskcon-Ambli Road, Ahmedabad, Gujarat - 380058",
-    phones: ["+91 84908 49007"],
-    email: "amd.iskcon@edeco.in",
-    whatsapp: "918490849007",
-  },
-  {
-    id: "anand",
-    region: "West",
-    city: "Anand",
-    state: "Gujarat",
-    name: "Anand",
-    address:
-      "Cube - 0675, Ground floor, Opp Bakeland Bakery, Near Sardar Statue, V.V. Nagar, Anand, Gujarat - 388120",
-    phones: ["+91 90238 58622"],
-    email: "info.anand@edeco.in",
-    whatsapp: "919023858622",
-  },
-  {
-    id: "delhi-cp",
-    region: "North",
-    city: "New Delhi",
-    state: "Delhi NCR",
-    name: "New Delhi Connaught Place",
-    address:
-      "601 & 602, 6th Floor, Ashoka Estate Building, 24 Barakhamba Road, Connaught Place, New Delhi - 110001",
-    phones: ["011 4015 1515", "+91 95998 08801"],
-    email: "info.delhi@edeco.in",
-    whatsapp: "919599808801",
-  },
-  {
-    id: "noida",
-    region: "North",
-    city: "Noida",
-    state: "Delhi NCR",
-    name: "Noida Sector 18",
-    address:
-      "Office No. 302, 3rd Floor, Wave Silver Tower, Sector 18, Noida, Uttar Pradesh - 201301",
-    phones: ["+91 95998 08802"],
-    email: "info.noida@edeco.in",
-    whatsapp: "919599808802",
-  },
-  {
-    id: "blr-ashok",
-    region: "South",
-    city: "Bengaluru",
-    state: "Karnataka",
-    name: "Bengaluru Ashok Nagar",
-    address:
-      "Ground Floor, Unit No. 03, Richmond Plaza, Richmond Circle, Bangalore, Karnataka - 560025",
-    phones: ["080 4641 4141", "+91 99000 88201"],
-    email: "info.blr@edeco.in",
-    whatsapp: "919900088201",
-  },
-  {
-    id: "chd-sec17",
-    region: "North",
-    city: "Chandigarh",
-    state: "Punjab & Chandigarh",
-    name: "Chandigarh Sector 17",
-    address: "SCO 147-148, 2nd Floor, Sector 17-C, Chandigarh, Punjab - 160017",
-    phones: ["0172 402 0202", "+91 98888 77601"],
-    email: "info.chd@edeco.in",
-    whatsapp: "919888877601",
-  },
-  {
-    id: "chennai-nung",
-    region: "South",
-    city: "Chennai",
-    state: "Tamil Nadu",
-    name: "Chennai Nungambakkam",
-    address:
-      "No. 12, 4th Floor, Apex Plaza, Nungambakkam High Road, Chennai, Tamil Nadu - 600034",
-    phones: ["044 4292 9292", "+91 98400 88301"],
-    email: "info.chennai@edeco.in",
-    whatsapp: "919840088301",
-  },
-  {
-    id: "hyd-banjara",
-    region: "South",
-    city: "Hyderabad",
-    state: "Telangana",
-    name: "Hyderabad Banjara Hills",
-    address:
-      "5th Floor, Shangrila Plaza, Opposite KBR Park, Road No. 2, Banjara Hills, Hyderabad, Telangana - 500034",
-    phones: ["040 4455 5555", "+91 91000 88401"],
-    email: "info.hyd@edeco.in",
-    whatsapp: "919100088401",
-  },
-  {
-    id: "kochi-ravi",
-    region: "South",
-    city: "Kochi",
-    state: "Kerala",
-    name: "Kochi Ravipuram",
-    address:
-      "Door No. 39/3547, 1st Floor, Ravipuram Road, Valanjambalam, Kochi, Kerala - 682016",
-    phones: ["0484 411 1111", "+91 97450 88501"],
-    email: "info.kochi@edeco.in",
-    whatsapp: "919745088501",
-  },
-  {
-    id: "mumbai-church",
-    region: "West",
-    city: "Mumbai",
-    state: "Maharashtra",
-    name: "Mumbai Churchgate",
-    address:
-      "Office No. 4, Ground Floor, Merchant Chambers, Opp. Churchgate Station, Mumbai, Maharashtra - 400020",
-    phones: ["022 4343 4343", "+91 98200 88601"],
-    email: "info.mumbai@edeco.in",
-    whatsapp: "919820088601",
-  },
-  {
-    id: "pune-fc",
-    region: "West",
-    city: "Pune",
-    state: "Maharashtra",
-    name: "Pune F.C. Road",
-    address:
-      "Office No. 101, 1st Floor, Pride House, F.C. Road, Shivajinagar, Pune, Maharashtra - 411005",
-    phones: ["020 4911 1111", "+91 99230 88701"],
-    email: "info.pune@edeco.in",
-    whatsapp: "919923088701",
-  },
-  {
-    id: "vijayawada",
-    region: "South",
-    city: "Vijayawada",
-    state: "Andhra Pradesh",
-    name: "Vijayawada Benz Circle",
-    address:
-      "Door No. 40-1-140, 3rd Floor, K.P. Towers, Benz Circle, Vijayawada, Andhra Pradesh - 520010",
-    phones: ["0866 248 4848", "+91 88866 88501"],
-    email: "info.vij@edeco.in",
-    whatsapp: "918886688501",
-  },
-  {
-    id: "gurugram-sec44",
-    region: "North",
-    city: "Gurugram",
-    state: "Haryana",
-    name: "Gurugram Sector 44",
-    address: "100 Tech Park Avenue, Sector 44, Gurugram, Haryana - 122003",
-    phones: ["+91 98765 43210"],
-    email: "info.gurgaon@edeco.in",
-    whatsapp: "919876543210",
-  },
-];
+import { MdOutlineSort } from "react-icons/md";
+import apiClient from "../api/apiClient";
 
 const STATE_REGION_MAP = {
   // North
@@ -205,8 +37,20 @@ const REGIONS = ["Regions", "North", "South", "East", "West", "Central"];
 const SORT_OPTIONS = ["Newest", "Most Visited", "A-Z"];
 
 export default function FindUsPage() {
+  const [branches, setBranches] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const res = await apiClient.get("/api/branch");
+        setBranches(res.data.data || []);
+      } catch (err) {
+        console.error("Failed to fetch branches:", err);
+      }
+    };
+    fetchBranches();
+  }, []);
   const [regionFilter, setRegionFilter] = useState("Regions");
   const [stateFilterCode, setStateFilterCode] = useState("");
   const [districtFilterCode, setDistrictFilterCode] = useState("");
@@ -552,7 +396,7 @@ export default function FindUsPage() {
                       : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   }`}
                 >
-                  <ArrowDownUp size={14} className={openDropdown === "sort" || sortBy !== "Newest" ? "text-white" : "text-slate-600"} />
+                  <MdOutlineSort size={14} className={openDropdown === "sort" || sortBy !== "Newest" ? "text-white" : "text-slate-600"} />
                   Sort: {sortBy}
                   <ChevronDown size={14} className="ml-0.5 opacity-70" />
                 </button>
