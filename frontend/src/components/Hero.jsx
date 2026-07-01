@@ -170,15 +170,15 @@ const Hero = () => {
       <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto mt-6 md:mt-8">
         {/* Tabs */}
         <div className="flex w-full overflow-x-auto scrollbar-hide items-end gap-[2px]">
-          {["Internship",  "Apprenticeships", "Jobs", "Bootcamps", "Master Degrees", "Site Search"].map((tab) => (
+          {["Internship",  "Apprenticeships", "Jobs", "Degree Programs", "Global Programs", "Site Search"].map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
               className={`flex-1 whitespace-nowrap px-4 md:px-5 py-3 md:py-4.5 text-[15px] md:text-[18px] font-semibold rounded-t-xl border border-b-0 transition-colors ${
                 activeTab === tab
-                  ? "bg-red-600 text-white border-[#00A9E0] relative z-10"
-                  : "bg-[#1F2853] text-white border-transparent hover:bg-[]"
+                  ? "bg-red-600 text-white  relative z-10"
+                  : "bg-[#1F2853] text-white "
               }`}
               style={activeTab === tab ? { marginBottom: "-1px" } : {}}
             >
@@ -190,7 +190,7 @@ const Hero = () => {
         {/* Search Inputs Container */}
         <form 
           onSubmit={handleSearch}
-          className="bg-white px-4 md:px-5 py-5 md:py-7 rounded-b-[4px] shadow-sm flex gap-4 md:gap-5 flex-col lg:flex-row w-full border-t border-[#00A9E0] relative z-0"
+          className="bg-white px-4 md:px-5 py-5 md:py-7 rounded-b-xl shadow-sm flex gap-4 md:gap-5 flex-col lg:flex-row w-full  relative z-0"
         >
           <input
             type="text"

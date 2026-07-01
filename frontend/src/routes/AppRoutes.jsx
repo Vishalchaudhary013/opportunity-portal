@@ -22,6 +22,7 @@ import ChooseSignup from "../components/signup/ChooseSignup";
 import DegreePage from "../pages/DegreePage";
 import DegreeDetailPage from "../pages/DegreeDetailPage";
 import FindUsPage from "../pages/FindUsPage";
+import Resource from "../pages/Resource";
 
 const AppRoutes = () => {
   return (
@@ -40,6 +41,7 @@ const AppRoutes = () => {
       <Route path='/degrees' element={<DegreePage />}/>
       <Route path='/degree/:id' element={<DegreeDetailPage />}/>
       <Route path="/locate-us" element={<FindUsPage />} />
+      <Route path="/resources" element={<Resource />} />
 
       {/* Protected Routes (Any logged in user) */}
       <Route element={<ProtectedRoute />}>

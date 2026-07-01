@@ -3,7 +3,7 @@ import { GoArrowRight } from "react-icons/go";
 import { TbQuestionMark } from "react-icons/tb";
 import { Link } from "react-router-dom";
 
-const SectionTitle = ({ title, subtitle , defination, viewAllLink = "/intership" }) => (
+const SectionTitle = ({ title, subtitle , defination, viewAllLink = "/intership", hideViewAll = false }) => (
   <>
 
     {/* Title Section */}
@@ -56,24 +56,22 @@ const SectionTitle = ({ title, subtitle , defination, viewAllLink = "/intership"
         )}
       </div>
 
-      <div>
-
-        <Link
-          to={viewAllLink}
-          className="flex border-2 items-center py-0.5 px-4 gap-2 rounded-lg border-[#1F2853] "
-        >
-          <div className="font-medium  text-[#1F2853]     ">
-            View All
-          </div>
-          
-          <span>
-            <GoArrowRight size={18} className="text-[#1F2853]" />
-          </span>
-        </Link>
-
-        
-
-      </div>
+      {!hideViewAll && (
+        <div>
+          <Link
+            to={viewAllLink}
+            className="flex border-2 items-center py-0.5 px-4 gap-2 rounded-lg border-[#1F2853] "
+          >
+            <div className="font-medium  text-[#1F2853]     ">
+              View All
+            </div>
+            
+            <span>
+              <GoArrowRight size={18} className="text-[#1F2853]" />
+            </span>
+          </Link>
+        </div>
+      )}
       </div>
     </div>
   </>

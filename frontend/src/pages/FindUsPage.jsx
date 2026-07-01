@@ -35,6 +35,7 @@ const STATE_REGION_MAP = {
 
 const REGIONS = ["Regions", "North", "South", "East", "West", "Central"];
 const SORT_OPTIONS = ["Newest", "Most Visited", "A-Z"];
+const POPULAR_CITIES = ["Popular City", "Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune", "Kolkata"];
 
 export default function FindUsPage() {
   const [branches, setBranches] = useState([]);
@@ -52,6 +53,7 @@ export default function FindUsPage() {
     fetchBranches();
   }, []);
   const [regionFilter, setRegionFilter] = useState("Regions");
+  const [popularCityFilter, setPopularCityFilter] = useState("Popular City");
   const [stateFilterCode, setStateFilterCode] = useState("");
   const [districtFilterCode, setDistrictFilterCode] = useState("");
   const [cityFilterCode, setCityFilterCode] = useState("");
@@ -91,6 +93,8 @@ export default function FindUsPage() {
   const filteredDistricts = districts.filter(d => d.name.toLowerCase().includes(districtSearch.toLowerCase()));
   const filteredCities = cities.filter(c => c.name.toLowerCase().includes(citySearch.toLowerCase()));
 
+
+  const selectedPopularCityName = states.find(s => s.code === stateFilterCode)?.name || "Popular City";
   const selectedStateName = states.find(s => s.code === stateFilterCode)?.name || "States";
   const selectedDistrictName = districts.find(d => d.code === districtFilterCode)?.name || "Districts";
   const selectedCityName = cityFilterCode || "Cities";
@@ -101,10 +105,11 @@ export default function FindUsPage() {
       branch.address.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRegion = regionFilter === "Regions" || branch.region === regionFilter;
+    const matchesPopularCity = popularCityFilter === "Popular City" || branch.city.toLowerCase() === popularCityFilter.toLowerCase();
     const matchesState = !stateFilterCode || branch.state.toLowerCase().includes(selectedStateName.toLowerCase()) || selectedStateName.toLowerCase().includes(branch.state.toLowerCase());
     const matchesCity = !cityFilterCode || branch.city.toLowerCase() === selectedCityName.toLowerCase();
 
-    return matchesSearch && matchesRegion && matchesState && matchesCity;
+    return matchesSearch && matchesRegion && matchesPopularCity && matchesState && matchesCity;
   });
 
   if (sortBy === "A-Z") {
@@ -174,6 +179,42 @@ export default function FindUsPage() {
                         className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${regionFilter === r ? "text-red-600 bg-red-50" : "text-slate-600"}`}
                       >
                         {r}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {/* popular city */}
+              <div className="relative">
+                <button
+                  onClick={() =>
+                    setOpenDropdown(openDropdown === "popularCity" ? null : "popularCity")
+                  }
+                  className={`flex items-center whitespace-nowrap gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition-all ${
+                    popularCityFilter !== "Popular City" || openDropdown === "popularCity"
+                      ? "bg-red-600 text-white shadow-md"
+                      : "bg-white border border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                  }`}
+                >
+                  <Building2 size={16} className={popularCityFilter !== "Popular City" || openDropdown === "popularCity" ? "text-white" : "text-slate-600"} />
+                  {popularCityFilter === "Popular City"
+                    ? "Popular City"
+                    : popularCityFilter}
+                  <ChevronDown size={14} className="ml-0.5 opacity-70" />
+                </button>
+                {openDropdown === "popularCity" && (
+                  <div className="absolute left-0 top-full mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1">
+                    {POPULAR_CITIES.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => {
+                          setPopularCityFilter(c);
+                          setOpenDropdown(null);
+                        }}
+                        className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-slate-50 ${popularCityFilter === c ? "text-red-600 bg-red-50" : "text-slate-600"}`}
+                      >
+                        {c}
                       </button>
                     ))}
                   </div>
@@ -366,6 +407,8 @@ export default function FindUsPage() {
                   </div>
                 )}
               </div>
+
+              
 
               {/* Sort Dropdown */}
              

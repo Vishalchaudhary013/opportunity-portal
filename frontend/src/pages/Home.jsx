@@ -43,10 +43,10 @@ const Home = () => {
         <IntegratedDegrees />
         
         <GlobalProgram limit={4} />
-        <Testimonials />
+        {/* <Testimonials /> */}
         {/* <Facebook /> */}
-        <Linkedinn />
-        <Instagram />
+        {/* <Linkedinn />
+        <Instagram /> */}
         <EdecoFaq />
       </div>
     </>

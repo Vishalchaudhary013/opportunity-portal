@@ -6,7 +6,7 @@ const ChooseSignup = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
-        <div className="bg-[#e0ebf8]">
+        <div className="">
             <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6 py-5">
         <header>
           <Link to="/" className="text-[30px] text-[#0f2a4d] font-bold cursor-pointer select-none hover:opacity-90">

@@ -16,15 +16,15 @@ const DegreeDetailPage = () => {
     }
   }, [id]);
 
-  if (!course) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <div className="flex-grow flex items-center justify-center mt-20">
-          <p className="text-xl text-slate-500">Degree program not found.</p>
-        </div>
-      </div>
-    );
-  }
+  // if (!course) {
+  //   return (
+  //     <div className="min-h-screen flex flex-col">
+  //       <div className="flex-grow flex items-center justify-center mt-20">
+  //         <p className="text-xl text-slate-500">Degree program not found.</p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <>

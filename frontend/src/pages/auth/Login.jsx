@@ -44,7 +44,7 @@ const Login = () => {
 
   return (
     <div className="bg-[#F8FAFC]">
-      <div className="bg-[#e0ebf8]">
+      <div className="bg-">
         <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto px-4 sm:px-6 py-5">
           
           <header>

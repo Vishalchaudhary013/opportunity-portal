@@ -252,7 +252,7 @@ const OpportunityForm = () => {
   return (
     <>
       {showOpportunityForm && (
-        <div className="bg-white rounded-xl border border-[#DCE5FA] overflow-hidden flex flex-col xl:flex-row min-h-[600px] shadow-sm">
+        <div className="bg-white  border border-[#DCE5FA] overflow-hidden flex flex-col xl:flex-row min-h-[600px] shadow-sm">
           {/* LEFT STEPPER SIDEBAR */}
           <div className="w-full xl:w-[300px] bg-white border-r border-[#E2EAFC] p-8 flex flex-col">
             <h2 className="text-xl font-bold text-slate-800 mb-6">

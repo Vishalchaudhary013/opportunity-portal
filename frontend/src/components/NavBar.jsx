@@ -126,6 +126,123 @@ const NavBar = () => {
 
   const userInitial = resolveUserInitial(user);
 
+  const isDegreeRoute = location.pathname.startsWith("/degree");
+
+  if (isDegreeRoute) {
+    return (
+      <>
+        <header className="top-0 fixed left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm py-3">
+          <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto flex items-center justify-between">
+            {/* LEFT SECTION */}
+            <div
+              className="flex items-center cursor-pointer"
+              onClick={() => navigate("/")}
+            >
+              <div className="font-display font-extrabold tracking-tight leading-none text-[#1F2853] flex items-center">
+                <img src={logo} alt="edeco logo" className="h-15 rounded-full" />
+                <span className="text-3xl ml-1">edeco</span>
+              </div>
+            </div>
+
+            {/* MIDDLE SECTION */}
+            <div className="hidden lg:flex items-center gap-8">
+              <Link to="/degree/online" className="text-[16px] font-medium text-gray-700 hover:text-red-600 transition-colors">
+                Online Degree's
+              </Link>
+              <Link to="/degree/master" className="text-[16px] font-medium text-gray-700 hover:text-red-600 transition-colors">
+                Master Degree's
+              </Link>
+              <Link to="/degree/bachelor" className="text-[16px] font-medium text-gray-700 hover:text-red-600 transition-colors">
+                Bachelor Degree's
+              </Link>
+               {/* <Link to="/degree/hybrid" className="text-[16px] font-medium text-gray-700 hover:text-red-600 transition-colors">
+                Hybrid Degree
+              </Link> */}
+               <Link to="/degree/integrated" className="text-[16px] font-medium text-gray-700 hover:text-red-600 transition-colors">
+                Industry Integrated Degree's
+              </Link>
+              {/* <div className="relative group cursor-pointer">
+                <span className="text-[16px] font-medium text-gray-700 hover:text-red-600 transition-colors flex items-center gap-1">More
+                  <MdKeyboardArrowDown size={20} />
+                </span>
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <Link to="/degrees?type=diploma" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Diploma Programs</Link>
+                  <Link to="/degrees?type=certification" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Certifications</Link>
+                </div>
+              </div> */}
+            </div>
+
+            {/* RIGHT SECTION */}
+            <div className="flex gap-4 items-center">
+              {user ? (
+                <div className="relative group">
+                  <button className="h-9 w-9 rounded-full bg-red-600 text-white text-2xl font-semibold flex items-center justify-center shadow-sm hover:ring-2 hover:ring-blue-100 transition-all">
+                    {userInitial}
+                  </button>
+                  <div className="absolute right-0 mt-2 w-56 bg-white shadow-2xl rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 border border-gray-100 py-2">
+                    <div className="px-4 py-2 border-b border-gray-50 mb-1">
+                      <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                        Signed in as
+                      </p>
+                      <p className="text-sm font-bold text-gray-900 truncate">
+                        {user.fullName || user.email}
+                      </p>
+                    </div>
+                    {isAdmin ? (
+                      <Link
+                        to={dashboardPath}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
+                      >
+                        <i className="bi bi-grid-1x2"></i> Admin Dashboard
+                      </Link>
+                    ) : (
+                      <>
+                        <Link
+                          to="/profile"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
+                        >
+                          <i className="bi bi-person"></i> Profile
+                        </Link>
+                        <Link
+                          to="/favorites"
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-red-600 transition-colors"
+                        >
+                          <i className="bi bi-heart"></i> Favorites
+                        </Link>
+                      </>
+                    )}
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors mt-1 border-t border-gray-50"
+                    >
+                      <i className="bi bi-box-arrow-right"></i> Sign Out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Link
+                    to="/login"
+                    className="text-[16px] font-semibold hover:underline text-gray-700"
+                  >
+                    Log In
+                  </Link>
+                  <Link
+                    to="/choose-signup"
+                    className="text-white px-4 py-1 rounded-4xl text-[17px] font-semibold bg-red-600 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                  >
+                    Sign up
+                  </Link>
+                </>
+              )}
+            </div>
+          </div>
+        </header>
+        <div className="h-[75px]" aria-hidden="true"></div>
+      </>
+    );
+  }
+
   return (
     <>
       <header className="top-0 fixed left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm ">
@@ -146,6 +263,14 @@ const NavBar = () => {
                 </li>
               </ul>
               <ul className="flex items-center gap-5">
+                <li>
+                  <a
+                href="https://event-lfawf6ih5-vishal-chaudharys-projects-57aced94.vercel.app/"
+                className="text-[16px]  cursor-pointer text-gray-700"
+              >
+                Events
+              </a>
+                </li>
                 <li className="group relative overflow-hidden rounded-lg p-[1.5px]">
                   {/* Rotating border */}
                   <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -180,14 +305,14 @@ const NavBar = () => {
                     onClick={() => changeLanguage("en")}
                     className="hover:text-red-600 transition-colors"
                   >
-                    ENG
+                    EN
                   </button>
                   <span className="text-[12px]">|</span>
                   <button
                     onClick={() => changeLanguage("hi")}
                     className="hover:text-red-600 transition-colors"
                   >
-                    HINDI
+                    HIN
                   </button>
                 </li>
 
@@ -275,7 +400,7 @@ const NavBar = () => {
                 }}
               >
                 <div className="font-display font-extrabold  tracking-tight leading-none transition-colors duration-300 text-[#1F2853] flex items-center">
-                  <img src={logo} alt="edeco logo" className="h-15  rounded-full" />
+                  {/* <img src={logo} alt="edeco logo" className="h-15  rounded-full" /> */}
                   <span className="text-3xl">edeco</span>
                 </div>
               </div>
@@ -476,12 +601,7 @@ const NavBar = () => {
               >
                 After K12
               </a>
-              <a
-                href="https://event-lfawf6ih5-vishal-chaudharys-projects-57aced94.vercel.app/"
-                className="text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 text-gray-700"
-              >
-                Events
-              </a>
+              
 
               {/* <NavLink
                   to="/global-services"
@@ -494,16 +614,26 @@ const NavBar = () => {
                   Global Services
                 </NavLink> */}
 
-              <NavLink
-                to="/resources"
-                className={({ isActive }) =>
-                  `text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer
-     hover:bg-blue-50 hover:text-red-600
-     ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
-                }
-              >
-                Resources
-              </NavLink>
+              <div className="relative group cursor-pointer">
+                <NavLink
+                  to="/resources"
+                  className={({ isActive }) =>
+                    `text-[16px] border border-transparent px-[15px] py-[12px] rounded-[7px] cursor-pointer hover:bg-blue-50 hover:text-red-600 flex items-center gap-1 ${isActive ? "text-red-600 bg-blue-50" : "text-gray-700"}`
+                  }
+                >
+                  Resources <MdKeyboardArrowDown
+                    size={20}
+                    className="transition-transform duration-200 group-hover:-rotate-180"
+                  />
+                </NavLink>
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                  <Link to="/resources" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">All Resources</Link>
+                  <Link to="/resources?tab=gallery" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Gallery</Link>
+                  <Link to="/resources?tab=testimonials" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Testimonials</Link>
+                  <Link to="/resources?tab=instagram" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Instagram</Link>
+                  <Link to="/resources?tab=linkdin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Linkdin</Link>
+                </div>
+              </div>
               {/* <NavLink
                   to="/more"
                   className={({ isActive }) =>
