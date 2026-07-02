@@ -6,6 +6,7 @@ import OpportunityForm from "../components/admin/OpportunityForm";
 import OverviewStats from "../components/superadmin/OverviewStats";
 import PostOpportunity from "../components/superadmin/PostOpportunity";
 import LocationManager from "../components/superadmin/LocationManager";
+import GalleryManager from "../components/superadmin/GalleryManager";
 
 import React from "react";
 import { useNavigate, Link } from "react-router-dom";
@@ -109,6 +110,7 @@ const AdminDashboardContent = () => {
       { key: "Admins", label: "Admins" },
       { key: "Users", label: "Users" },
       { key: "Location", label: "Location" },
+      { key: "Gallery", label: "Gallery" },
       { key: "Internship", label: "Internships" },
       { key: "Apprenticeships", label: "Apprenticeships" },
       { key: "Jobs", label: "Jobs" },
@@ -245,6 +247,7 @@ const AdminDashboardContent = () => {
               )}
 
               {activeSection === "Location" && <LocationManager />}
+              {activeSection === "Gallery" && <GalleryManager />}
 
                 <SuperDirectory />
                 <ApplicationsTable />

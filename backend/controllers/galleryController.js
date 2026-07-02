@@ -121,6 +121,26 @@ export const updateGallery = async (req, res) => {
     gallery.location = location || gallery.location;
 
     
+    if (req.body.updateExistingImages === 'true') {
+      let kept = req.body.keptExistingImages;
+      if (!kept) kept = [];
+      if (!Array.isArray(kept)) kept = [kept];
+      const keptUrls = new Set(kept);
+
+      // find images that are  removed
+      const imagesToRemove = gallery.images.filter(img => !keptUrls.has(img.url));
+      
+      // delete files from filesystem
+      imagesToRemove.forEach(img => {
+        if (img.imageType === "upload" && fs.existsSync("." + img.url)) {
+          fs.unlinkSync("." + img.url);
+        }
+      });
+
+      // keep only the ones that were not removed
+      gallery.images = gallery.images.filter(img => keptUrls.has(img.url));
+    }
+
     if (req.files && req.files.length > 0) {
       req.files.forEach((file) => {
         gallery.images.push({

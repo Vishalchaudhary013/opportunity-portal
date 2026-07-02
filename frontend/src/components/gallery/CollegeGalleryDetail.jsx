@@ -1,9 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, X, Grid, List, Image as ImageIcon, ArrowDown } from "lucide-react";
+import { getGalleryByID } from "../../api/galleryAPI";
+import { resolveAssetUrl } from "../../api/apiClient";
 
 const CollegeGalleryDetail = ({ college, onBack, }) => {
   const [selectedIndex, setSelectedIndex] = useState(null);
-  const detailImages = Array.from({ length: 39 }).map((_, i) => `https://picsum.photos/800/600?random=${college.photos + i + 100}`);
+  const [galleryImages, setGalleryImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        setLoading(true);
+        if (college?._id) {
+          const json = await getGalleryByID(college._id);
+          
+          if (json.success) {
+            setGalleryImages(json.data.images || []);
+          }
+        } else {
+          
+          setGalleryImages(college?.images || []);
+        }
+      } catch (error) {
+        console.error("Error fetching gallery detail:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchGallery();
+  }, [college]);
+
+  
+  const getImageUrl = (img) => {
+    if (!img) return "";
+    if (img.imageType === "upload") {
+      return resolveAssetUrl(img.url);
+    }
+    return img.url; 
+  };
 
   return (
     <div className="w-full bg-white min-h-screen py-6 mt-15">
@@ -15,7 +51,7 @@ const CollegeGalleryDetail = ({ college, onBack, }) => {
           </button>
 
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-[#1a202c]">{college.collegeName}</h2>
+            <h2 className="text-2xl font-bold text-[#1a202c]">{college.title}</h2>
             <p className="text-gray-500 text-[15px] mt-1">{college.location}</p>
             {/* <p className="text-gray-500 text-[15px] mt-1">Gallery</p> */}
           </div>
@@ -36,24 +72,32 @@ const CollegeGalleryDetail = ({ college, onBack, }) => {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 auto-rows-[240px] gap-4 grid-flow-dense">
-          {detailImages.map((img, i) => {
-            let spanClass = "col-span-1 row-span-1";
-            if (i === 0 || i === 5 || i === 6 || i===13 || i===18) spanClass = "col-span-1 row-span-2";
-            else if (i === 4 || i === 8 || i===11 || i===25) spanClass = "col-span-2 row-span-1";
-            
-            return (
-              <div 
-                key={i} 
-                onClick={() => setSelectedIndex(i)}
-                className={`rounded-lg overflow-hidden shadow-sm group relative cursor-pointer ${spanClass}`}
-              >
-                <img src={img} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
-              </div>
-            );
-          })}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        ) : galleryImages.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">No images found for this gallery.</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-4 auto-rows-[240px] gap-4 grid-flow-dense">
+            {galleryImages.map((imgObj, i) => {
+              let spanClass = "col-span-1 row-span-1";
+              if (i === 0 || i === 5 || i === 6 || i===13 || i===18) spanClass = "col-span-1 row-span-2";
+              else if (i === 4 || i === 8 || i===11 || i===25) spanClass = "col-span-2 row-span-1";
+              
+              return (
+                <div 
+                  key={i} 
+                  onClick={() => setSelectedIndex(i)}
+                  className={`rounded-lg overflow-hidden shadow-sm group relative cursor-pointer ${spanClass}`}
+                >
+                  <img src={getImageUrl(imgObj)} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300"></div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Load More */}
         <div className="flex justify-center mt-12 mb-8">
@@ -77,7 +121,7 @@ const CollegeGalleryDetail = ({ college, onBack, }) => {
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedIndex((prev) => (prev > 0 ? prev - 1 : detailImages.length - 1));
+                setSelectedIndex((prev) => (prev > 0 ? prev - 1 : galleryImages.length - 1));
               }}
               className="absolute left-4 md:left-10 text-white/50 hover:text-white p-2 transition-colors cursor-pointer"
             >
@@ -85,7 +129,7 @@ const CollegeGalleryDetail = ({ college, onBack, }) => {
             </button>
 
             <img 
-              src={detailImages[selectedIndex]} 
+              src={getImageUrl(galleryImages[selectedIndex])} 
               alt="Fullscreen" 
               className="max-w-[90vw] max-h-[85vh] object-contain select-none"
             />
@@ -94,7 +138,7 @@ const CollegeGalleryDetail = ({ college, onBack, }) => {
             <button 
               onClick={(e) => {
                 e.stopPropagation();
-                setSelectedIndex((prev) => (prev < detailImages.length - 1 ? prev + 1 : 0));
+                setSelectedIndex((prev) => (prev < galleryImages.length - 1 ? prev + 1 : 0));
               }}
               className="absolute right-4 md:right-10 text-white/50 hover:text-white p-2 transition-colors cursor-pointer"
             >

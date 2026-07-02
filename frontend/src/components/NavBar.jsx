@@ -12,7 +12,7 @@ import {
 import { FaLocationArrow, FaWhatsapp } from "react-icons/fa6";
 import { Home } from "lucide-react";
 import { IoMdPlay } from "react-icons/io";
-import logo from "../assets/logo.jpeg";
+import logo from "../assets/logoo.png";
 
 const NavBar = () => {
   const [showExplore, setShowExplore] = useState(false);
@@ -134,15 +134,19 @@ const NavBar = () => {
         <header className="top-0 fixed left-0 w-full z-50 bg-white border-b border-gray-200 shadow-sm py-3">
           <div className="w-full max-w-[1350px] px-4 md:px-6 mx-auto flex items-center justify-between">
             {/* LEFT SECTION */}
-            <div
+
+            <Link to='/' className="overflow-hidden">
+              <img src={logo} alt="" className="object-cover"/>            
+            </Link>
+            {/* <div
               className="flex items-center cursor-pointer"
               onClick={() => navigate("/")}
             >
               <div className="font-display font-extrabold tracking-tight leading-none text-[#1F2853] flex items-center">
-                <img src={logo} alt="edeco logo" className="h-15 rounded-full" />
-                <span className="text-3xl ml-1">edeco</span>
+                <img src={logo} alt="" className="h-15 rounded-full" />
+               
               </div>
-            </div>
+            </div> */}
 
             {/* MIDDLE SECTION */}
             <div className="hidden lg:flex items-center gap-8">
@@ -389,7 +393,7 @@ const NavBar = () => {
             {/* LEFT SECTION */}
             <div className="flex items-center ">
               {/* LOGO */}
-              <div
+              {/* <div
                 className="flex items-center cursor-pointer"
                 onClick={() => {
                   if (window.location.pathname === "/") {
@@ -400,10 +404,14 @@ const NavBar = () => {
                 }}
               >
                 <div className="font-display font-extrabold  tracking-tight leading-none transition-colors duration-300 text-[#1F2853] flex items-center">
-                  {/* <img src={logo} alt="edeco logo" className="h-15  rounded-full" /> */}
+                   <img src={logo} alt="edeco logo" className="h-15  rounded-full" /> 
                   <span className="text-3xl">edeco</span>
                 </div>
-              </div>
+              </div> */}
+
+              <Link to='/' className="w-27 h-">
+               <img src={logo} alt="" className=""/>
+              </Link>
 
               {/*  EXPLORE DROPDOWN  */}
             </div>

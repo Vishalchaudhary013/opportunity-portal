@@ -13,7 +13,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import { useAdminContext } from "./AdminContext";
-import { LayoutPanelLeft, LocateIcon } from "lucide-react";
+import { LayoutPanelLeft, LocateIcon, Image as ImageIcon } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 
 const CORE_ADMIN_ITEMS = [
@@ -25,6 +25,7 @@ const CORE_SUPER_ITEMS = [
   { key: "Admins", label: "Admins" },
   { key: "Users", label: "Users" },
   { key: "Location", label: "Location" },
+  { key: "Gallery", label: "Gallery" },
   { key: "All Application", label: "All Application" },
   { key: "Closed Application", label: "Closed Application" },
 ];
@@ -65,7 +66,8 @@ const getMenuIcon = (key) => {
     "Post Opportunity": <FiBriefcase size={16} />,
     Admins: <FiShield size={16} />,
     Users: <FiUsers size={16} />,
-    Location:<LocateIcon size={16} />
+    Location:<LocateIcon size={16} />,
+    Gallery: <ImageIcon size={16} />
   };
   return icons[key] || null;
 };
@@ -116,9 +118,9 @@ const AdminSidebar = () => {
   let finalMenuItems = [];
   if (isSuperDashboard && isSuperAdmin) {
      finalMenuItems = [
-       ...CORE_SUPER_ITEMS.slice(0, 4),
+       ...CORE_SUPER_ITEMS.slice(0, 5),
        ...activeProgramItems,
-       ...CORE_SUPER_ITEMS.slice(4)
+       ...CORE_SUPER_ITEMS.slice(5)
      ];
   } else {
      finalMenuItems = [

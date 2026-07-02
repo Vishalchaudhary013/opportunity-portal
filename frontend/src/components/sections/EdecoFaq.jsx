@@ -48,7 +48,7 @@ const EdecoFaq = () => {
   const [activeIndex, setActiveIndex] = useState(null);
 
   return (
-    <section className="w-full max-w-[1350px] px-4 md:px-6 mx-auto pb-[70px] pt-15">
+    <section className="w-full max-w-[1000px] px-4 md:px-6 mx-auto pb-[70px] pt-15">
       <h5 className="text-[14.5px]  mb-0.5 text-center">MORE QUESTIONS?</h5>
       <h2 className="text-[25px]  font-semibold text-gray-900 mb-6 text-center">
         Frequently asked questions

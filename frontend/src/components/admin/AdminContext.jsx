@@ -667,7 +667,7 @@ export const AdminProvider = ({ children, dashboardType = "admin" }) => {
 
   const handleOpenAdminDashboard = async (adminId) => {
     try {
-      window.open(`/admin-dashboard?impersonate=${adminId}`, "_blank");
+      navigate(`/admin-dashboard?impersonate=${adminId}`);
     } catch (apiError) {
       setError(getApiErrorMessage(apiError, "Failed to open selected admin dashboard."));
     }
