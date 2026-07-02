@@ -20,6 +20,7 @@ import { startDailySuperAdminRegistrationNotifier } from "./utils/dailyRegistrat
 import customCategory from "./models/customCategoryModel.js";
 import customCategoryRoutes from "./routers/customCategoryRoutes.js";
 import branchRoute from './routers/branchRoute.js'
+import galleryRoutes from './routers/galleryRoutes.js'
 const app = express();
 
 dotenv.config();
@@ -44,7 +45,7 @@ app.use("/api/submissions", submissionRoutes);
 app.use("/api/social", socialPostRoutes);
 app.use("/api/custom-categories",customCategoryRoutes)
 app.use('/api/branch',branchRoute)
-
+app.use('/api/gallery',galleryRoutes)
 
 
 app.use((error, req, res, next) => {

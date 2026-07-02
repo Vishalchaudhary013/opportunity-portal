@@ -631,7 +631,7 @@ const NavBar = () => {
                   <Link to="/resources?tab=gallery" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Gallery</Link>
                   <Link to="/resources?tab=testimonials" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Testimonials</Link>
                   <Link to="/resources?tab=instagram" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Instagram</Link>
-                  <Link to="/resources?tab=linkdin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Linkdin</Link>
+                  <Link to="/resources?tab=linkedin" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-600">Linkedin</Link>
                 </div>
               </div>
               {/* <NavLink
